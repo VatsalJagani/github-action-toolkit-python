@@ -1,0 +1,19 @@
+import os
+import json
+from typing import Any
+from unittest import mock
+
+import pytest
+
+import github_action_toolkit as gat
+
+
+def test_event_payload(tmpdir: Any) -> None:
+    file = tmpdir.join("summary")
+    payload = {"test": "test"}
+    file.write(json.dumps(payload))
+
+    with mock.patch.dict(os.environ, {"GITHUB_EVENT_PATH": file.strpath}):
+        data = gat.event_payload()
+
+    assert data == payload
