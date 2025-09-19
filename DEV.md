@@ -60,6 +60,11 @@ ruff check .
 ruff check --fix .
 ```
 
+* Check for static type checking issues (mypy)
+```
+mypy .
+```
+
 
 ### Pypi Release Publish Setup
 
