@@ -1,23 +1,23 @@
 Installation
 ============
 
-**my-package** supports Python >= 3.8.
+**github-action-toolkit** supports Python >= 3.8.
 
 ## Installing with `pip`
 
-**my-package** is available [on PyPI](https://pypi.org/project/my-package/). Just run
+**github-action-toolkit** is available [on PyPI](https://pypi.org/project/github-action-toolkit/). Just run
 
 ```bash
-pip install my-package
+pip install github-action-toolkit
 ```
 
 ## Installing from source
 
-To install **my-package** from source, first clone [the repository](https://github.com/allenai/python-package-template):
+To install **github-action-toolkit** from source, first clone [the repository](https://github.com/VatsalJagani/github-action-toolkit-python):
 
 ```bash
-git clone https://github.com/allenai/python-package-template.git
-cd python-package-template
+git clone https://github.com/VatsalJagani/github-action-toolkit-python.git
+cd github-action-toolkit-python
 ```
 
 Then run

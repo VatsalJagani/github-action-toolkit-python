@@ -1,4 +1,4 @@
-# **my-package**
+# **github-action-toolkit**
 
 ```{toctree}
 :maxdepth: 2
@@ -15,8 +15,8 @@ overview
 
 CHANGELOG
 CONTRIBUTING
-License <https://raw.githubusercontent.com/allenai/python-package-template/main/LICENSE>
-GitHub Repository <https://github.com/allenai/python-package-template>
+License <https://raw.githubusercontent.com/allenai/github-action-toolkit-python/main/LICENSE>
+GitHub Repository <https://github.com/VatsalJagani/github-action-toolkit-python>
 ```
 
 ## Indices and tables
