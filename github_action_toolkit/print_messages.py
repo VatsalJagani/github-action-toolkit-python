@@ -4,7 +4,6 @@ import sys
 from contextlib import contextmanager
 from typing import Any, Generator, Union
 
-
 if sys.version_info >= (3, 8):
     from typing import Literal
 

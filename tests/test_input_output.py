@@ -8,7 +8,6 @@ import github_action_toolkit as gat
 import github_action_toolkit.input_output as gha_utils_input_output
 
 
-
 def test__build_file_input() -> None:
     assert (
         gha_utils_input_output._build_file_input("test", "value")

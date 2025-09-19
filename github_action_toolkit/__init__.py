@@ -1,3 +1,5 @@
+# isort: skip_file
+
 from .version import VERSION, VERSION_SHORT
 
 from .print_messages import echo as echo

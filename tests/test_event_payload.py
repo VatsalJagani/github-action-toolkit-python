@@ -1,9 +1,7 @@
-import os
 import json
+import os
 from typing import Any
 from unittest import mock
-
-import pytest
 
 import github_action_toolkit as gat
 

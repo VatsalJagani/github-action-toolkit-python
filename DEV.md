@@ -25,6 +25,23 @@ python -m pip install -e '.[dev]'
 python -m pip install -e .
 ```
 
+* Run Checks and Test Before Committing Changes
+```
+make
+```
+
+* Fix Import sorting (isort) issues automatically
+    * For all files:
+        ```
+        isort .
+        ```
+    * For specific file:
+        ```
+        isort github_action_toolkit/abc.py
+        ```
+
+* 
+
 
 ### Pypi Release Publish Setup
 
