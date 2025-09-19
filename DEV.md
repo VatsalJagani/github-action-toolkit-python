@@ -25,6 +25,46 @@ python -m pip install -e '.[dev]'
 python -m pip install -e .
 ```
 
+* Run Checks and Test Before Committing Changes
+```
+make
+```
+
+* Fix Import sorting (isort) issues automatically
+    * For all files:
+        ```
+        isort .
+        ```
+    * For specific file:
+        ```
+        isort github_action_toolkit/abc.py
+        ```
+
+* Check for formatting issues (black)
+```
+black --check .
+```
+
+* Auto-fix formatting issues with black
+```
+black .
+```
+
+* Check for linting issues (ruff)
+```
+ruff check .
+```
+
+* Auto-fix linting issues with ruff
+```
+ruff check --fix .
+```
+
+* Check for static type checking issues (mypy)
+```
+mypy .
+```
+
 
 ### Pypi Release Publish Setup
 
