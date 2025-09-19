@@ -2,32 +2,42 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+
 [project]
 # See https://setuptools.pypa.io/en/latest/userguide/quickstart.html for more project configuration options.
 name = "github-action-toolkit"
+description = "A Python library to help build powerful GitHub Actions or functions that work on Github action."
 dynamic = ["version"]
 readme = "README.md"
 classifiers = [
-    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
 ]
 authors = [
-    {name = "Allen Institute for Artificial Intelligence", email = "contact@allenai.org"}
+    {name = "Vatsal Jagani", email = "vatsaljagani85@gmail.com"}
 ]
 requires-python = ">=3.8"
+license = {file = "LICENSE"}
+
 dependencies = [
   # Add your own dependencies here
 ]
-license = {file = "LICENSE"}
+
 
 [project.urls]
 Homepage = "https://github.com/VatsalJagani/github-action-toolkit-python"
 Repository = "https://github.com/VatsalJagani/github-action-toolkit-python"
 Changelog = "https://github.com/VatsalJagani/github-action-toolkit-python/blob/main/CHANGELOG.md"
-# Documentation = "https://github-action-toolkit.readthedocs.io/"
+Documentation = "https://github-action-toolkit.readthedocs.io/"
+
 
 [project.optional-dependencies]
 dev = [
@@ -51,6 +61,7 @@ dev = [
     "packaging"
 ]
 
+
 [tool.setuptools.packages.find]
 exclude = [
     "*.tests",
@@ -61,6 +72,7 @@ exclude = [
     "scripts*"
 ]
 
+
 [tool.setuptools]
 include-package-data = true
 
@@ -69,6 +81,7 @@ github_action_toolkit = ["py.typed"]
 
 [tool.setuptools.dynamic]
 version = {attr = "github_action_toolkit.version.VERSION"}
+
 
 [tool.black]
 line-length = 100
@@ -86,13 +99,16 @@ exclude = '''
 )
 '''
 
+
 [tool.isort]
 profile = "black"
 multi_line_output = 3
 
+
 # You can override these pyright settings by adding a personal pyrightconfig.json file.
 [tool.pyright]
 reportPrivateImportUsage = false
+
 
 [tool.ruff]
 line-length = 115
@@ -100,6 +116,7 @@ target-version = "py39"
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
+
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -109,6 +126,7 @@ check_untyped_defs = true
 [[tool.mypy.overrides]]
 module = "tests.*"
 strict_optional = false
+
 
 [tool.pytest.ini_options]
 testpaths = "tests/"

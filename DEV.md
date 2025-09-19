@@ -1,13 +1,39 @@
 # github-action-toolkit - Developer README File
 
-### Pypi setup
+### Local Development Setup
+
+* Create virtual environment.
+```
+conda create -n github_action_toolkit python=3.11
+```
+
+* Activate virtual environment.
+```
+conda activate github_action_toolkit
+```
+
+* Install dev dependencies:
+```
+python -m pip install -e '.[dev]'
+```
+
+* Add/update package dependencies:
+    * Update `pyproject.toml` file's `[project]` section's `dependencies` parameter with new dependencies.
+
+* Install/upgrade dependencies in local environment.
+```
+python -m pip install -e .
+```
+
+
+### Pypi Release Publish Setup
 
 (Optional) If you plan on publishing your package to PyPI, add repository secrets for `PYPI_USERNAME` and `PYPI_PASSWORD`. To add these, go to "Settings" > "Secrets" > "Actions", and then click "New repository secret".
 
     *If you don't have PyPI account yet, you can [create one for free](https://pypi.org/account/register/).*
 
 
-### readthedocs Setup
+### readthedocs Doc Publish Setup
 
 (Optional) If you want to deploy your API docs to [readthedocs.org](https://readthedocs.org), go to the [readthedocs dashboard](https://readthedocs.org/dashboard/import/?) and import your new project.
 
@@ -24,7 +50,7 @@
     *After your first release, the docs will automatically be published to [your-project-name.readthedocs.io](https://your-project-name.readthedocs.io/).*
 
 
-### Creating releases
+### Creating Release Process
 
 1. Update the version in `github_action_toolkit/version.py`.
 
