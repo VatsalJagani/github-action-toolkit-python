@@ -48,9 +48,7 @@ def _escape_data(data: Any) -> str:
     :param data: Any type of data to be escaped e.g. string, number, list, dict
     :returns: string after escaping
     """
-    return (
-        _make_string(data).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
-    )
+    return _make_string(data).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
 
 
 def _escape_property(data: Any) -> str:
@@ -86,7 +84,7 @@ def _build_options_string(**kwargs: Any) -> str:
 def _print_command(
     command: CommandTypes,
     command_message: str,
-    options_string: Union[str,None] = "",
+    options_string: Union[str, None] = "",
     use_subprocess: bool = False,
     escape_message: bool = True,
 ) -> None:
@@ -104,16 +102,13 @@ def _print_command(
         command_message = _escape_data(command_message)
 
     full_command = (
-        f"{COMMAND_MARKER}{command} "
-        f"{options_string or ''}"
-        f"{COMMAND_MARKER}{command_message}"
+        f"{COMMAND_MARKER}{command} " f"{options_string or ''}" f"{COMMAND_MARKER}{command_message}"
     )
 
     if use_subprocess or COMMANDS_USE_SUBPROCESS:
         subprocess.run(["echo", full_command])
     else:
         print(full_command)
-
 
 
 def echo(message: Any, use_subprocess: bool = False) -> None:
@@ -146,9 +141,7 @@ def debug(message: str, use_subprocess: bool = False) -> None:
     :param use_subprocess: use subprocess module to echo command
     :returns: None
     """
-    _print_command(
-        "debug", message, use_subprocess=use_subprocess, escape_message=False
-    )
+    _print_command("debug", message, use_subprocess=use_subprocess, escape_message=False)
 
 
 def notice(

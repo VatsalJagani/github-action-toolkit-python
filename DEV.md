@@ -40,7 +40,15 @@ make
         isort github_action_toolkit/abc.py
         ```
 
-* 
+* Check for formatting issues (black)
+```
+black --check .
+```
+
+* Auto-fix formatting issues with black
+```
+black .
+```
 
 
 ### Pypi Release Publish Setup

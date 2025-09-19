@@ -8,12 +8,7 @@ def _clean_markdown_string(markdown_string: str) -> str:
     :param markdown_string: string with markdown content
     :returns: string after escaping
     """
-    return (
-        str(markdown_string)
-        .replace("%25", "%")
-        .replace("%0D", "\r")
-        .replace("%0A", "\n")
-    )
+    return str(markdown_string).replace("%25", "%").replace("%0D", "\r").replace("%0A", "\n")
 
 
 def append_job_summary(markdown_text: str) -> None:
