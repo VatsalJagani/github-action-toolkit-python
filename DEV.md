@@ -50,6 +50,16 @@ black --check .
 black .
 ```
 
+* Check for linting issues (ruff)
+```
+ruff check .
+```
+
+* Auto-fix linting issues with ruff
+```
+ruff check --fix .
+```
+
 
 ### Pypi Release Publish Setup
 
