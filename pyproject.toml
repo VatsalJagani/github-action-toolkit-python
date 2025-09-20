@@ -28,7 +28,8 @@ requires-python = ">=3.8"
 license = {file = "LICENSE"}
 
 dependencies = [
-  # Add your own dependencies here
+    "gitpython>=3.1",
+    "PyGithub>=1.58"
 ]
 
 
