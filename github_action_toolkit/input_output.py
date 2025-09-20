@@ -25,6 +25,46 @@ def get_user_input(name: str) -> Union[str, None]:
     return os.environ.get(f"INPUT_{name.upper()}")
 
 
+def get_user_input_as(name: str, input_type: type, default_value: Any = None) -> Any:
+    """
+    gets user input from environment variables and casts it to the specified type.
+
+    :param name: Name of the user input
+    :param input_type: Type to cast the input value to (e.g., str, int, float, bool)
+    :param default_value: In case the input is not provided return this as default value (e.g., True, False, 0, etc)
+    :returns: input value cast to the specified type or None
+    """
+    value = get_user_input(name)
+    if value is None:
+        return None
+
+    try:
+        if input_type == bool:
+            if type(value) == bool:
+                return value
+            if default_value == True:
+                if value in ("false", "f", "0", "n", "no"):
+                    return False
+                else:
+                    return True
+            elif default_value == False:
+                if value in ("true", "t", "1", "y", "yes"):
+                    return True
+                else:
+                    return False
+            else:
+                return input_type(value)
+
+        else:
+            if value == "":
+                return default_value
+            else:
+                return input_type(value)
+
+    except ValueError as e:
+        raise ValueError(f"Cannot convert input '{name}' to {input_type}: {e}") from e
+
+
 def set_output(name: str, value: Any, use_subprocess: Union[bool, None] = None) -> None:
     """
     sets out for your workflow using GITHUB_OUTPUT file.

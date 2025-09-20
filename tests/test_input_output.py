@@ -73,6 +73,39 @@ def test_get_user_input() -> None:
     assert gat.get_user_input("another") is None
 
 
+@mock.patch.dict(os.environ, {"INPUT_AGE": "30", "INPUT_HEIGHT": "5.8"})
+def test_get_user_input_as_basic_types():
+    assert gat.get_user_input_as("age", int) == 30
+    assert gat.get_user_input_as("height", float) == 5.8
+    assert gat.get_user_input_as("age", str) == "30"
+
+
+@mock.patch.dict(os.environ, {"INPUT_ACTIVE": "true", "INPUT_DISABLED": "no", "INPUT_UNKNOWN": "maybe"})
+def test_get_user_input_as_boolean_true_false():
+    assert gat.get_user_input_as("active", bool, default_value=False) is True
+    assert gat.get_user_input_as("disabled", bool, default_value=True) is False
+    # fallback to casting if not matching known true/false strings
+    assert gat.get_user_input_as("unknown", bool) is True
+
+
+@mock.patch.dict(os.environ, {"INPUT_EMPTY": ""})
+def test_get_user_input_as_empty_string_returns_default():
+    assert gat.get_user_input_as("empty", int, default_value=42) == 42
+    assert gat.get_user_input_as("empty", str, default_value="default") == "default"
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_user_input_as_missing_env_var():
+    assert gat.get_user_input_as("nonexistent", int) is None
+    assert gat.get_user_input_as("nonexistent", str, default_value="x") is None
+
+
+@mock.patch.dict(os.environ, {"INPUT_BROKEN": "abc"})
+def test_get_user_input_as_type_cast_error():
+    with pytest.raises(ValueError):
+        gat.get_user_input_as("broken", int)
+
+
 def test_set_env(tmpdir: Any) -> None:
     file = tmpdir.join("envfile")
 

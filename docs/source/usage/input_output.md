@@ -64,6 +64,21 @@ Gets user input from running workflow.
 # my value
 ```
 
+### **`get_user_input_as(name, input_type, default_value)`**
+
+Gets user input from running workflow with type-casting into choice.
+
+**example:**
+
+```python
+>> from github_action_toolkit import get_user_input_as
+
+>> get_user_input_as("my_bool_input", bool, False)
+
+# Output:
+# False
+```
+
 ### **`set_output(name, value)`**
 
 Sets a step's output parameter by writing to `GITHUB_OUTPUT` environment file. Note that the step will need an `id` to be defined to later retrieve the output value.

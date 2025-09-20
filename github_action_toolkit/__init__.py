@@ -19,6 +19,7 @@ from .job_summary import remove_job_summary as remove_job_summary
 from .input_output import get_state as get_state
 from .input_output import save_state as save_state
 from .input_output import get_user_input as get_user_input
+from .input_output import get_user_input_as as get_user_input_as
 from .input_output import set_output as set_output
 from .input_output import get_workflow_environment_variables as get_workflow_environment_variables
 from .input_output import get_env as get_env
