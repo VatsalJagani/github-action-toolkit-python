@@ -14,7 +14,7 @@ If path is provided, the existing local repo will be used.
 **example:**
 
 ```python
->> from github_action_toolkit.git_manager import Repo
+>> from github_action_toolkit import Repo
 
 >> with Repo(url="https://github.com/user/repo.git") as repo:
 >>     print(repo.get_current_branch())

@@ -95,10 +95,18 @@ def test_pull(mock_git_repo):
 
 @mock.patch("github_action_toolkit.git_manager.Github")
 def test_create_pr(mock_github, mock_git_repo):
+    # Mock the repo object returned by GitRepo (which is used inside our Repo class)
+    mock_repo_instance = mock_git_repo.return_value
+
+    # Mock the remotes.origin.url property to be a valid GitHub URL string
+    mock_repo_instance.remotes.origin.url = "https://github.com/test/repo.git"
+
+    # Mock the PR creation
     mock_repo_obj = mock.Mock()
     mock_pr = mock.Mock()
     mock_pr.html_url = "https://github.com/test/repo/pull/1"
     mock_repo_obj.create_pull.return_value = mock_pr
+
     mock_github.return_value.get_repo.return_value = mock_repo_obj
 
     with Repo(path=".") as repo:
