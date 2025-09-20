@@ -67,15 +67,15 @@ def get_user_input_as(name: str, input_type: type, default_value: Any = None) ->
         return None
 
     try:
-        if input_type == bool:
-            if type(value) == bool:
+        if input_type is bool:
+            if isinstance(value, bool):
                 return value
-            if default_value == True:
+            if default_value is True:
                 if value in ("false", "f", "0", "n", "no"):
                     return False
                 else:
                     return True
-            elif default_value == False:
+            elif default_value is False:
                 if value in ("true", "t", "1", "y", "yes"):
                     return True
                 else:
