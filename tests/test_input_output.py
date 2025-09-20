@@ -67,6 +67,45 @@ def test_get_state() -> None:
     assert gat.get_state("abc") is None
 
 
+
+@mock.patch.dict(os.environ, {
+    "INPUT_USERNAME": "test_user",
+    "INPUT_DEBUG": "true",
+    "SOME_OTHER_ENV": "ignore_this"
+})
+def test_get_all_user_inputs_returns_only_input_vars():
+    result = gat.get_all_user_inputs()
+    assert isinstance(result, dict)
+    assert result == {
+        "username": "test_user",
+        "debug": "true"
+    }
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_all_user_inputs_with_no_inputs():
+    assert gat.get_all_user_inputs() == {}
+
+
+@mock.patch.dict(os.environ, {
+    "INPUT_API_KEY": "abc123",
+    "INPUT_VERBOSE": "yes"
+})
+def test_print_all_user_inputs_outputs_correctly(capfd):
+    gat.print_all_user_inputs()
+    out, _ = capfd.readouterr()
+    assert "User Inputs:" in out
+    assert "api_key: abc123" in out
+    assert "verbose: yes" in out
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_print_all_user_inputs_when_no_env_vars(capfd):
+    gat.print_all_user_inputs()
+    out, _ = capfd.readouterr()
+    assert "No user inputs found." in out
+
+
 @mock.patch.dict(os.environ, {"INPUT_USERNAME": "test", "ANOTHER": "another test"})
 def test_get_user_input() -> None:
     assert gat.get_user_input("username") == "test"

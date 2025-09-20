@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Following new user input related function has been added.
+    - get_all_user_inputs
+    - print_all_user_inputs
     - get_user_input_as
 
 

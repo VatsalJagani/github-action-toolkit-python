@@ -3,7 +3,7 @@ from typing import Any, Dict, Union
 from warnings import warn
 
 from .consts import ACTION_ENV_DELIMITER
-from .print_messages import _escape_data, _escape_property
+from .print_messages import _escape_data, _escape_property, echo, group
 
 
 def _build_file_input(name: str, value: Any) -> bytes:
@@ -13,6 +13,34 @@ def _build_file_input(name: str, value: Any) -> bytes:
         f"{_escape_data(value)}\n"
         f"{ACTION_ENV_DELIMITER}\n".encode("utf-8")
     )
+
+
+
+def get_all_user_inputs() -> Dict[str, str]:
+    """
+    Retrieves all environment variables that start with 'INPUT_'.
+
+    :returns: Dictionary of input names and their values.
+    """
+    return {
+        key[6:].lower(): value
+        for key, value in os.environ.items()
+        if key.startswith("INPUT_")
+    }
+
+
+def print_all_user_inputs() -> None:
+    """
+    Prints all user inputs (from environment variables) to the console.
+    """
+    inputs = get_all_user_inputs()
+    if not inputs:
+        echo("No user inputs found.")
+        return
+
+    with group("User Inputs:"):
+        for name, value in inputs.items():
+            echo(f"  {name}: {value}")
 
 
 def get_user_input(name: str) -> Union[str, None]:
