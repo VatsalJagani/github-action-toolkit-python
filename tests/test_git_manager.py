@@ -102,7 +102,6 @@ def test_create_pr(mock_github, mock_git_repo):
     with Repo(path=".") as repo:
         pr_url = repo.create_pr(
             github_token="fake-token",
-            repo_name="test/repo",
             title="Test PR",
             body="PR Body",
             head="feature/test",

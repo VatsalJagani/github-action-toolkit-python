@@ -1,6 +1,7 @@
 import os
+import re
 import tempfile
-from typing import Optional
+from typing import Optional, Union
 from git import Repo as GitRepo
 from github import Github
 
@@ -22,9 +23,13 @@ class Repo:
             info(f"Using existing repository at {self.repo_path}")
             self.repo = GitRepo(path)
 
+        self.base_branch = self.repo.active_branch.name
+
+
     def __enter__(self):
         self.configure_git()
         return self
+
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # Optional cleanup
@@ -77,23 +82,51 @@ class Repo:
 
     def create_pr(
         self,
-        github_token: str,
-        repo_name: str,
-        title: str,
-        body: str,
-        head: str,
-        base: str = "main"
-    ):
+        github_token: Union[str, None] = None,
+        title: Union[str, None] = None,
+        body: Union[str, None] = "",
+        head: Union[str, None] = None,
+        base: Union[str, None] = None
+    ) -> str:
         """
-        Creates a pull request on GitHub using PyGithub.
-        - github_token: GitHub token (with repo scope)
-        - repo_name: 'owner/repo'
-        - head: branch name with your changes (e.g., 'fix/my-bug')
-        - base: branch to merge into (default 'main')
+        Creates a pull request on GitHub.
+
+        :param github_token: GitHub token with repo access (optional, defaults to env variable)
+        :param title: Title for the PR (optional, uses last commit message)
+        :param body: Body for the PR (optional)
+        :param head: Source branch for the PR (optional, uses current branch)
+        :param base: Target branch for the PR (optional, uses original base branch)
+        :returns: URL of the created PR
         """
-        info(f"Creating PR from {head} to {base} on {repo_name}")
-        gh = Github(github_token)
-        repo = gh.get_repo(repo_name)
+
+        # 1. Get GitHub token
+        token = github_token or os.environ.get("GITHUB_TOKEN")
+        if not token:
+            raise ValueError("GitHub token not provided and GITHUB_TOKEN not set in environment.")
+
+        # 2. Infer repo name from remote
+        origin_url = self.repo.remotes.origin.url
+        # Convert SSH or HTTPS URL to "owner/repo"
+        match = re.search(r"(github\.com[:/])(.+?)(\.git)?$", origin_url)
+        if not match:
+            raise ValueError(f"Cannot extract repo name from remote URL: {origin_url}")
+        repo_name = match.group(2)
+
+        # 3. Use last commit message as PR title
+        if not title:
+            title = self.repo.head.commit.message.strip()
+
+        # 4. Use current branch as head
+        if not head:
+            head = self.repo.active_branch.name
+
+        # 5. Use base branch from original branch at init
+        if not base:
+            base = self.base_branch or "main"  # fallback if not set during init
+
+        # 6. Create PR using PyGithub
+        github = Github(token)
+        repo = github.get_repo(repo_name)
         pr = repo.create_pull(title=title, body=body, head=head, base=base)
-        info(f"Pull request created: {pr.html_url}")
+
         return pr.html_url

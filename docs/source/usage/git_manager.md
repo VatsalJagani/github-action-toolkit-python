@@ -96,35 +96,55 @@ Pulls the latest changes for the current branch from the specified remote (defau
 >> repo.pull()
 ```
 
-### **`Repo.create_pr(github_token, repo_name, title, body, head, base="main")`**
+### **`Repo.create_pr(github_token=None, title=None, body=None, head=None, base=None)`**
 
 Creates a pull request on GitHub.
 
+This method automatically infers most of the required values based on the current repository state, making it ideal for use in GitHub Actions or automation scripts.
+
 Parameters:
 
-github_token: GitHub token with repo scope.
+* github_token (optional):
+GitHub token with repo scope.
+If not provided, it will be read from the environment variable GITHUB_TOKEN.
 
-repo_name: The repo in the format "owner/repo".
+* title (optional):
+Title of the pull request.
+If not provided, the latest commit message will be used.
 
-title: Title of the pull request.
+* body (optional):
+Description body for the pull request.
+Defaults to an empty string.
 
-body: Description body for the pull request.
+* head (optional):
+The name of the branch containing your changes.
+If not provided, the current active branch will be used.
 
-head: The name of the branch with your changes.
-
-base: The branch you want to merge into (default is "main").
+* base (optional):
+The branch you want to merge into.
+If not provided, it uses the branch that was active at the time the repo was cloned or opened.
 
 **example:**
 
 ```python
 >> pr_url = repo.create_pr(
 >>     github_token=os.getenv("GITHUB_TOKEN"),
->>     repo_name="myuser/myrepo",
 >>     title="Auto PR",
 >>     body="This PR was created automatically.",
 >>     head="feature/auto-update",
 >>     base="main"
 >> )
+
+>> print(pr_url)
+
+# Output:
+# https://github.com/myuser/myrepo/pull/42
+```
+
+Or, using full automatic inference:
+
+```python
+>> pr_url = repo.create_pr()
 
 >> print(pr_url)
 
