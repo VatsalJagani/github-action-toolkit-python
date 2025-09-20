@@ -23,8 +23,8 @@ from github_action_toolkit import VERSION, VERSION_SHORT  # noqa: E402
 # -- Project information -----------------------------------------------------
 
 project = "github-action-toolkit"
-copyright = f"{datetime.today().year}, Allen Institute for Artificial Intelligence"
-author = "Allen Institute for Artificial Intelligence"
+copyright = f"{datetime.today().year}, Vatsal Jagani"
+author = "Vatsal Jagani"
 version = VERSION_SHORT
 release = VERSION
 

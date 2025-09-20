@@ -10,6 +10,17 @@ usage
 ```
 
 ```{toctree}
+:maxdepth: 2
+:hidden:
+:caption: Usage
+
+/usage/print_messages
+/usage/job_summary
+/usage/input_output
+/usage/event_payload
+```
+
+```{toctree}
 :hidden:
 :caption: Development
 
@@ -19,9 +30,7 @@ License <https://raw.githubusercontent.com/VatsalJagani/github-action-toolkit-py
 GitHub Repository <https://github.com/VatsalJagani/github-action-toolkit-python>
 ```
 
-## Indices and tables
 
-```{eval-rst}
-* :ref:`genindex`
-* :ref:`modindex`
-```
+This is a python library which contains helpful utility functions and classes that can be used for building GitHub action steps or building custom GitHub action.
+
+
