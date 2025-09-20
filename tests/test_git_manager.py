@@ -1,6 +1,8 @@
 import tempfile
-import pytest
 from unittest import mock
+
+import pytest
+
 from github_action_toolkit.git_manager import Repo
 
 
