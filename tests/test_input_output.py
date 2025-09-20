@@ -67,18 +67,20 @@ def test_get_state() -> None:
     assert gat.get_state("abc") is None
 
 
-
-@mock.patch.dict(os.environ, {
-    "INPUT_USERNAME": "test_user",
-    "INPUT_DEBUG": "true",
-    "SOME_OTHER_ENV": "ignore_this"
-})
+@mock.patch.dict(
+    os.environ,
+    {
+        "INPUT_USERNAME": "test_user",
+        "INPUT_DEBUG": "true",
+        "SOME_OTHER_ENV": "ignore_this",
+    },
+)
 def test_get_all_user_inputs_returns_only_input_vars():
     result = gat.get_all_user_inputs()
     assert isinstance(result, dict)
     assert result == {
         "username": "test_user",
-        "debug": "true"
+        "debug": "true",
     }
 
 
@@ -87,10 +89,13 @@ def test_get_all_user_inputs_with_no_inputs():
     assert gat.get_all_user_inputs() == {}
 
 
-@mock.patch.dict(os.environ, {
-    "INPUT_API_KEY": "abc123",
-    "INPUT_VERBOSE": "yes"
-})
+@mock.patch.dict(
+    os.environ,
+    {
+        "INPUT_API_KEY": "abc123",
+        "INPUT_VERBOSE": "yes",
+    },
+)
 def test_print_all_user_inputs_outputs_correctly(capfd):
     gat.print_all_user_inputs()
     out, _ = capfd.readouterr()
@@ -119,7 +124,14 @@ def test_get_user_input_as_basic_types():
     assert gat.get_user_input_as("age", str) == "30"
 
 
-@mock.patch.dict(os.environ, {"INPUT_ACTIVE": "true", "INPUT_DISABLED": "no", "INPUT_UNKNOWN": "maybe"})
+@mock.patch.dict(
+    os.environ,
+    {
+        "INPUT_ACTIVE": "true",
+        "INPUT_DISABLED": "no",
+        "INPUT_UNKNOWN": "maybe",
+    },
+)
 def test_get_user_input_as_boolean_true_false():
     assert gat.get_user_input_as("active", bool, default_value=False) is True
     assert gat.get_user_input_as("disabled", bool, default_value=True) is False

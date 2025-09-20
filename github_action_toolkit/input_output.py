@@ -15,18 +15,13 @@ def _build_file_input(name: str, value: Any) -> bytes:
     )
 
 
-
 def get_all_user_inputs() -> Dict[str, str]:
     """
     Retrieves all environment variables that start with 'INPUT_'.
 
     :returns: Dictionary of input names and their values.
     """
-    return {
-        key[6:].lower(): value
-        for key, value in os.environ.items()
-        if key.startswith("INPUT_")
-    }
+    return {key[6:].lower(): value for key, value in os.environ.items() if key.startswith("INPUT_")}
 
 
 def print_all_user_inputs() -> None:
