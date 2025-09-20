@@ -3,6 +3,7 @@
 from .version import VERSION, VERSION_SHORT
 
 from .print_messages import echo as echo
+from .print_messages import info as info
 from .print_messages import debug as debug
 from .print_messages import notice as notice
 from .print_messages import warning as warning
