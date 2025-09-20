@@ -1,6 +1,8 @@
 # github-action-toolkit - Developer README File
 
-### Local Development Setup
+## Local Setup
+
+#### Local Setup & Dependencies Installation
 
 * Create virtual environment.
 ```
@@ -17,18 +19,24 @@ conda activate github_action_toolkit
 python -m pip install -e '.[dev]'
 ```
 
-* Add/update package dependencies:
-    * Update `pyproject.toml` file's `[project]` section's `dependencies` parameter with new dependencies.
-
 * Install/upgrade dependencies in local environment.
 ```
 python -m pip install -e .
 ```
 
-* Run Checks and Test Before Committing Changes
+#### Run Docs Locally
+
 ```
-make
+make docs
 ```
+
+#### Run Checks and Tests before committing
+
+```
+make run-checks
+```
+
+#### Auto Fix Linting, Styling and Formatting Issue
 
 * Fix Import sorting (isort) issues automatically
     * For all files:
@@ -40,19 +48,9 @@ make
         isort github_action_toolkit/abc.py
         ```
 
-* Check for formatting issues (black)
-```
-black --check .
-```
-
 * Auto-fix formatting issues with black
 ```
 black .
-```
-
-* Check for linting issues (ruff)
-```
-ruff check .
 ```
 
 * Auto-fix linting issues with ruff
@@ -60,9 +58,22 @@ ruff check .
 ruff check --fix .
 ```
 
-* Check for static type checking issues (mypy)
+
+#### Build the local whl or tgz variant of package/library
+
 ```
-mypy .
+make build
+```
+
+
+## Add new Dependencies
+
+* Add/update package dependencies:
+    * Update `pyproject.toml` file's `[project]` section's `dependencies` parameter with new dependencies.
+
+* Install/upgrade dependencies in local environment.
+```
+python -m pip install -e .
 ```
 
 
