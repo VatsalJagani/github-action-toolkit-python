@@ -20,6 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - get_user_input_as
 
 - New class `Repo` added with relevant functions.
+    - get_current_branch
+    - create_new_branch
+    - add
+    - commit
+    - add_all_and_commit
+    - push
+    - pull
+    - create_pr
 
 
 ## [v0.1.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.1.0) - 2025-09-20
@@ -53,7 +61,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Following event_payload related function has been added.
     - event_payload
-
-### Changed
-
-### Removed
