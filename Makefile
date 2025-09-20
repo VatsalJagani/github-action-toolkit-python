@@ -1,7 +1,7 @@
-# .PHONY : docs
-# docs :
-# 	rm -rf docs/build/
-# 	sphinx-autobuild -b html --watch github_action_toolkit/ docs/source/ docs/build/
+.PHONY : docs
+docs :
+	rm -rf docs/build/
+	sphinx-autobuild -b html --watch github_action_toolkit/ docs/source/ docs/build/
 
 .PHONY : run-checks
 run-checks :
