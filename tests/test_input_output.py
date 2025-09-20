@@ -67,10 +67,94 @@ def test_get_state() -> None:
     assert gat.get_state("abc") is None
 
 
+@mock.patch.dict(
+    os.environ,
+    {
+        "INPUT_USERNAME": "test_user",
+        "INPUT_DEBUG": "true",
+        "SOME_OTHER_ENV": "ignore_this",
+    },
+)
+def test_get_all_user_inputs_returns_only_input_vars():
+    result = gat.get_all_user_inputs()
+    assert isinstance(result, dict)
+    assert result == {
+        "username": "test_user",
+        "debug": "true",
+    }
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_all_user_inputs_with_no_inputs():
+    assert gat.get_all_user_inputs() == {}
+
+
+@mock.patch.dict(
+    os.environ,
+    {
+        "INPUT_API_KEY": "abc123",
+        "INPUT_VERBOSE": "yes",
+    },
+)
+def test_print_all_user_inputs_outputs_correctly(capfd):
+    gat.print_all_user_inputs()
+    out, _ = capfd.readouterr()
+    assert "User Inputs:" in out
+    assert "api_key: abc123" in out
+    assert "verbose: yes" in out
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_print_all_user_inputs_when_no_env_vars(capfd):
+    gat.print_all_user_inputs()
+    out, _ = capfd.readouterr()
+    assert "No user inputs found." in out
+
+
 @mock.patch.dict(os.environ, {"INPUT_USERNAME": "test", "ANOTHER": "another test"})
 def test_get_user_input() -> None:
     assert gat.get_user_input("username") == "test"
     assert gat.get_user_input("another") is None
+
+
+@mock.patch.dict(os.environ, {"INPUT_AGE": "30", "INPUT_HEIGHT": "5.8"})
+def test_get_user_input_as_basic_types():
+    assert gat.get_user_input_as("age", int) == 30
+    assert gat.get_user_input_as("height", float) == 5.8
+    assert gat.get_user_input_as("age", str) == "30"
+
+
+@mock.patch.dict(
+    os.environ,
+    {
+        "INPUT_ACTIVE": "true",
+        "INPUT_DISABLED": "no",
+        "INPUT_UNKNOWN": "maybe",
+    },
+)
+def test_get_user_input_as_boolean_true_false():
+    assert gat.get_user_input_as("active", bool, default_value=False) is True
+    assert gat.get_user_input_as("disabled", bool, default_value=True) is False
+    # fallback to casting if not matching known true/false strings
+    assert gat.get_user_input_as("unknown", bool) is True
+
+
+@mock.patch.dict(os.environ, {"INPUT_EMPTY": ""})
+def test_get_user_input_as_empty_string_returns_default():
+    assert gat.get_user_input_as("empty", int, default_value=42) == 42
+    assert gat.get_user_input_as("empty", str, default_value="default") == "default"
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_user_input_as_missing_env_var():
+    assert gat.get_user_input_as("nonexistent", int) is None
+    assert gat.get_user_input_as("nonexistent", str, default_value="x") is None
+
+
+@mock.patch.dict(os.environ, {"INPUT_BROKEN": "abc"})
+def test_get_user_input_as_type_cast_error():
+    with pytest.raises(ValueError):
+        gat.get_user_input_as("broken", int)
 
 
 def test_set_env(tmpdir: Any) -> None:

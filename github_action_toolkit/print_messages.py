@@ -130,6 +130,20 @@ def echo(message: Any, use_subprocess: bool = False) -> None:
         print(message)
 
 
+def info(message: Any, use_subprocess: bool = False) -> None:
+    """
+    prints a message to the GitHub Actions shell.
+
+    Template: {message}
+    Example: info "info message"
+
+    :param message: Any type of message e.g. string, number, list, dict
+    :param use_subprocess: use subprocess module to echo command
+    :returns: None
+    """
+    echo(message=message, use_subprocess=use_subprocess)
+
+
 def debug(message: str, use_subprocess: bool = False) -> None:
     """
     prints a debug message in the GitHub Actions shell.

@@ -16,6 +16,21 @@ Prints specified message to the action workflow console.
 # Hello World
 ```
 
+### **`info(message, use_subprocess=False)`**
+
+Prints specified message to the action workflow console. (Same function as `echo()`)
+
+**example:**
+
+```python
+>> from github_action_toolkit import info
+
+>> info("Hello World-1")
+
+# Output:
+# Hello World-1
+```
+
 ### **`debug(message, use_subprocess=False)`**
 
 Prints colorful debug message to the action workflow console.

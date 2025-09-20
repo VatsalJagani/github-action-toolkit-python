@@ -3,6 +3,7 @@
 from .version import VERSION, VERSION_SHORT
 
 from .print_messages import echo as echo
+from .print_messages import info as info
 from .print_messages import debug as debug
 from .print_messages import notice as notice
 from .print_messages import warning as warning
@@ -18,7 +19,10 @@ from .job_summary import remove_job_summary as remove_job_summary
 
 from .input_output import get_state as get_state
 from .input_output import save_state as save_state
+from .input_output import get_all_user_inputs as get_all_user_inputs
+from .input_output import print_all_user_inputs as print_all_user_inputs
 from .input_output import get_user_input as get_user_input
+from .input_output import get_user_input_as as get_user_input_as
 from .input_output import set_output as set_output
 from .input_output import get_workflow_environment_variables as get_workflow_environment_variables
 from .input_output import get_env as get_env

@@ -120,6 +120,21 @@ def test_echo(capfd: Any, test_input: str, expected: str) -> None:
 @pytest.mark.parametrize(
     "test_input,expected",
     [
+        ("test", "test\n"),
+        ("test\n", "test\n\n"),
+        ("%test", "%test\n"),
+        ("\rtest", "\rtest\n"),
+    ],
+)
+def test_info(capfd: Any, test_input: str, expected: str) -> None:
+    gat.info(test_input)
+    out, err = capfd.readouterr()
+    assert out == expected
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
         ("test", "::debug ::test\n"),
         ("test\n", "::debug ::test\n\n"),
         ("%test", "::debug ::%test\n"),
