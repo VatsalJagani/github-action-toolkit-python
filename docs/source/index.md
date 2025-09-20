@@ -6,7 +6,7 @@
 :caption: Getting started
 
 installation
-overview
+usage
 ```
 
 ```{toctree}
