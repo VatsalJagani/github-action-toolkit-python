@@ -30,7 +30,7 @@ def test_init_with_path(mock_git_repo):
 def test_configure_git(mock_git_repo):
     # Create the mock repo instance
     repo_instance = mock_git_repo.return_value
-    
+
     # Create a specific mock for config_writer
     mock_config_writer = mock.Mock()
     repo_instance.config_writer.return_value = mock_config_writer
@@ -107,15 +107,12 @@ def test_create_pr(mock_github, mock_git_repo):
             title="Test PR",
             body="PR Body",
             head="feature/test",
-            base="main"
+            base="main",
         )
 
     mock_github.assert_called_once_with("fake-token")
     mock_github.return_value.get_repo.assert_called_once_with("test/repo")
     mock_repo_obj.create_pull.assert_called_once_with(
-        title="Test PR",
-        body="PR Body",
-        head="feature/test",
-        base="main"
+        title="Test PR", body="PR Body", head="feature/test", base="main"
     )
     assert pr_url == "https://github.com/test/repo/pull/1"
