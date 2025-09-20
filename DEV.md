@@ -105,6 +105,10 @@ python -m pip install -e .
 
 1. Update the version in `github_action_toolkit/version.py`.
 
+2. Update dependencies and create build.
+    * `python -m pip install -e .`
+    * `make build`
+
 3. Run the release script:
 
     ```bash
