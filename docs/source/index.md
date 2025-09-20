@@ -15,7 +15,7 @@ usage
 
 CHANGELOG
 CONTRIBUTING
-License <https://raw.githubusercontent.com/allenai/github-action-toolkit-python/main/LICENSE>
+License <https://raw.githubusercontent.com/VatsalJagani/github-action-toolkit-python/main/LICENSE>
 GitHub Repository <https://github.com/VatsalJagani/github-action-toolkit-python>
 ```
 
