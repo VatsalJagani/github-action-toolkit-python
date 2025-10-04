@@ -31,3 +31,4 @@ from .input_output import set_env as set_env
 from .event_payload import event_payload as event_payload
 
 from .git_manager import Repo as Repo
+from .file_handler import File as File
