@@ -79,6 +79,8 @@ class File:
             # Content found
             if end_index < 0:
                 end_index = len(lower_content) - 1
+            else:
+                end_index -= 1
 
             debug(f"Found start_index={start_index}, end_index={end_index}")
 

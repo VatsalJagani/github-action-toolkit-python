@@ -33,9 +33,11 @@ def test_write_content_to_custom_path(tmp_path, handler_with_file):
 def test_write_content_part_found(handler_with_file):
     initial = "Header\nStart\nOld content\nEnd\nFooter"
     handler, file_path = handler_with_file(initial)
-    result = handler.write_content_part("New content", start_markers=["Start"], end_markers=["End"])
+    result = handler.write_content_part(
+        "New content", start_markers=["Start\n"], end_markers=["End\n"]
+    )
     assert result is True
-    assert file_path.read_text() == "Header\nStartNew contentEnd\nFooter"
+    assert file_path.read_text() == "Header\nStart\nNew content\nEnd\nFooter"
 
 
 def test_write_content_part_not_found_adds_new(handler_with_file):
@@ -55,13 +57,17 @@ def test_write_content_part_no_change(handler_with_file):
     initial = "Header\nStart\nExact content\nEnd\nFooter"
     handler, file_path = handler_with_file(initial)
     result = handler.write_content_part(
-        "Exact content", start_markers=["Start"], end_markers=["End"]
+        "Exact content",
+        start_markers=["Start\n"],
+        end_markers=["End\n"],
+        start_marker_to_add="\n",
+        end_marker_to_add="\n",
     )
     assert result is False
 
 
 def test_write_content_part_file_not_exist(tmp_path):
     file_path = tmp_path / "missing.txt"
-    handler = File(str(file_path))
     with pytest.raises(FileNotFoundError):
+        handler = File(str(file_path))
         handler.write_content_part("data", ["Start"], ["End"])
