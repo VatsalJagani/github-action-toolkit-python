@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Union
+from typing import Any
 from warnings import warn
 
 from .consts import ACTION_ENV_DELIMITER
@@ -11,11 +11,11 @@ def _build_file_input(name: str, value: Any) -> bytes:
         f"{_escape_property(name)}"
         f"<<{ACTION_ENV_DELIMITER}\n"
         f"{_escape_data(value)}\n"
-        f"{ACTION_ENV_DELIMITER}\n".encode("utf-8")
+        f"{ACTION_ENV_DELIMITER}\n".encode()
     )
 
 
-def get_all_user_inputs() -> Dict[str, str]:
+def get_all_user_inputs() -> dict[str, str]:
     """
     Retrieves all environment variables that start with 'INPUT_'.
 
@@ -38,7 +38,7 @@ def print_all_user_inputs() -> None:
             echo(f"  {name}: {value}")
 
 
-def get_user_input(name: str) -> Union[str, None]:
+def get_user_input(name: str) -> str | None:
     """
     gets user input from environment variables.
 
@@ -88,7 +88,7 @@ def get_user_input_as(name: str, input_type: type, default_value: Any = None) ->
         raise ValueError(f"Cannot convert input '{name}' to {input_type}: {e}") from e
 
 
-def set_output(name: str, value: Any, use_subprocess: Union[bool, None] = None) -> None:
+def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> None:
     """
     sets out for your workflow using GITHUB_OUTPUT file.
 
@@ -107,7 +107,7 @@ def set_output(name: str, value: Any, use_subprocess: Union[bool, None] = None) 
         f.write(_build_file_input(name, value))
 
 
-def get_state(name: str) -> Union[str, None]:
+def get_state(name: str) -> str | None:
     """
     gets environment variable value for the state.
 
@@ -117,7 +117,7 @@ def get_state(name: str) -> Union[str, None]:
     return os.environ.get(f"STATE_{name}")
 
 
-def save_state(name: str, value: Any, use_subprocess: Union[bool, None] = None) -> None:
+def save_state(name: str, value: Any, use_subprocess: bool | None = None) -> None:
     """
     sets state for your workflow using $GITHUB_STATE file
     for sharing it with your workflow's pre: or post: actions.
@@ -137,7 +137,7 @@ def save_state(name: str, value: Any, use_subprocess: Union[bool, None] = None) 
         f.write(_build_file_input(name, value))
 
 
-def get_workflow_environment_variables() -> Dict[str, Any]:
+def get_workflow_environment_variables() -> dict[str, Any]:
     """
     get a dictionary of all environment variables set in the GitHub Actions workflow.
 
@@ -155,9 +155,10 @@ def get_workflow_environment_variables() -> Dict[str, Any]:
 
                 try:
                     decoded_value = next(file).decode("utf-8").strip()
+                    environment_variable_dict[name] = decoded_value  # ← move inside try
                 except StopIteration:
                     break
-            environment_variable_dict[name] = decoded_value
+
     return environment_variable_dict
 
 

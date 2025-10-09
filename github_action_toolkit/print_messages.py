@@ -1,27 +1,21 @@
 import json
 import subprocess
-import sys
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Generator, Union
+from typing import Any, Literal
 
-if sys.version_info >= (3, 8):
-    from typing import Literal
-
-    CommandTypes = Literal[
-        "add-mask",
-        "debug",
-        "error",
-        "group",
-        "notice",
-        "save-state",
-        "set-output",
-        "stop-commands",
-        "warning",
-    ]
-    LogCommandTypes = Literal["debug", "error", "notice", "warning"]
-else:
-    CommandTypes = str
-    LogCommandTypes = str
+CommandTypes = Literal[
+    "add-mask",
+    "debug",
+    "error",
+    "group",
+    "notice",
+    "save-state",
+    "set-output",
+    "stop-commands",
+    "warning",
+]
+LogCommandTypes = Literal["debug", "error", "notice", "warning"]
 
 
 from .consts import COMMAND_MARKER, COMMANDS_USE_SUBPROCESS
@@ -84,7 +78,7 @@ def _build_options_string(**kwargs: Any) -> str:
 def _print_command(
     command: CommandTypes,
     command_message: str,
-    options_string: Union[str, None] = "",
+    options_string: str | None = "",
     use_subprocess: bool = False,
     escape_message: bool = True,
 ) -> None:
@@ -102,7 +96,7 @@ def _print_command(
         command_message = _escape_data(command_message)
 
     full_command = (
-        f"{COMMAND_MARKER}{command} " f"{options_string or ''}" f"{COMMAND_MARKER}{command_message}"
+        f"{COMMAND_MARKER}{command} {options_string or ''}{COMMAND_MARKER}{command_message}"
     )
 
     if use_subprocess or COMMANDS_USE_SUBPROCESS:
@@ -160,12 +154,12 @@ def debug(message: str, use_subprocess: bool = False) -> None:
 
 def notice(
     message: str,
-    title: Union[str, None] = None,
-    file: Union[str, None] = None,
-    col: Union[int, None] = None,
-    end_column: Union[int, None] = None,
-    line: Union[int, None] = None,
-    end_line: Union[int, None] = None,
+    title: str | None = None,
+    file: str | None = None,
+    col: int | None = None,
+    end_column: int | None = None,
+    line: int | None = None,
+    end_line: int | None = None,
     use_subprocess: bool = False,
 ) -> None:
     """
@@ -202,12 +196,12 @@ def notice(
 
 def warning(
     message: str,
-    title: Union[str, None] = None,
-    file: Union[str, None] = None,
-    col: Union[int, None] = None,
-    end_column: Union[int, None] = None,
-    line: Union[int, None] = None,
-    end_line: Union[int, None] = None,
+    title: str | None = None,
+    file: str | None = None,
+    col: int | None = None,
+    end_column: int | None = None,
+    line: int | None = None,
+    end_line: int | None = None,
     use_subprocess: bool = False,
 ) -> None:
     """
@@ -244,12 +238,12 @@ def warning(
 
 def error(
     message: str,
-    title: Union[str, None] = None,
-    file: Union[str, None] = None,
-    col: Union[int, None] = None,
-    end_column: Union[int, None] = None,
-    line: Union[int, None] = None,
-    end_line: Union[int, None] = None,
+    title: str | None = None,
+    file: str | None = None,
+    col: int | None = None,
+    end_column: int | None = None,
+    line: int | None = None,
+    end_line: int | None = None,
     use_subprocess: bool = False,
 ) -> None:
     """

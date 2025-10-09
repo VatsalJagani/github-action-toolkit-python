@@ -2,6 +2,7 @@ import tempfile
 from unittest import mock
 
 import pytest
+from git import Repo as GitRepo
 
 from github_action_toolkit.git_manager import Repo
 
@@ -81,14 +82,24 @@ def test_add_all_and_commit(mock_git_repo):
 
 def test_push(mock_git_repo):
     with Repo(path=".") as repo:
-        repo.repo.active_branch.name = "test-branch"
-        repo.push()
-        repo.repo.git.push.assert_called_once_with("origin", "test-branch")
+        mock_branch = mock.Mock()
+        mock_branch.name = "test-branch"
+        with mock.patch.object(
+            GitRepo, "active_branch", new_callable=mock.PropertyMock
+        ) as mock_active_branch:
+            mock_active_branch.return_value = mock_branch
+            repo.push()
+            repo.repo.git.push.assert_called_once_with("origin", "test-branch")
 
 
 def test_pull(mock_git_repo):
     with Repo(path=".") as repo:
-        repo.repo.active_branch.name = "test-branch"
+        mock_branch = mock.Mock()
+        mock_branch.name = "test-branch"
+        with mock.patch.object(
+            GitRepo, "active_branch", new_callable=mock.PropertyMock
+        ) as mock_active_branch:
+            mock_active_branch.return_value = mock_branch
         repo.pull()
         repo.repo.git.pull.assert_called_once_with("origin", "test-branch")
 
