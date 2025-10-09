@@ -52,8 +52,8 @@ def test__make_string(test_input: Any, expected: str) -> None:
         ("\rtest", "%0Dtest"),
     ],
 )
-def test__escape_data(test_input: str, expected: str) -> None:
-    assert gat_print_messages._escape_data(test_input) == expected
+def test_escape_data(test_input: str, expected: str) -> None:
+    assert gat_print_messages.escape_data(test_input) == expected
 
 
 @pytest.mark.parametrize(
@@ -64,8 +64,8 @@ def test__escape_data(test_input: str, expected: str) -> None:
         ("test,", "test%2C"),
     ],
 )
-def test__escape_property(test_input: str, expected: str) -> None:
-    assert gat_print_messages._escape_property(test_input) == expected
+def test_escape_property(test_input: str, expected: str) -> None:
+    assert gat_print_messages.escape_property(test_input) == expected
 
 
 @pytest.mark.parametrize(

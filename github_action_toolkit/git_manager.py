@@ -1,6 +1,7 @@
 import os
 import re
 import tempfile
+from types import TracebackType
 
 from git import Repo as GitRepo
 from github import Github
@@ -9,6 +10,11 @@ from .print_messages import info
 
 
 class Repo:
+    url: str | None
+    repo_path: str
+    repo: GitRepo
+    base_branch: str
+
     def __init__(self, url: str | None = None, path: str | None = None):
         if not url and not path:
             raise ValueError("Either 'url' or 'path' must be provided")
@@ -29,7 +35,12 @@ class Repo:
         self.configure_git()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ):
         # Optional cleanup
         pass
 

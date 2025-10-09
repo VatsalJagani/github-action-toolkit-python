@@ -3,14 +3,14 @@ from typing import Any
 from warnings import warn
 
 from .consts import ACTION_ENV_DELIMITER
-from .print_messages import _escape_data, _escape_property, echo, group
+from .print_messages import echo, escape_data, escape_property, group
 
 
 def _build_file_input(name: str, value: Any) -> bytes:
     return (
-        f"{_escape_property(name)}"
+        f"{escape_property(name)}"
         f"<<{ACTION_ENV_DELIMITER}\n"
-        f"{_escape_data(value)}\n"
+        f"{escape_data(value)}\n"
         f"{ACTION_ENV_DELIMITER}\n".encode()
     )
 
@@ -63,8 +63,6 @@ def get_user_input_as(name: str, input_type: type, default_value: Any = None) ->
 
     try:
         if input_type is bool:
-            if isinstance(value, bool):
-                return value
             if default_value is True:
                 if value in ("false", "f", "0", "n", "no"):
                     return False
@@ -145,7 +143,7 @@ def get_workflow_environment_variables() -> dict[str, Any]:
 
     :returns: dictionary of all environment variables
     """
-    environment_variable_dict = {}
+    environment_variable_dict: dict[str, str] = {}
     marker = f"<<{ACTION_ENV_DELIMITER}"
 
     with open(os.environ["GITHUB_ENV"], "rb") as file:

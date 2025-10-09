@@ -33,7 +33,7 @@ def _make_string(data: Any) -> str:
     return str(data)
 
 
-def _escape_data(data: Any) -> str:
+def escape_data(data: Any) -> str:
     """
     Removes `%, \r, \n` characters from a string.
 
@@ -45,7 +45,7 @@ def _escape_data(data: Any) -> str:
     return _make_string(data).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
 
 
-def _escape_property(data: Any) -> str:
+def escape_property(data: Any) -> str:
     """
     Removes `%, \r, \n, :, ,` characters from a string.
 
@@ -54,7 +54,7 @@ def _escape_property(data: Any) -> str:
     :param data: Any type of data to be escaped e.g. string, number, list, dict
     :returns: string after escaping
     """
-    return _escape_data(data).replace(":", "%3A").replace(",", "%2C")
+    return escape_data(data).replace(":", "%3A").replace(",", "%2C")
 
 
 def _to_camel_case(text: str) -> str:
@@ -69,7 +69,7 @@ def _to_camel_case(text: str) -> str:
 
 def _build_options_string(**kwargs: Any) -> str:
     return ",".join(
-        f"{_to_camel_case(key)}={_escape_property(value)}"
+        f"{_to_camel_case(key)}={escape_property(value)}"
         for key, value in kwargs.items()
         if value is not None
     )
@@ -93,7 +93,7 @@ def _print_command(
     :returns: None
     """
     if escape_message:
-        command_message = _escape_data(command_message)
+        command_message = escape_data(command_message)
 
     full_command = (
         f"{COMMAND_MARKER}{command} {options_string or ''}{COMMAND_MARKER}{command_message}"
