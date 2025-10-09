@@ -10,7 +10,6 @@ import tempfile
 from unittest import mock
 
 import pytest
-from git import Repo as GitRepo
 
 from github_action_toolkit.git_manager import Repo
 
@@ -89,38 +88,26 @@ def test_add_all_and_commit(mock_git_repo):
 
 
 def test_push(mock_git_repo):
+    mock_git_repo.return_value.active_branch.name = "test-branch"
+
     with Repo(path=".") as repo:
-        mock_branch = mock.Mock()
-        mock_branch.name = "test-branch"
-        with mock.patch.object(
-            GitRepo, "active_branch", new_callable=mock.PropertyMock
-        ) as mock_active_branch:
-            mock_active_branch.return_value = mock_branch
-            repo.push()
-            repo.repo.git.push.assert_called_once_with("origin", "test-branch")
+        repo.push()
+        repo.repo.git.push.assert_called_once_with("origin", "test-branch")
 
 
 def test_pull(mock_git_repo):
+    mock_git_repo.return_value.active_branch.name = "test-branch"
+
     with Repo(path=".") as repo:
-        mock_branch = mock.Mock()
-        mock_branch.name = "test-branch"
-        with mock.patch.object(
-            GitRepo, "active_branch", new_callable=mock.PropertyMock
-        ) as mock_active_branch:
-            mock_active_branch.return_value = mock_branch
         repo.pull()
         repo.repo.git.pull.assert_called_once_with("origin", "test-branch")
 
 
 @mock.patch("github_action_toolkit.git_manager.Github")
 def test_create_pr(mock_github, mock_git_repo):
-    # Mock the repo object returned by GitRepo (which is used inside our Repo class)
     mock_repo_instance = mock_git_repo.return_value
-
-    # Mock the remotes.origin.url property to be a valid GitHub URL string
     mock_repo_instance.remotes.origin.url = "https://github.com/test/repo.git"
 
-    # Mock the PR creation
     mock_repo_obj = mock.Mock()
     mock_pr = mock.Mock()
     mock_pr.html_url = "https://github.com/test/repo/pull/1"
