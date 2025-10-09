@@ -10,8 +10,6 @@ Installation & Usage Documentation is hosted at - [https://github-action-toolkit
 
 ## Project Docs
 
-For how to install uv and Python, see [installation.md](installation.md).
-
 For development workflows, see [development.md](development.md).
 
-For instructions on publishing to PyPI, see [publishing.md](publishing.md).
+For instructions on release process and publishing to PyPI, see [release.md](release.md).
