@@ -101,6 +101,7 @@ def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> Non
             "Argument `use_subprocess` for `set_output()` is deprecated and "
             "going to be removed in the next version.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
     with open(os.environ["GITHUB_OUTPUT"], "ab") as f:
@@ -131,6 +132,7 @@ def save_state(name: str, value: Any, use_subprocess: bool | None = None) -> Non
             "Argument `use_subprocess` for `save_state()` is deprecated and "
             "going to be removed in the next version.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
     with open(os.environ["GITHUB_STATE"], "ab") as f:
