@@ -68,7 +68,7 @@ When you're ready to contribute code to address an open issue, please follow the
         upstream https://github.com/VatsalJagani/github-action-toolkit-python.git (push)
 
 
-**Then Read the [development.md](development.md) for this project for development guidelines.**
+**Then Read the `development.md` file on GitHub for this project for development guidelines.**
 
 2. **Ensure your fork is up-to-date**
 
@@ -98,7 +98,7 @@ When you're ready to contribute code to address an open issue, please follow the
 
 4. **Test your changes**
 
-**Then Read the [development.md](development.md) for this project for development guidelines.**
+**Then Read the `development.md` file on GitHub for this project for development guidelines.**
 
 
 ### Writing docstrings

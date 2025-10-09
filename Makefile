@@ -38,13 +38,20 @@ clean:
 	-rm -rf *.egg-info/
 	-rm -rf .pytest_cache/
 	-rm -rf .mypy_cache/
+	-rm -rf .ruff_cache/
 	-rm -rf .venv/
 	-rm -rf docs/build/
 	-rm -rf CLAUDE.md AGENTS.md
 	-find . -type d -name "__pycache__" -exec rm -rf {} +
 
 
-.PHONY : docs
-docs :
+.PHONY : docs-live
+docs-live :
 	rm -rf docs/build/
 	sphinx-autobuild -b html --watch github_action_toolkit/ docs/source/ docs/build/
+
+.PHONY : docs-check
+docs-check:
+	rm -rf docs/build/
+	uv sync --all-extras
+	$(MAKE) -C docs html

@@ -56,7 +56,7 @@ uv tool install --editable .
 
 # Documentation
 # Run Doc locally
-make docs
+make docs-live
 
 # Dependency management directly with uv:
 # Add a new dependency:

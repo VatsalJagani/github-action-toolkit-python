@@ -60,6 +60,7 @@ dev = [
     "sphinx-autodoc-typehints>=3.4.0",
     "sphinx-copybutton>=0.5.2",
     "furo>=2025.9.25",
+    "myst-parser>=4.0.1",
 ]
 
 [project.scripts]
