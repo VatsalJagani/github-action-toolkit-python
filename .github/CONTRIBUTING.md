@@ -67,27 +67,8 @@ When you're ready to contribute code to address an open issue, please follow the
         upstream https://github.com/VatsalJagani/github-action-toolkit-python.git (fetch)
         upstream https://github.com/VatsalJagani/github-action-toolkit-python.git (push)
 
-    Finally, you'll need to create a Python 3 virtual environment suitable for working on this project. There a number of tools out there that making working with virtual environments easier.
-    The most direct way is with the [`venv` module](https://docs.python.org/3.7/library/venv.html) in the standard library, but if you're new to Python or you don't already have a recent Python 3 version installed on your machine,
-    we recommend [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
 
-    On Mac, for example, you can install Miniconda with [Homebrew](https://brew.sh/):
-
-        brew install miniconda
-
-    Then you can create and activate a new Python environment by running:
-
-        conda create -n github-action-toolkit python=3.9
-        conda activate github-action-toolkit
-
-    Once your virtual environment is activated, you can install your local clone in "editable mode" with
-
-        pip install -U pip setuptools wheel
-        pip install -e .[dev]
-
-    The "editable mode" comes from the `-e` argument to `pip`, and essential just creates a symbolic link from the site-packages directory of your virtual environment to the source code in your local clone. That way any changes you make will be immediately reflected in your virtual environment.
-
-    </details>
+**Then Read the [development.md](development.md) for this project for development guidelines.**
 
 2. **Ensure your fork is up-to-date**
 
@@ -117,49 +98,8 @@ When you're ready to contribute code to address an open issue, please follow the
 
 4. **Test your changes**
 
-    <details><summary>Expand details 👇</summary><br/>
+**Then Read the [development.md](development.md) for this project for development guidelines.**
 
-    Our continuous integration (CI) testing runs [a number of checks](https://github.com/VatsalJagani/github-action-toolkit-python/actions) for each pull request on [GitHub Actions](https://github.com/features/actions). You can run most of these tests locally, which is something you should do *before* opening a PR to help speed up the review process and make it easier for us.
-
-    First, you should run [`isort`](https://github.com/PyCQA/isort) and [`black`](https://github.com/psf/black) to make sure you code is formatted consistently.
-    Many IDEs support code formatters as plugins, so you may be able to setup isort and black to run automatically everytime you save.
-    For example, [`black.vim`](https://github.com/psf/black/tree/master/plugin) will give you this functionality in Vim. But both `isort` and `black` are also easy to run directly from the command line.
-    Just run this from the root of your clone:
-
-        isort .
-        black .
-
-    Our CI also uses [`ruff`](https://github.com/astral-sh/ruff) to lint the code base and [`mypy`](http://mypy-lang.org/) for type-checking. You should run both of these next with
-
-        ruff check .
-
-    and
-
-        mypy .
-
-    We also strive to maintain high test coverage, so most contributions should include additions to [the unit tests](https://github.com/VatsalJagani/github-action-toolkit-python/tree/main/tests). These tests are run with [`pytest`](https://docs.pytest.org/en/latest/), which you can use to locally run any test modules that you've added or changed.
-
-    For example, if you've fixed a bug in `github_action_toolkit/a/b.py`, you can run the tests specific to that module with
-
-        pytest -v tests/a/b_test.py
-
-    If your contribution involves additions to any public part of the API, we require that you write docstrings
-    for each function, method, class, or module that you add.
-    See the [Writing docstrings](#writing-docstrings) section below for details on the syntax.
-    You should test to make sure the API documentation can build without errors by running
-
-        make docs
-
-    If the build fails, it's most likely due to small formatting issues. If the error message isn't clear, feel free to comment on this in your pull request.
-
-    And finally, please update the [CHANGELOG](https://github.com/VatsalJagani/github-action-toolkit-python/blob/main/CHANGELOG.md) with notes on your contribution in the "Unreleased" section at the top.
-
-    After all of the above checks have passed, you can now open [a new GitHub pull request](https://github.com/VatsalJagani/github-action-toolkit-python/pulls).
-    Make sure you have a clear description of the problem and the solution, and include a link to relevant issues.
-
-    We look forward to reviewing your PR!
-
-    </details>
 
 ### Writing docstrings
 
