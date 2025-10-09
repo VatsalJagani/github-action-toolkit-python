@@ -1,9 +1,9 @@
-name: Publish to PyPI
+name: Publish Package & Docs
 
 on:
   release:
     types: [published]
-  workflow_dispatch: # Enable manual trigger.
+  workflow_dispatch:   # Enable manual trigger.
 
 jobs:
   build-and-publish:
@@ -12,16 +12,14 @@ jobs:
       id-token: write # Mandatory for OIDC.
       contents: read
     steps:
-      - name: Checkout (official GitHub action)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Important for versioning plugins:
           fetch-depth: 0
 
       - name: Install uv (official Astral action)
         uses: astral-sh/setup-uv@v5
         with:
-          version: "0.8.13"
           enable-cache: true
           python-version: "3.12"
 
@@ -38,7 +36,7 @@ jobs:
         run: uv build
 
       - name: Generate release notes
-        run: python scripts/release_notes.py > ${{ github.workspace }}-RELEASE_NOTES.md
+        run: python devtools/release_notes.py > ${{ github.workspace }}-RELEASE_NOTES.md
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
