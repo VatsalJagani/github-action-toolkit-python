@@ -74,28 +74,6 @@ uv add package_name@latest
 See [uv docs](https://docs.astral.sh/uv/) for details.
 
 
-## Auto Fix Linting, Styling and Formatting Issue
-
-* Fix Import sorting (isort) issues automatically
-    * For all files:
-        ```
-        isort .
-        ```
-    * For specific file:
-        ```
-        isort github_action_toolkit/abc.py
-        ```
-
-* Auto-fix formatting issues with black
-```
-black .
-```
-
-* Auto-fix linting issues with ruff
-```
-ruff check --fix .
-```
-
 
 ## Agent Rules
 
