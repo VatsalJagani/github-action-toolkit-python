@@ -1,17 +1,57 @@
-.PHONY : docs
-docs :
+# Makefile for easy development workflows.
+# See development.md for docs.
+# Note GitHub Actions call uv directly, not this Makefile.
+
+.DEFAULT_GOAL := default
+
+.PHONY: default install lint test upgrade build clean agent-rules
+
+default: agent-rules install lint test 
+
+install:
+	uv sync --all-extras
+
+lint:
+	uv run python devtools/lint.py
+
+test:
+	uv run pytest
+
+upgrade:
+	uv sync --upgrade --all-extras --dev
+
+build:
+	uv build
+
+agent-rules: CLAUDE.md AGENTS.md
+
+# Use .cursor/rules for sources of rules.
+# Create Claude and Codex rules from these.
+CLAUDE.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
+	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > CLAUDE.md
+
+AGENTS.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
+	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > AGENTS.md
+
+clean:
+	-rm -rf dist/
+	-rm -rf *.egg-info/
+	-rm -rf .pytest_cache/
+	-rm -rf .mypy_cache/
+	-rm -rf .ruff_cache/
+	-rm -rf .venv/
+	-rm -rf docs/build/
+	-rm -rf CLAUDE.md AGENTS.md
+	-find . -type d -name "__pycache__" -exec rm -rf {} +
+
+
+.PHONY : docs-live
+docs-live :
 	rm -rf docs/build/
 	sphinx-autobuild -b html --watch github_action_toolkit/ docs/source/ docs/build/
 
-.PHONY : run-checks
-run-checks :
-	isort --check .
-	black --check .
-	ruff check .
-	mypy .
-	CUDA_VISIBLE_DEVICES='' pytest -v --color=yes --doctest-modules tests/ github_action_toolkit/
-
-.PHONY : build
-build :
-	rm -rf *.egg-info/
-	python -m build
+.PHONY : docs-check
+docs-check:
+	rm -rf docs/build/
+	uv sync --all-extras
+	$(MAKE) -C docs html

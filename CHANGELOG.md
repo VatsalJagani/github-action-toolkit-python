@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Code Improvement
+
+- Linting issues fixed.
+- Code annotation updated.
+
+### Improvements for Better Python Package Management
+
+- Added Agent instruction for Code Editors and AI tools.
+- Developer Docs improved.
+- Contributor notes improved.
+- Document Contributor notes improved.
+- Release publication document added.
+- GitHub Workflow - Build and Test updated.
+- New Github Workflow for publishing Release and Docs added.
+- Make file improved.
+- Adding linting checks and other code checking file.
+- `pyproject.toml` file improved.
+
+
 ## [v0.3.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.3.0) - 2025-09-20
 
 ### Added

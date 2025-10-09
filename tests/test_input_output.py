@@ -1,3 +1,11 @@
+# pyright: reportPrivateUsage=false
+# pyright: reportUnusedVariable=false
+# pyright: reportUnusedParameter=false
+# pyright: reportMissingParameterType=false
+# pyright: reportUnknownVariableType=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportUnknownMemberType=false
+
 import os
 from typing import Any
 from unittest import mock

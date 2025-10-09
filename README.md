@@ -6,3 +6,10 @@ This is python library for utility functions and class helpful for custom GitHub
 ## Documentation
 
 Installation & Usage Documentation is hosted at - [https://github-action-toolkit.readthedocs.io/](https://github-action-toolkit.readthedocs.io/)
+
+
+## Project Docs
+
+For development workflows, see [development.md](development.md).
+
+For instructions on release process and publishing to PyPI, see [release.md](release.md).

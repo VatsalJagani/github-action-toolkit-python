@@ -1,4 +1,4 @@
-name: PR Checks
+name: CHANGELOG Check
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

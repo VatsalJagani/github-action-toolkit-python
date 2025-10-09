@@ -1,21 +1,21 @@
 import os
-from typing import Any, Dict, Union
+from typing import Any
 from warnings import warn
 
 from .consts import ACTION_ENV_DELIMITER
-from .print_messages import _escape_data, _escape_property, echo, group
+from .print_messages import echo, escape_data, escape_property, group
 
 
 def _build_file_input(name: str, value: Any) -> bytes:
     return (
-        f"{_escape_property(name)}"
+        f"{escape_property(name)}"
         f"<<{ACTION_ENV_DELIMITER}\n"
-        f"{_escape_data(value)}\n"
-        f"{ACTION_ENV_DELIMITER}\n".encode("utf-8")
+        f"{escape_data(value)}\n"
+        f"{ACTION_ENV_DELIMITER}\n".encode()
     )
 
 
-def get_all_user_inputs() -> Dict[str, str]:
+def get_all_user_inputs() -> dict[str, str]:
     """
     Retrieves all environment variables that start with 'INPUT_'.
 
@@ -38,7 +38,7 @@ def print_all_user_inputs() -> None:
             echo(f"  {name}: {value}")
 
 
-def get_user_input(name: str) -> Union[str, None]:
+def get_user_input(name: str) -> str | None:
     """
     gets user input from environment variables.
 
@@ -63,8 +63,6 @@ def get_user_input_as(name: str, input_type: type, default_value: Any = None) ->
 
     try:
         if input_type is bool:
-            if isinstance(value, bool):
-                return value
             if default_value is True:
                 if value in ("false", "f", "0", "n", "no"):
                     return False
@@ -88,7 +86,7 @@ def get_user_input_as(name: str, input_type: type, default_value: Any = None) ->
         raise ValueError(f"Cannot convert input '{name}' to {input_type}: {e}") from e
 
 
-def set_output(name: str, value: Any, use_subprocess: Union[bool, None] = None) -> None:
+def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> None:
     """
     sets out for your workflow using GITHUB_OUTPUT file.
 
@@ -101,13 +99,14 @@ def set_output(name: str, value: Any, use_subprocess: Union[bool, None] = None) 
             "Argument `use_subprocess` for `set_output()` is deprecated and "
             "going to be removed in the next version.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
     with open(os.environ["GITHUB_OUTPUT"], "ab") as f:
         f.write(_build_file_input(name, value))
 
 
-def get_state(name: str) -> Union[str, None]:
+def get_state(name: str) -> str | None:
     """
     gets environment variable value for the state.
 
@@ -117,7 +116,7 @@ def get_state(name: str) -> Union[str, None]:
     return os.environ.get(f"STATE_{name}")
 
 
-def save_state(name: str, value: Any, use_subprocess: Union[bool, None] = None) -> None:
+def save_state(name: str, value: Any, use_subprocess: bool | None = None) -> None:
     """
     sets state for your workflow using $GITHUB_STATE file
     for sharing it with your workflow's pre: or post: actions.
@@ -131,19 +130,20 @@ def save_state(name: str, value: Any, use_subprocess: Union[bool, None] = None) 
             "Argument `use_subprocess` for `save_state()` is deprecated and "
             "going to be removed in the next version.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
     with open(os.environ["GITHUB_STATE"], "ab") as f:
         f.write(_build_file_input(name, value))
 
 
-def get_workflow_environment_variables() -> Dict[str, Any]:
+def get_workflow_environment_variables() -> dict[str, Any]:
     """
     get a dictionary of all environment variables set in the GitHub Actions workflow.
 
     :returns: dictionary of all environment variables
     """
-    environment_variable_dict = {}
+    environment_variable_dict: dict[str, str] = {}
     marker = f"<<{ACTION_ENV_DELIMITER}"
 
     with open(os.environ["GITHUB_ENV"], "rb") as file:
@@ -155,9 +155,10 @@ def get_workflow_environment_variables() -> Dict[str, Any]:
 
                 try:
                     decoded_value = next(file).decode("utf-8").strip()
+                    environment_variable_dict[name] = decoded_value  # ← move inside try
                 except StopIteration:
                     break
-            environment_variable_dict[name] = decoded_value
+
     return environment_variable_dict
 
 

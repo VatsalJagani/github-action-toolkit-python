@@ -1,7 +1,7 @@
 import os
 import re
 import tempfile
-from typing import Optional, Union
+from types import TracebackType
 
 from git import Repo as GitRepo
 from github import Github
@@ -10,7 +10,12 @@ from .print_messages import info
 
 
 class Repo:
-    def __init__(self, url: Optional[str] = None, path: Optional[str] = None):
+    url: str | None
+    repo_path: str
+    repo: GitRepo
+    base_branch: str
+
+    def __init__(self, url: str | None = None, path: str | None = None):
         if not url and not path:
             raise ValueError("Either 'url' or 'path' must be provided")
 
@@ -30,7 +35,12 @@ class Repo:
         self.configure_git()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ):
         # Optional cleanup
         pass
 
@@ -66,23 +76,23 @@ class Repo:
         self.repo.git.add(all=True)
         self.repo.git.commit("-m", message)
 
-    def push(self, remote: str = "origin", branch: Optional[str] = None):
+    def push(self, remote: str = "origin", branch: str | None = None):
         branch = branch or self.get_current_branch()
         info(f"Pushing to {remote}/{branch}")
         self.repo.git.push(remote, branch)
 
-    def pull(self, remote: str = "origin", branch: Optional[str] = None):
+    def pull(self, remote: str = "origin", branch: str | None = None):
         branch = branch or self.get_current_branch()
         info(f"Pulling from {remote}/{branch}")
         self.repo.git.pull(remote, branch)
 
     def create_pr(
         self,
-        github_token: Union[str, None] = None,
-        title: Union[str, None] = None,
-        body: Union[str, None] = "",
-        head: Union[str, None] = None,
-        base: Union[str, None] = None,
+        github_token: str | None = None,
+        title: str | None = None,
+        body: str = "",
+        head: str | None = None,
+        base: str | None = None,
     ) -> str:
         """
         Creates a pull request on GitHub.
@@ -110,7 +120,12 @@ class Repo:
 
         # 3. Use last commit message as PR title
         if not title:
-            title = self.repo.head.commit.message.strip()
+            raw_message = self.repo.head.commit.message
+            if isinstance(raw_message, bytes):
+                raw_message = raw_message.decode()
+            title = raw_message.strip()
+            if not title:
+                raise ValueError("No commit message found for PR title.")
 
         # 4. Use current branch as head
         if not head:
