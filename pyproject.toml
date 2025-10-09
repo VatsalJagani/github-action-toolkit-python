@@ -13,7 +13,7 @@ authors = [
     { name="Vatsal Jagani", email="vatsaljagani85@gmail.com" },
 ]
 readme = "README.md"
-license = "MIT"
+license = {file = "LICENSE"}
 requires-python = ">=3.11,<4.0"
 dynamic = ["version"]
 
