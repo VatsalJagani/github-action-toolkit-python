@@ -10,6 +10,6 @@ Installation & Usage Documentation is hosted at - [https://github-action-toolkit
 
 ## Project Docs
 
-For development workflows, see [development.md](development.md).
+For development workflows, see [development.md](devtools/development.md).
 
-For instructions on release process and publishing to PyPI, see [release.md](release.md).
+For instructions on release process and publishing to PyPI, see [release.md](devtools/release.md).
