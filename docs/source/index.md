@@ -19,6 +19,7 @@ usage
 /usage/input_output
 /usage/event_payload
 /usage/git_manager
+/usage/github_artifacts
 ```
 
 ```{toctree}

@@ -15,3 +15,5 @@ This section documents all the functions provided by `github-action-toolkit`. Th
 * **[GitHub Action Event Payload](/usage/event_payload)**
 
 * **[Git Repo Functions](/usage/git_manager)**
+
+* **[GitHub Artifact Functions](/usage/github_artifacts)**

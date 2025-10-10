@@ -26,10 +26,12 @@ __all__ = (  # noqa: F405
     "set_env",
     "event_payload",
     "Repo",
+    "GitHubArtifacts",
 )
 
 from .event_payload import *  # noqa: F403
 from .git_manager import *  # noqa: F403
+from .github_artifacts import *  # noqa: F403
 from .input_output import *  # noqa: F403
 from .job_summary import *  # noqa: F403
 from .print_messages import *  # noqa: F403

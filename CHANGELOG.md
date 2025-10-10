@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Added GitHubArtifacts class with following functions
+    - get_artifacts
+    - get_artifact
+    - download_artifact
+    - delete_artifact
+
+
 ## [v0.4.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.4.0) - 2025-10-10
 
 ### Code Improvement
