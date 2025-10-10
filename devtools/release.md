@@ -9,14 +9,14 @@
 3. Run the release script:
 
     ```bash
-    ./devtools/release.sh
+    make create-release
     ```
 
     This will commit the changes to the CHANGELOG and `version.py` files and then create a new tag in git
     which will trigger a workflow on GitHub Actions that handles the rest.
 
 
-### What does `release.yml` GitHub Workflow Do:
+### What does `release.yml` GitHub Workflow Do Automatically:
 
 * It generates Release Notes from Change Log.
 * It publishes a GitHub release on the Repo.

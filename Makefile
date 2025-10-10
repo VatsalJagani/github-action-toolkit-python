@@ -1,5 +1,5 @@
 # Makefile for easy development workflows.
-# See development.md for docs.
+# See devtools/development.md for docs.
 # Note GitHub Actions call uv directly, not this Makefile.
 
 .DEFAULT_GOAL := default
@@ -55,3 +55,8 @@ docs-check:
 	rm -rf docs/build/
 	uv sync --all-extras
 	$(MAKE) -C docs html
+
+
+.PHONY : create-release
+create-release:
+	./devtools/release.sh
