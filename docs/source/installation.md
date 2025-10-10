@@ -1,7 +1,7 @@
 Installation
 ============
 
-**github-action-toolkit** supports Python >= 3.8.
+**github-action-toolkit** supports Python >= 3.11.
 
 ## Installing with `pip`
 
@@ -9,6 +9,12 @@ Installation
 
 ```bash
 pip install github-action-toolkit
+```
+
+## Installing with `uv`
+
+```bash
+uv add github-action-toolkit
 ```
 
 ## Installing from source
