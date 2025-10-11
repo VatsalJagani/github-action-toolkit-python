@@ -1,0 +1,3 @@
+# [run]
+# omit = 
+    # omit extra files which needs to be excluded from coverage.
