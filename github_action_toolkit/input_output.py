@@ -59,7 +59,7 @@ def get_user_input_as(name: str, input_type: type, default_value: Any = None) ->
     """
     value = get_user_input(name)
     if value is None:
-        return None
+        return default_value
 
     try:
         if input_type is bool:
