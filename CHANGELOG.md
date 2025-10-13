@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Changed
+### Fixed
 
+- get_user_input_as function's default value recognition when not defined in the environment variable issue is fixed.
 - devtools reorganized.
 
 

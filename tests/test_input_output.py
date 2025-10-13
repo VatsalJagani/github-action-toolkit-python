@@ -156,7 +156,7 @@ def test_get_user_input_as_empty_string_returns_default():
 @mock.patch.dict(os.environ, {}, clear=True)
 def test_get_user_input_as_missing_env_var():
     assert gat.get_user_input_as("nonexistent", int) is None
-    assert gat.get_user_input_as("nonexistent", str, default_value="x") is None
+    assert gat.get_user_input_as("nonexistent", str, default_value="x") == "x"
 
 
 @mock.patch.dict(os.environ, {"INPUT_BROKEN": "abc"})
