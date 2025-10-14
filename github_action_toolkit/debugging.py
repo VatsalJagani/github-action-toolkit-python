@@ -7,12 +7,7 @@ def print_directory_tree(max_level: int = 3) -> None:
     """Print directory structure in a visually appealing tree format."""
     with group(f'DEBUG: Printing Directory Structure. CWD="{os.getcwd()}"'):
         startpath = os.getcwd()
-        prefix_map = {
-            "branch": "├── ",
-            "last_branch": "└── ",
-            "indent": "│   ",
-            "empty": "    "
-        }
+        prefix_map = {"branch": "├── ", "last_branch": "└── ", "indent": "│   ", "empty": "    "}
 
         for root, dirs, files in os.walk(startpath):
             level = root.replace(startpath, "").count(os.sep)
@@ -29,10 +24,12 @@ def print_directory_tree(max_level: int = 3) -> None:
             else:
                 # Create the prefix based on level
                 indent = ""
-                for i in range(level - 1):
+                for _ in range(level - 1):
                     indent += prefix_map["indent"]
-                
-                is_last_dir = os.path.basename(root) == sorted(os.listdir(os.path.dirname(root)))[-1]
+
+                is_last_dir = (
+                    os.path.basename(root) == sorted(os.listdir(os.path.dirname(root)))[-1]
+                )
                 prefix = prefix_map["last_branch"] if is_last_dir else prefix_map["branch"]
                 info(f"{indent}{prefix}{os.path.basename(root)}/")
 

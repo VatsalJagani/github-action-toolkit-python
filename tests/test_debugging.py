@@ -124,14 +124,14 @@ def test_print_directory_tree(
         )
 
         # Match each line against expected pattern
-        for line, pattern in zip(lines, expected_patterns):
+        for line, pattern in zip(lines, expected_patterns, strict=False):
             assert re.match(pattern, line), f"Line {line!r} does not match {pattern!r}"
 
         # Negative assertions by level
         if max_level <= 1:
-            assert all("deep_file.txt" not in l for l in lines)
+            assert all("deep_file.txt" not in _l for _l in lines)
         if max_level == 0:
-            assert all("subdir" not in l for l in lines)
+            assert all("subdir" not in _l for _l in lines)
     finally:
         os.chdir(original_dir)
 
@@ -148,4 +148,3 @@ def test_print_directory_tree_empty_dir(capfd: Any, tmp_path: Path) -> None:
         assert "──" not in lines[0]
     finally:
         os.chdir(original_dir)
-
