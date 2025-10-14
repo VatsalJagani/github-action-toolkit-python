@@ -27,6 +27,7 @@ __all__ = (  # noqa: F405
     "event_payload",
     "Repo",
     "GitHubArtifacts",
+    "print_directory_tree"
 )
 
 from .event_payload import *  # noqa: F403
@@ -35,4 +36,5 @@ from .github_artifacts import *  # noqa: F403
 from .input_output import *  # noqa: F403
 from .job_summary import *  # noqa: F403
 from .print_messages import *  # noqa: F403
+from .debugging import *  # noqa: F403
 from .version import VERSION, VERSION_SHORT  # noqa: F403
