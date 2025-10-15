@@ -197,7 +197,7 @@ class Repo:
             except Exception:  # noqa: BLE001
                 origin = None
         remote_ref = f"origin/{current_base}"
-        remote_branches: set[str] = {ref.name for ref in origin.refs} if origin else set[str]()
+        remote_branches: set[str] = {ref.name for ref in origin.refs} if origin else set()
 
         # Checkout base branch; if remote ref exists, prefer forcing base to track it
         try:
