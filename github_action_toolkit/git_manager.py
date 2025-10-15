@@ -215,14 +215,22 @@ class Repo:
                 self.repo.git.reset("--hard", remote_ref)
             except Exception as exc:  # noqa: BLE001
                 info(f"Hard reset to {remote_ref} failed: {exc}; falling back to local HEAD")
-                self.repo.git.reset("--hard")
+                try:
+                    self.repo.git.reset("--hard")
+                except Exception as exc:  # noqa: BLE001
+                    info(f"Fallback local hard reset failed: {exc}")
         else:
             info(f"Remote ref {remote_ref} not found; performing local hard reset")
-            self.repo.git.reset("--hard")
+            try:
+                self.repo.git.reset("--hard")
+            except Exception as exc:  # noqa: BLE001
+                info(f"Local hard reset failed: {exc}")
 
         # Final clean to remove any residuals after branch switch
-        self.repo.git.clean("-fdx")
-
+        try:
+            self.repo.git.clean("-fdx")
+        except Exception as exc:  # noqa: BLE001
+            info(f"Final clean failed: {exc}")
         try:
             self.repo.git.pull("origin", current_base)
         except Exception as exc:  # noqa: BLE001
