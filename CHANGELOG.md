@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a new debugging function `print_directory_tree`
 
+### Changed
+
+- `Repo` class: Introduced shared cleanup helper to synchronize to base branch. Cleanup job runs on both context enter and exit (fetch, checkout, hard reset, clean, pull). To use it you can use the new parameter added to Repo constructor `cleanup`.
+
 
 ## [v0.5.1](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.5.1) - 2025-10-13
 
