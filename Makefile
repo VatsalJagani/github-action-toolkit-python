@@ -23,15 +23,18 @@ upgrade:
 build:
 	uv build
 
-agent-rules: CLAUDE.md AGENTS.md
+agent-rules: CLAUDE.md AGENTS.md .copilot-instructions.md
 
 # Use .cursor/rules for sources of rules.
-# Create Claude and Codex rules from these.
+# Create Claude, Codex, and GitHub Copilot rules from these.
 CLAUDE.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
 	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > CLAUDE.md
 
 AGENTS.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
 	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > AGENTS.md
+
+.copilot-instructions.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
+	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > .copilot-instructions.md
 
 clean:
 	-rm -rf dist/
@@ -41,7 +44,7 @@ clean:
 	-rm -rf .ruff_cache/
 	-rm -rf .venv/
 	-rm -rf docs/build/
-	-rm -rf CLAUDE.md AGENTS.md
+	-rm -rf CLAUDE.md AGENTS.md .copilot-instructions.md
 	-find . -type d -name "__pycache__" -exec rm -rf {} +
 
 

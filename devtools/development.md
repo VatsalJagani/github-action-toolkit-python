@@ -78,9 +78,12 @@ See [uv docs](https://docs.astral.sh/uv/) for details.
 ## Agent Rules
 
 See [.cursor/rules](.cursor/rules) for agent rules.
-These are written for [Cursor](https://www.cursor.com/) but are also used by other
-agents because the Makefile will generate `CLAUDE.md` and `AGENTS.md` from the same
-rules.
+These rules are written for [Cursor](https://www.cursor.com/).
+However, they are also used by other agents.
+The Makefile will generate the following files from the same rules:
+- `CLAUDE.md` (for Claude AI)
+- `AGENTS.md` (for general agents)
+- `.copilot-instructions.md` (for GitHub Copilot)
 
 ```shell
 make agent-rules
