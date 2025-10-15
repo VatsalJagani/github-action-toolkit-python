@@ -5,6 +5,7 @@
 # pyright: reportUnknownVariableType=false
 # pyright: reportUnknownParameterType=false
 # pyright: reportUnknownMemberType=false
+# pyright: reportUnknownArgumentType=false
 
 import tempfile
 from unittest import mock
@@ -101,6 +102,79 @@ def test_pull(mock_git_repo):
     with Repo(path=".") as repo:
         repo.pull()
         repo.repo.git.pull.assert_called_once_with("origin", "test-branch")
+
+
+def test_context_manager_cleanup_true_happy_path(mock_git_repo):
+    """When cleanup=True we should fetch, checkout, reset, clean, pull on enter and exit."""
+    mock_repo = mock_git_repo.return_value
+    mock_repo.active_branch.name = "main"
+    # Simulate origin refs containing origin/main
+    mock_ref = mock.Mock()
+    mock_ref.name = "origin/main"
+    mock_repo.remotes.origin.refs = [mock_ref]
+
+    with Repo(path=".", cleanup=True):
+        pass
+
+    # Expect two sync cycles (enter and exit)
+    assert mock_repo.git.fetch.call_count == 2
+    # Checkout to base twice; with remote available we use `checkout -B base origin/base`
+    checkout_b_calls = [
+        c for c in mock_repo.git.checkout.call_args_list if c.args == ("-B", "main", "origin/main")
+    ]
+    assert len(checkout_b_calls) == 2
+    # Reset to remote ref twice
+    reset_remote_calls = [
+        c for c in mock_repo.git.reset.call_args_list if c.args == ("--hard", "origin/main")
+    ]
+    assert len(reset_remote_calls) == 2
+    # Clean four times (pre and post, for enter and exit)
+    clean_calls = [c for c in mock_repo.git.clean.call_args_list if c.args == ("-fdx",)]
+    assert len(clean_calls) == 4
+    # Pull twice
+    pull_calls = [c for c in mock_repo.git.pull.call_args_list if c.args == ("origin", "main")]
+    assert len(pull_calls) == 2
+
+
+def test_context_manager_cleanup_true_missing_remote_ref(mock_git_repo):
+    """If remote ref missing it should fall back to local hard reset only (on enter and exit)."""
+    mock_repo = mock_git_repo.return_value
+    mock_repo.active_branch.name = "develop"
+    # No origin/develop in refs
+    mock_repo.remotes.origin.refs = []
+
+    with Repo(path=".", cleanup=True):
+        pass
+
+    # Expect two sync cycles (enter and exit)
+    assert mock_repo.git.fetch.call_count == 2
+    checkout_calls = [c for c in mock_repo.git.checkout.call_args_list if c.args == ("develop",)]
+    assert len(checkout_calls) == 2
+    # Expect four local hard resets (pre and post, for enter and exit)
+    local_hard_resets = [c for c in mock_repo.git.reset.call_args_list if c.args == ("--hard",)]
+    assert len(local_hard_resets) == 4
+    # Clean four times
+    clean_calls = [c for c in mock_repo.git.clean.call_args_list if c.args == ("-fdx",)]
+    assert len(clean_calls) == 4
+    pull_calls = [c for c in mock_repo.git.pull.call_args_list if c.args == ("origin", "develop")]
+    assert len(pull_calls) == 2
+
+
+def test_context_manager_no_cleanup(mock_git_repo):
+    """When cleanup=False none of the destructive git ops should run."""
+    mock_repo = mock_git_repo.return_value
+    mock_repo.active_branch.name = "main"
+
+    with Repo(path=".", cleanup=False):
+        pass
+
+    # Ensure no cleanup-related operations were invoked
+    assert not mock_repo.git.fetch.called
+    assert not mock_repo.git.clean.called
+    assert not mock_repo.git.reset.called
+    # checkout only happens for create_new_branch or inside cleanup logic
+    # so we verify it's not called here.
+    assert not mock_repo.git.checkout.called
 
 
 @mock.patch("github_action_toolkit.git_manager.Github")

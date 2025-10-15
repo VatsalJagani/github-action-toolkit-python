@@ -1,7 +1,7 @@
 Git and GitHub Repo related Functions
 ================
 
-### **`Repo(url=None, path=None)` Class**
+### **`Repo(url: str = None, path: str = None, cleanup: bool = False)` Class**
 
 Initializes the Git repository with this class.
 
@@ -10,6 +10,24 @@ Either url or path parameter is required.
 If url is provided, the repo will be cloned into a temp directory. And you can access the path of the repository with `repo.repo_path` variable.
 
 If path is provided, the existing local repo will be used.
+
+#### Cleanup Mode (`cleanup=True`)
+
+When `cleanup=True`, the repository is force-synchronized to the original base branch captured at construction time on both context entry and exit:
+
+1. `git fetch --prune` (non-fatal if it fails)
+2. Pre-sync: `git reset --hard` then `git clean -fdx` (clear local changes/untracked files)
+3. Checkout base branch:
+	- If `origin/<base_branch>` exists: `git checkout -B <base_branch> origin/<base_branch>`
+	- Otherwise: `git checkout <base_branch>` (non-fatal; logs on failure)
+4. Post-sync reset:
+	- If `origin/<base_branch>` exists: `git reset --hard origin/<base_branch>` (falls back to `git reset --hard` on failure)
+	- Otherwise: `git reset --hard`
+5. Post-sync clean: `git clean -fdx` (removes untracked, directories, ignored files)
+6. `git pull origin <base_branch>` (non-fatal)
+
+This synchronization happens twice: once on `__enter__` (before your work) and once on `__exit__` (after your work), guaranteeing the repo is clean, on the base branch, and up to date. All steps are defensive: errors never raise, they only log.
+
 
 **example:**
 

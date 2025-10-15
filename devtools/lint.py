@@ -6,7 +6,7 @@ from rich import print as rprint
 
 # Update as needed.
 SRC_PATHS = ["github_action_toolkit", "tests", "devtools"]
-DOC_PATHS = ["README.md"]
+DOC_PATHS = ["README.md", "development.md", "CHANGELOG.md", "CONTRIBUTING.md", "docs/source"]
 
 
 reconfigure(emoji=not get_console().options.legacy_windows)  # No emojis on legacy windows.
