@@ -446,7 +446,7 @@ dependencies = [
     { name = "pygithub" },
 ]
 
-[package.dev-dependencies]
+[package.optional-dependencies]
 dev = [
     { name = "basedpyright" },
     { name = "codespell" },
@@ -466,27 +466,24 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "basedpyright", marker = "extra == 'dev'", specifier = ">=1.29.1" },
+    { name = "codespell", marker = "extra == 'dev'", specifier = ">=2.4.1" },
+    { name = "funlog", marker = "extra == 'dev'", specifier = ">=0.2.1" },
+    { name = "furo", marker = "extra == 'dev'", specifier = ">=2025.9.25" },
     { name = "gitpython", specifier = ">=3.1" },
+    { name = "myst-parser", marker = "extra == 'dev'", specifier = ">=4.0.1" },
     { name = "pygithub", specifier = ">=1.58" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.5" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "pytest-sugar", marker = "extra == 'dev'", specifier = ">=1.0.0" },
+    { name = "rich", marker = "extra == 'dev'", specifier = ">=14.0.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.9" },
+    { name = "sphinx", marker = "extra == 'dev'", specifier = ">=8.2.3" },
+    { name = "sphinx-autobuild", marker = "extra == 'dev'", specifier = ">=2025.8.25" },
+    { name = "sphinx-autodoc-typehints", marker = "extra == 'dev'", specifier = ">=3.4.0" },
+    { name = "sphinx-copybutton", marker = "extra == 'dev'", specifier = ">=0.5.2" },
 ]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "basedpyright", specifier = ">=1.29.1" },
-    { name = "codespell", specifier = ">=2.4.1" },
-    { name = "funlog", specifier = ">=0.2.1" },
-    { name = "furo", specifier = ">=2025.9.25" },
-    { name = "myst-parser", specifier = ">=4.0.1" },
-    { name = "pytest", specifier = ">=8.3.5" },
-    { name = "pytest-cov", specifier = ">=7.0.0" },
-    { name = "pytest-sugar", specifier = ">=1.0.0" },
-    { name = "rich", specifier = ">=14.0.0" },
-    { name = "ruff", specifier = ">=0.11.9" },
-    { name = "sphinx", specifier = ">=8.2.3" },
-    { name = "sphinx-autobuild", specifier = ">=2025.8.25" },
-    { name = "sphinx-autodoc-typehints", specifier = ">=3.4.0" },
-    { name = "sphinx-copybutton", specifier = ">=0.5.2" },
-]
+provides-extras = ["dev"]
 
 [[package]]
 name = "gitpython"
