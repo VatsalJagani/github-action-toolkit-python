@@ -18,21 +18,21 @@ requires-python = ">=3.11,<4.0"
 dynamic = ["version"]
 
 # https://pypi.org/classifiers/
-# Adjust as needed:
 classifiers = [
-    # Adjust as needed:
     "Development Status :: 4 - Beta",
-    # "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Utilities",
     "Typing :: Typed",
-    # Include this to avoid accidentally publishing to PyPI:
-    # "Private :: Do Not Upload",
 ]
 
 
@@ -47,21 +47,56 @@ dependencies = [
 # ---- Dev dependencies ----
 
 [project.optional-dependencies]
-dev = [
+# Testing dependencies
+test = [
     "pytest>=8.3.5",
     "pytest-sugar>=1.0.0",
     "pytest-cov>=7.0.0",
+]
+
+# Linting and formatting dependencies
+lint = [
     "ruff>=0.11.9",
     "codespell>=2.4.1",
-    "rich>=14.0.0",
+]
+
+# Type checking dependencies
+typing = [
     "basedpyright>=1.29.1",
-    "funlog>=0.2.1",
+    "mypy>=1.15.0",
+    "types-requests>=2.31.0",
+]
+
+# Documentation dependencies
+docs = [
     "sphinx>=8.2.3",
     "sphinx-autobuild>=2025.8.25",
     "sphinx-autodoc-typehints>=3.4.0",
     "sphinx-copybutton>=0.5.2",
     "furo>=2025.9.25",
     "myst-parser>=4.0.1",
+]
+
+# Utilities for development
+utils = [
+    "rich>=14.0.0",
+    "funlog>=0.2.1",
+]
+
+# Pre-commit hooks
+pre-commit = [
+    "pre-commit>=4.0.1",
+    "pyproject-fmt>=2.7.6",
+]
+
+# Conventional commits support
+commits = [
+    "commitizen>=4.1.0",
+]
+
+# All development dependencies (meta-extra)
+dev = [
+    "github-action-toolkit[test,lint,typing,docs,utils,pre-commit,commits]",
 ]
 
 [project.scripts]
@@ -180,3 +215,20 @@ testpaths = [
 ]
 norecursedirs = []
 filterwarnings = []
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "semver"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+ignore_missing_imports = true
+files = ["github_action_toolkit", "tests", "devtools"]
