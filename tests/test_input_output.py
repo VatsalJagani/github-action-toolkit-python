@@ -255,3 +255,15 @@ def test_add_path_relative_raises_error(tmpdir: Any) -> None:
     with mock.patch.dict(os.environ, {"GITHUB_PATH": file.strpath}):
         with pytest.raises(ValueError, match="must be an absolute path"):
             gat.add_path("relative/path")
+
+
+def test_delimiter_in_value_raises_error(tmpdir: Any) -> None:
+    """Test that values containing the delimiter raise a ValueError"""
+    from github_action_toolkit.consts import ACTION_ENV_DELIMITER
+    
+    file = tmpdir.join("envfile")
+    malicious_value = f"test{ACTION_ENV_DELIMITER}injection"
+
+    with mock.patch.dict(os.environ, {"GITHUB_ENV": file.strpath}):
+        with pytest.raises(ValueError, match="contains the delimiter"):
+            gat.set_env("test", malicious_value)

@@ -1,4 +1,5 @@
 import os
+import threading
 from pathlib import Path
 from typing import Any
 from warnings import warn
@@ -6,13 +7,65 @@ from warnings import warn
 from .consts import ACTION_ENV_DELIMITER
 from .print_messages import echo, escape_data, escape_property, group
 
+# Thread-local lock for file operations to ensure thread-safety
+_file_locks: dict[str, threading.Lock] = {}
+_locks_lock = threading.Lock()
+
+
+def _get_file_lock(filepath: str) -> threading.Lock:
+    """Get or create a lock for a specific file path."""
+    with _locks_lock:
+        if filepath not in _file_locks:
+            _file_locks[filepath] = threading.Lock()
+        return _file_locks[filepath]
+
+
+def _write_to_file(filepath: str, content: bytes) -> None:
+    """
+    Thread-safe atomic write to a file.
+    
+    :param filepath: Path to the file
+    :param content: Content to write (as bytes)
+    :raises: IOError if file cannot be written
+    """
+    lock = _get_file_lock(filepath)
+    with lock:
+        try:
+            with open(filepath, "ab") as f:
+                f.write(content)
+                f.flush()  # Ensure data is written to disk
+                os.fsync(f.fileno())  # Force write to disk for atomicity
+        except (OSError, IOError) as e:
+            raise IOError(f"Failed to write to {filepath}: {e}") from e
+
 
 def _build_file_input(name: str, value: Any) -> bytes:
+    """
+    Build properly formatted and escaped environment file input.
+    
+    Uses heredoc-style delimiters to safely handle multi-line values.
+    Validates that the delimiter doesn't appear in the value to prevent injection.
+    
+    :param name: Variable name
+    :param value: Variable value
+    :returns: Properly formatted bytes for writing to env file
+    :raises ValueError: If the delimiter appears in the value (extremely rare)
+    """
+    escaped_value = escape_data(value)
+    
+    # Validate that our delimiter doesn't appear in the escaped value
+    # This is extremely unlikely but we check for safety
+    if ACTION_ENV_DELIMITER in escaped_value:
+        raise ValueError(
+            f"Value contains the delimiter '{ACTION_ENV_DELIMITER}'. "
+            "This is not supported for security reasons."
+        )
+    
     return (
         f"{escape_property(name)}"
         f"<<{ACTION_ENV_DELIMITER}\n"
-        f"{escape_data(value)}\n"
-        f"{ACTION_ENV_DELIMITER}\n".encode()
+        f"{escaped_value}\n"
+        f"{ACTION_ENV_DELIMITER}\n".encode("utf-8")
     )
 
 
@@ -103,8 +156,7 @@ def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> Non
             stacklevel=2,
         )
 
-    with open(os.environ["GITHUB_OUTPUT"], "ab") as f:
-        f.write(_build_file_input(name, value))
+    _write_to_file(os.environ["GITHUB_OUTPUT"], _build_file_input(name, value))
 
 
 def get_state(name: str) -> str | None:
@@ -134,8 +186,7 @@ def save_state(name: str, value: Any, use_subprocess: bool | None = None) -> Non
             stacklevel=2,
         )
 
-    with open(os.environ["GITHUB_STATE"], "ab") as f:
-        f.write(_build_file_input(name, value))
+    _write_to_file(os.environ["GITHUB_STATE"], _build_file_input(name, value))
 
 
 def get_workflow_environment_variables() -> dict[str, Any]:
@@ -181,8 +232,7 @@ def set_env(name: str, value: Any) -> None:
     :param value: value of the environment variable
     :returns: None
     """
-    with open(os.environ["GITHUB_ENV"], "ab") as f:
-        f.write(_build_file_input(name, value))
+    _write_to_file(os.environ["GITHUB_ENV"], _build_file_input(name, value))
 
 
 def export_variable(name: str, value: Any) -> None:
@@ -212,5 +262,4 @@ def add_path(path: str | Path) -> None:
         raise ValueError(f"Path '{path_str}' must be an absolute path")
     
     # Write to GITHUB_PATH file
-    with open(os.environ["GITHUB_PATH"], "ab") as f:
-        f.write(f"{path_str}\n".encode("utf-8"))
+    _write_to_file(os.environ["GITHUB_PATH"], f"{path_str}\n".encode("utf-8"))
