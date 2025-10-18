@@ -195,3 +195,63 @@ def test_get_workflow_environment_variables(tmpdir: Any) -> None:
 def test_get_env() -> None:
     assert gat.get_env("GITHUB_ACTOR") == "test"
     assert gat.get_env("ANOTHER") == "another test"
+
+
+def test_export_variable(tmpdir: Any) -> None:
+    """Test that export_variable works as an alias for set_env"""
+    file = tmpdir.join("envfile")
+
+    with mock.patch.dict(os.environ, {"GITHUB_ENV": file.strpath}):
+        gat.export_variable("test", "test_value")
+        gat.export_variable("another", 42)
+
+    assert file.read() == (
+        "test<<__ENV_DELIMITER__\n"
+        "test_value\n__ENV_DELIMITER__\n"
+        "another<<__ENV_DELIMITER__\n42\n"
+        "__ENV_DELIMITER__\n"
+    )
+
+
+def test_add_path_with_string(tmpdir: Any) -> None:
+    """Test adding a path using a string"""
+    file = tmpdir.join("pathfile")
+    test_path = "/usr/local/bin"
+
+    with mock.patch.dict(os.environ, {"GITHUB_PATH": file.strpath}):
+        gat.add_path(test_path)
+
+    assert file.read() == f"{test_path}\n"
+
+
+def test_add_path_with_pathlib(tmpdir: Any) -> None:
+    """Test adding a path using pathlib.Path"""
+    from pathlib import Path
+
+    file = tmpdir.join("pathfile")
+    test_path = Path("/opt/bin")
+
+    with mock.patch.dict(os.environ, {"GITHUB_PATH": file.strpath}):
+        gat.add_path(test_path)
+
+    assert file.read() == f"{test_path}\n"
+
+
+def test_add_path_multiple(tmpdir: Any) -> None:
+    """Test adding multiple paths"""
+    file = tmpdir.join("pathfile")
+
+    with mock.patch.dict(os.environ, {"GITHUB_PATH": file.strpath}):
+        gat.add_path("/usr/local/bin")
+        gat.add_path("/opt/bin")
+
+    assert file.read() == "/usr/local/bin\n/opt/bin\n"
+
+
+def test_add_path_relative_raises_error(tmpdir: Any) -> None:
+    """Test that relative paths raise a ValueError"""
+    file = tmpdir.join("pathfile")
+
+    with mock.patch.dict(os.environ, {"GITHUB_PATH": file.strpath}):
+        with pytest.raises(ValueError, match="must be an absolute path"):
+            gat.add_path("relative/path")

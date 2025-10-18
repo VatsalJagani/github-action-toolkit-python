@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Any
 from warnings import warn
 
@@ -182,3 +183,34 @@ def set_env(name: str, value: Any) -> None:
     """
     with open(os.environ["GITHUB_ENV"], "ab") as f:
         f.write(_build_file_input(name, value))
+
+
+def export_variable(name: str, value: Any) -> None:
+    """
+    Sets an environment variable for your workflows (alias for set_env).
+    This matches the naming convention from the Node.js actions/toolkit.
+
+    :param name: name of the environment variable
+    :param value: value of the environment variable
+    :returns: None
+    """
+    set_env(name, value)
+
+
+def add_path(path: str | Path) -> None:
+    """
+    Prepends a directory to the system PATH for all subsequent actions in the current job.
+    The newly added path is available in the current action and all subsequent actions.
+
+    :param path: Absolute path to add to PATH
+    :returns: None
+    """
+    path_str = str(path) if isinstance(path, Path) else path
+    
+    # Validate that the path is absolute
+    if not os.path.isabs(path_str):
+        raise ValueError(f"Path '{path_str}' must be an absolute path")
+    
+    # Write to GITHUB_PATH file
+    with open(os.environ["GITHUB_PATH"], "ab") as f:
+        f.write(f"{path_str}\n".encode("utf-8"))
