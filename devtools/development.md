@@ -11,6 +11,65 @@ repo](https://github.com/VatsalJagani/github-action-toolkit/fork) (having your o
 fork will make it easier to contribute) and
 [clone it](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
 
+## Pre-commit Hooks
+
+This project uses [pre-commit](https://pre-commit.com/) to ensure code quality and consistency.
+After cloning the repository, install the pre-commit hooks:
+
+```shell
+# Install pre-commit hooks
+uv sync --extra pre-commit
+uv run pre-commit install
+
+# Run hooks manually on all files
+uv run pre-commit run --all-files
+```
+
+The pre-commit hooks will automatically:
+- Format code with Ruff
+- Check for common issues (trailing whitespace, YAML syntax, etc.)
+- Run spell checking with codespell
+- Format pyproject.toml with pyproject-fmt
+- Run type checking with mypy
+
+## Conventional Commits
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
+This enables automatic changelog generation and semantic versioning.
+
+Commit message format:
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Common types:
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation only changes
+- `style`: Changes that don't affect code meaning (formatting, etc.)
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+- `perf`: Performance improvement
+- `test`: Adding or updating tests
+- `chore`: Changes to build process or auxiliary tools
+
+Examples:
+```
+feat: add support for GitHub artifacts API
+fix: correct input validation in get_user_input_as
+docs: update README with new examples
+chore: update dependencies
+```
+
+You can use commitizen to help format commits:
+```shell
+uv sync --extra commits
+uv run cz commit
+```
+
 ## Basic Developer Workflows
 
 The `Makefile` simply offers shortcuts to `uv` commands for developer convenience.
@@ -73,6 +132,25 @@ uv add package_name@latest
 
 See [uv docs](https://docs.astral.sh/uv/) for details.
 
+## Optional Dependency Extras
+
+The project provides granular optional dependency groups:
+
+- `test`: Testing dependencies (pytest, pytest-cov, etc.)
+- `lint`: Linting and formatting tools (ruff, codespell)
+- `typing`: Type checking tools (basedpyright, mypy)
+- `docs`: Documentation building tools (sphinx, furo, etc.)
+- `utils`: Development utilities (rich, funlog)
+- `pre-commit`: Pre-commit hooks and related tools
+- `commits`: Conventional commits tools (commitizen)
+- `dev`: All development dependencies (meta-extra)
+
+Install specific extras:
+```shell
+uv sync --extra test --extra lint
+# Or install all at once:
+uv sync --all-extras
+```
 
 
 ## Agent Rules
