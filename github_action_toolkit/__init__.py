@@ -24,6 +24,8 @@ __all__ = (  # noqa: F405
     "get_workflow_environment_variables",
     "get_env",
     "set_env",
+    "export_variable",
+    "add_path",
     "event_payload",
     "Repo",
     "GitHubArtifacts",
