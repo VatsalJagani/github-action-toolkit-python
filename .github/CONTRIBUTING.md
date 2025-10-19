@@ -104,7 +104,6 @@ When you're ready to contribute code to address an open issue, please follow the
     
     - Run tests: `uv run pytest`
     - Run linting: `make lint` or `uv run python devtools/lint.py`
-    - Install and run pre-commit hooks: `make pre-commit-install && make pre-commit-run`
     - Ensure your code builds: `uv build`
     
     </details>
