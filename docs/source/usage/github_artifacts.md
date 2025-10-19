@@ -1,9 +1,16 @@
-Github Artifact related Functions
-================
+# GitHub Artifacts
 
-### **`GitHubArtifacts(github_token=None, github_repo=None)` Class**
+Upload and download workflow artifacts for sharing data between jobs.
 
-Initializes the necessary functions and pre-requisites for artifacts related operations with robust upload/download, pattern matching, integrity checks, and error handling.
+## Overview
+
+The `GitHubArtifacts` class provides robust artifact management with upload/download capabilities, pattern matching, integrity checks, and error handling.
+
+## API Reference
+
+### `GitHubArtifacts(github_token=None, github_repo=None)`
+
+Initializes the artifact manager for GitHub Actions artifact operations.
 
 Both parameters are optional but environment variables for it needs to be present GITHUB_TOKEN and GITHUB_REPOSITORY respectively.
 
@@ -14,7 +21,7 @@ Both parameters are optional but environment variables for it needs to be presen
 >> artifacts = GitHubArtifacts()
 ```
 
-### **`GitHubArtifacts.get_artifacts(current_run_only=False, name_pattern=None)`**
+### `GitHubArtifacts.get_artifacts(current_run_only=False, name_pattern=None)`
 
 Returns a list of GitHub Actions artifacts for the current repository with optional filtering.
 
@@ -42,7 +49,7 @@ Returns a list of GitHub Actions artifacts for the current repository with optio
 # test-coverage
 ```
 
-### **`GitHubArtifacts.get_artifact(artifact_id)`**
+### `GitHubArtifacts.get_artifact(artifact_id)`
 
 Fetches a specific artifact by its ID.
 
@@ -56,7 +63,7 @@ Fetches a specific artifact by its ID.
 # running-tests
 ```
 
-### **`GitHubArtifacts.upload_artifact(name, paths=None, patterns=None, root_dir=None, retention_days=None, verify_checksum=True, max_retries=3)`**
+### `GitHubArtifacts.upload_artifact(name, paths=None, patterns=None, root_dir=None, retention_days=None, verify_checksum=True, max_retries=3)`
 
 Upload files as an artifact with pattern matching, compression, and integrity checks.
 
@@ -93,7 +100,7 @@ Returns a dictionary with artifact info including checksum.
 >> )
 ```
 
-### **`GitHubArtifacts.download_artifact(artifact, is_extract=False, extract_dir=None, verify_checksum=False, expected_checksum=None, max_retries=3)`**
+### `GitHubArtifacts.download_artifact(artifact, is_extract=False, extract_dir=None, verify_checksum=False, expected_checksum=None, max_retries=3)`
 
 Downloads a given artifact as a zip file with optional extraction and integrity verification.
 
@@ -134,7 +141,7 @@ Extracting it:
 # Folder 'artifact_running-tests' created with extracted contents.
 ```
 
-### **`GitHubArtifacts.delete_artifact(artifact, max_retries=3)`**
+### `GitHubArtifacts.delete_artifact(artifact, max_retries=3)`
 
 Deletes the given artifact from the repository with retry logic for robustness.
 
@@ -163,3 +170,72 @@ The artifact management system includes:
 * **Retention Configuration**: Set custom retention periods for artifacts
 * **Retry Logic**: Automatic retry with exponential backoff for transient failures
 * **Error Handling**: Robust handling of large files and edge cases with detailed error messages
+
+
+## Artifact Patterns
+
+### Uploading Test Results
+
+```python
+from pathlib import Path
+from github_action_toolkit import GitHubArtifacts, info
+
+def upload_test_results(results_dir: Path):
+    """Upload all test result files as artifacts."""
+    artifacts = GitHubArtifacts()
+    
+    # Upload with pattern matching
+    artifacts.upload_artifact(
+        name='test-results',
+        paths=[results_dir],
+        retention_days=30
+    )
+    
+    info(f'Uploaded test results from {results_dir}')
+```
+
+### Downloading from Previous Run
+
+```python
+from github_action_toolkit import GitHubArtifacts, info
+
+def download_previous_artifact(artifact_name: str, dest: str):
+    """Download artifact from previous workflow run."""
+    artifacts = GitHubArtifacts()
+    
+    # Get latest artifact with this name
+    artifact_list = artifacts.get_artifacts(name_pattern=artifact_name)
+    
+    if not artifact_list:
+        info(f'No artifact found: {artifact_name}')
+        return None
+    
+    latest = artifact_list[0]
+    artifacts.download_artifact(latest.id, dest)
+    info(f'Downloaded {artifact_name} to {dest}')
+    return dest
+```
+
+### Conditional Artifact Upload
+
+```python
+from github_action_toolkit import GitHubArtifacts, get_user_input_as
+
+def upload_artifacts_if_enabled():
+    """Only upload artifacts if configured."""
+    upload_artifacts = get_user_input_as(
+        'upload-artifacts',
+        bool,
+        default_value=True
+    )
+    
+    if not upload_artifacts:
+        info('Artifact upload disabled')
+        return
+    
+    artifacts = GitHubArtifacts()
+    artifacts.upload_artifact(
+        name='build-output',
+        paths=['dist/']
+    )
+```

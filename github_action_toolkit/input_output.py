@@ -314,7 +314,7 @@ def with_env(**env_vars: str) -> Generator[None, None, None]:
 def export_variable(name: str, value: Any) -> None:
     """
     Sets an environment variable for your workflows (alias for set_env).
-    This matches the naming convention from the Node.js actions/toolkit.
+    This matches the naming convention from the Javascript actions/toolkit.
 
     :param name: name of the environment variable
     :param value: value of the environment variable

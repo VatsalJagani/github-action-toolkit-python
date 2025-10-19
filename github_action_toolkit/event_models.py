@@ -1,3 +1,11 @@
+"""
+Pydantic models for GitHub Actions event payloads.
+
+These models provide type-safe representations of various GitHub event structures
+like actors, repositories, commits, pull requests, and more. They enable validation
+and easy access to event payload data in GitHub Actions workflows.
+"""
+
 from __future__ import annotations
 
 from typing import Any

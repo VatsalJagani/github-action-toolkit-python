@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Documentation Improvements**
+  - Added comprehensive Quickstart Guide for getting started in minutes
+  - Added Comparison Guide with Javascript @actions/toolkit with function mapping and examples
+  - Added Recipes documentation with common patterns for inputs, outputs, grouping, annotations, and more
+  - Added Security Best Practices guide covering input validation, secrets management, and secure coding
+  - Added Examples documentation with complete workflow examples (greeter, linter, test reporter, deployment, etc.)
+  - Enhanced README with comparison to Javascript toolkit, installation instructions, and code examples
+  - Updated documentation index with better organization and navigation
+  - Added practical example scripts: `test_reporter_action.py` and `docker_build_action.py`
+
+- **Code Documentation**
+  - Added module-level docstrings to `consts.py` explaining constants usage
+  - Added module-level docstrings to `version.py` explaining version management
+  - Added module-level docstrings to `event_models.py` explaining Pydantic models
+
 - Local Development Simulator
   - Local development simulator for testing GitHub Actions locally without pushing to GitHub
   - `simulate_github_action()` context manager for full environment simulation
@@ -33,6 +48,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `GitRepo` as an alias for `Repo` class
 
 ### Changed
+
+- Improved error messages with actionable context across all functions
+- Enhanced docstrings with detailed parameter descriptions and exception information
+- Functions now raise specific exception types instead of generic ValueError/RuntimeError:
+  - `set_output()`, `save_state()`, `set_env()`, `get_workflow_environment_variables()` raise `EnvironmentVariableError`
+  - `get_user_input_as()` raises `InputError`
+  - `Repo.__init__()` raises `ConfigurationError` or `GitOperationError`
+  - `Repo.create_pr()` raises `ConfigurationError`, `GitOperationError`, or `GitHubAPIError`
+  - `GitHubArtifacts.__init__()` raises `ConfigurationError`, `EnvironmentVariableError`, or `GitHubAPIError`
 
 - **BREAKING**: Removed backward compatibility function exports from main package
   - Event payload functions (`event_payload()`, `get_event_name()`, etc.) removed - use `EventPayload` class instead
@@ -75,17 +99,6 @@ handler = CancellationHandler()
 handler.enable()
 ```
   - `is_cancellation_enabled()` - Check if cancellation is enabled
-
-### Changed
-
-- Improved error messages with actionable context across all functions
-- Enhanced docstrings with detailed parameter descriptions and exception information
-- Functions now raise specific exception types instead of generic ValueError/RuntimeError:
-  - `set_output()`, `save_state()`, `set_env()`, `get_workflow_environment_variables()` raise `EnvironmentVariableError`
-  - `get_user_input_as()` raises `InputError`
-  - `Repo.__init__()` raises `ConfigurationError` or `GitOperationError`
-  - `Repo.create_pr()` raises `ConfigurationError`, `GitOperationError`, or `GitHubAPIError`
-  - `GitHubArtifacts.__init__()` raises `ConfigurationError`, `EnvironmentVariableError`, or `GitHubAPIError`
 
 
 ## [v0.7.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.7.0) - 2025-10-19
@@ -153,7 +166,7 @@ handler.enable()
   - Benchmark reports with performance metrics
   - Comprehensive documentation for Job Summary API with examples
 
-- Added `export_variable` function as an alias for `set_env` to match Node.js @actions/core naming convention
+- Added `export_variable` function as an alias for `set_env` to match Javascript @actions/core naming convention
 - Added `add_path` function to prepend directories to the system PATH for subsequent workflow steps
 
 - Added new functions related to `event_payload`

@@ -343,3 +343,52 @@ Once you've tested your action locally and verified it works:
 
 The local simulator helps you catch bugs early and iterate faster, making custom action development much more efficient!
 
+
+## Testing Actions
+
+### Local Testing with Simulator
+
+```python
+from github_action_toolkit import simulate_github_action, SimulatorConfig
+
+def test_greeting_action():
+    """Test the greeting action locally."""
+    config = SimulatorConfig(
+        inputs={'name': 'Test User'},
+        repository='testorg/testrepo'
+    )
+    
+    with simulate_github_action(config) as sim:
+        # Import and run your action
+        from action import main
+        main()
+    
+    # Verify outputs
+    assert sim.outputs['greeting'] == 'Hello, Test User!'
+    
+    # Verify summary was created
+    assert 'Greeting' in sim.summary
+```
+
+### Integration Testing
+
+```python
+import pytest
+from github_action_toolkit import simulate_github_action, SimulatorConfig
+
+@pytest.fixture
+def github_env():
+    """Provide simulated GitHub environment."""
+    config = SimulatorConfig(repository='test/repo')
+    with simulate_github_action(config) as sim:
+        yield sim
+
+def test_action_with_inputs(github_env):
+    """Test action with specific inputs."""
+    # Your action code runs here
+    from action import process_inputs
+    result = process_inputs()
+    
+    assert result is not None
+    assert github_env.outputs['status'] == 'success'
+```

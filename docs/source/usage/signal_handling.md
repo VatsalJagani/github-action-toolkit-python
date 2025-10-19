@@ -1,13 +1,18 @@
-Signal Handling & Cancellation
-==============================
+# Signal Handling & Cancellation
 
-The toolkit provides support for graceful cancellation when workflows are stopped or cancelled. This allows your actions to clean up resources properly before exiting.
+Handle workflow cancellation and SIGTERM/SIGINT signals gracefully.
 
-## CancellationHandler Class
+## Overview
 
-The `CancellationHandler` class provides a unified interface for managing cancellation signals.
+The `CancellationHandler` class provides unified handling for managing cancellation signals in GitHub Actions workflows, allowing you to clean up resources and exit gracefully when a workflow is cancelled.
 
-### Creating a Handler
+## API Reference
+
+### `CancellationHandler()`
+
+Creates a new cancellation handler instance.
+
+**Example:**
 
 ```python
 from github_action_toolkit import CancellationHandler
@@ -15,7 +20,7 @@ from github_action_toolkit import CancellationHandler
 handler = CancellationHandler()
 ```
 
-### **`enable()`**
+### `enable()`
 
 Enable automatic handling of cancellation signals (SIGTERM and SIGINT). When enabled, cancellation signals will:
 1. Call all registered cancellation handlers
@@ -39,7 +44,7 @@ finally:
     handler.disable()
 ```
 
-### **`disable()`**
+### `disable()`
 
 Disable automatic handling of cancellation signals and restore original signal handlers.
 
@@ -54,7 +59,7 @@ handler.enable()
 handler.disable()
 ```
 
-### **`is_enabled()`**
+### `is_enabled()`
 
 Check if cancellation support is currently enabled for this handler.
 
@@ -68,7 +73,7 @@ if handler.is_enabled():
     print("Cancellation support is active")
 ```
 
-### **`register(handler_func)`**
+### `register(handler_func)`
 
 Register a cleanup handler to be called when cancellation is requested. Handlers are called in the order they were registered.
 

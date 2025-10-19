@@ -321,3 +321,44 @@ from github_action_toolkit import GitHubAPIClient
 
 help(GitHubAPIClient)
 ```
+
+
+## API Rate Limiting
+
+### Automatic Rate Limit Handling
+
+```python
+from github_action_toolkit import GitHubAPIClient, info
+
+client = GitHubAPIClient()
+
+# Automatically handles rate limits with retry
+with client.with_rate_limit_handling(wait=True):
+    repos = client.paginate(lambda: client.github.get_user().get_repos())
+    for repo in repos:
+        info(f'Processing {repo.full_name}')
+        # API calls here are protected
+```
+
+### Manual Rate Limit Checking
+
+```python
+from github_action_toolkit import GitHubAPIClient, warning
+import time
+
+client = GitHubAPIClient()
+
+def check_rate_limit():
+    """Check and warn about rate limit."""
+    rate_limit = client.get_rate_limit()
+    remaining = rate_limit.core.remaining
+    
+    if remaining < 100:
+        reset_time = rate_limit.core.reset.timestamp()
+        wait_seconds = reset_time - time.time()
+        warning(
+            f'Only {remaining} API calls remaining. '
+            f'Resets in {wait_seconds/60:.1f} minutes.',
+            title='Rate Limit Low'
+        )
+```

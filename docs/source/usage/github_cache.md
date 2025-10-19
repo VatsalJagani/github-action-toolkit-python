@@ -1,9 +1,16 @@
-GitHub Cache Functions
-================
+# GitHub Cache
 
-### **`GitHubCache(github_token=None, github_repo=None)` Class**
+Cache dependencies and build outputs across workflow runs for faster execution.
 
-Initializes the cache client for GitHub Actions cache operations. Enables performance optimizations through caching across workflow runs, supporting hierarchical key fallbacks and cross-job data sharing.
+## Overview
+
+The `GitHubCache` class provides a typed interface for GitHub Actions cache operations. It enables performance optimizations through caching across workflow runs, supporting hierarchical key fallbacks and cross-job data sharing.
+
+## API Reference
+
+### `GitHubCache(github_token=None, github_repo=None)`
+
+Initializes the cache client for GitHub Actions cache operations.
 
 Both parameters are optional but environment variables for them need to be present: GITHUB_TOKEN and GITHUB_REPOSITORY respectively.
 
@@ -14,7 +21,7 @@ Both parameters are optional but environment variables for them need to be prese
 >> cache = GitHubCache()
 ```
 
-### **`GitHubCache.save_cache(paths, key, enable_cross_os_archive=False)`**
+### `GitHubCache.save_cache(paths, key, enable_cross_os_archive=False)`
 
 Save cache with the specified key. Supports composite keys for fine-grained cache management.
 
@@ -50,7 +57,7 @@ Returns the cache ID if successful, None if cache already exists.
 # Cache saved with ID: 123456
 ```
 
-### **`GitHubCache.restore_cache(paths, primary_key, restore_keys=None, enable_cross_os_archive=False)`**
+### `GitHubCache.restore_cache(paths, primary_key, restore_keys=None, enable_cross_os_archive=False)`
 
 Restore cache with fallback key hierarchy. Tries the primary key first, then falls back to restore keys in order.
 
@@ -90,7 +97,7 @@ Returns the matched cache key if found and restored, None if no cache found.
 # Cache restored from key: npm-Linux-abc12345
 ```
 
-### **`GitHubCache.is_feature_available()`**
+### `GitHubCache.is_feature_available()`
 
 Check if the cache feature is available in the current environment. Useful for gracefully handling cases where cache is not available.
 
@@ -219,3 +226,69 @@ except CacheRestoreError as e:
    ```python
    key = f"build-v1.2.3-{platform.system()}"
    ```
+
+## Caching Strategies
+
+### Dependency Caching
+
+```python
+from pathlib import Path
+from github_action_toolkit import GitHubCache, info
+
+def cache_dependencies(requirements_file: Path):
+    """Cache Python dependencies."""
+    cache = GitHubCache()
+    
+    # Generate cache key from requirements hash
+    key = f"python-deps-{hash_file(requirements_file)}"
+    restore_keys = ['python-deps-']  # Fallback to any python deps
+    
+    # Try to restore
+    cache_hit = cache.restore_cache(
+        paths=['.venv'],
+        key=key,
+        restore_keys=restore_keys
+    )
+    
+    if cache_hit:
+        info(f'Cache hit: {key}')
+        return True
+    
+    info('Cache miss, installing dependencies...')
+    # Install dependencies
+    install_dependencies()
+    
+    # Save for next time
+    cache.save_cache(paths=['.venv'], key=key)
+    return False
+
+def hash_file(path: Path) -> str:
+    """Generate hash of file contents."""
+    import hashlib
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:8]
+```
+
+### Build Output Caching
+
+```python
+from github_action_toolkit import GitHubCache, info
+
+def cache_build_artifacts():
+    """Cache build outputs."""
+    cache = GitHubCache()
+    
+    # Include environment in key for cross-OS safety
+    import platform
+    os_name = platform.system().lower()
+    
+    key = f'build-{os_name}-{get_git_commit_hash()}'
+    
+    try:
+        if cache.restore_cache(paths=['dist', 'build'], key=key):
+            info('Using cached build artifacts')
+            return True
+    except Exception as e:
+        info(f'Cache restore failed: {e}')
+    
+    return False
+```

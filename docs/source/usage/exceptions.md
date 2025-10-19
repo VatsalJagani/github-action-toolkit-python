@@ -1,9 +1,12 @@
-Exception Handling
-==================
+# Exception Handling
 
-The toolkit provides a comprehensive exception taxonomy for better error handling and debugging. All exceptions inherit from `GitHubActionError`.
+Structured exception types for better error handling in GitHub Actions.
 
-**Note:** All exceptions can be imported from `github_action_toolkit.exceptions`:
+## Overview
+
+The toolkit provides a comprehensive exception taxonomy for better error handling and debugging. All exceptions inherit from `GitHubActionError` and provide specific exception classes for different error scenarios.
+
+**Note:** Import exceptions from `github_action_toolkit.exceptions`:
 
 ```python
 from github_action_toolkit.exceptions import (
