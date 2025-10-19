@@ -304,3 +304,151 @@ class JobSummary:
 
         self._buffer.clear()
         return self
+
+
+class JobSummaryTemplate:
+    """
+    Reusable templates for common job summary patterns.
+
+    Templates provide pre-built patterns for common use cases like test reports,
+    coverage reports, and deployment summaries.
+    """
+
+    @staticmethod
+    def test_report(
+        title: str,
+        passed: int,
+        failed: int,
+        skipped: int = 0,
+        duration: str | None = None,
+    ) -> JobSummary:
+        """
+        Create a test report summary.
+
+        :param title: report title
+        :param passed: number of passed tests
+        :param failed: number of failed tests
+        :param skipped: number of skipped tests
+        :param duration: optional test duration
+        :returns: JobSummary with test report
+        """
+        summary = JobSummary()
+        summary.add_heading(title, 1)
+        summary.add_separator()
+
+        total = passed + failed + skipped
+        status = "✓ All tests passed" if failed == 0 else f"✗ {failed} test(s) failed"
+
+        summary.add_quote(status)
+
+        rows = [
+            ["Metric", "Count"],
+            ["Total Tests", str(total)],
+            ["✓ Passed", str(passed)],
+        ]
+        if failed > 0:
+            rows.append(["✗ Failed", str(failed)])
+        if skipped > 0:
+            rows.append(["⊘ Skipped", str(skipped)])
+        if duration:
+            rows.append(["Duration", duration])
+
+        summary.add_table(rows)
+        return summary
+
+    @staticmethod
+    def coverage_report(title: str, modules: dict[str, float]) -> JobSummary:
+        """
+        Create a coverage report summary.
+
+        :param title: report title
+        :param modules: dict mapping module names to coverage percentages
+        :returns: JobSummary with coverage report
+        """
+        summary = JobSummary()
+        summary.add_heading(title, 1)
+        summary.add_separator()
+
+        if not modules:
+            summary.add_raw("No coverage data available")
+            return summary
+
+        avg_coverage = sum(modules.values()) / len(modules)
+        status = "✓ Good coverage" if avg_coverage >= 80 else "⚠ Low coverage"
+        summary.add_quote(f"{status}: {avg_coverage:.1f}% average")
+
+        rows = [["Module", "Coverage"]]
+        for module, coverage in sorted(modules.items()):
+            emoji = "✓" if coverage >= 80 else "⚠" if coverage >= 60 else "✗"
+            rows.append([module, f"{emoji} {coverage:.1f}%"])
+
+        summary.add_table(rows)
+        return summary
+
+    @staticmethod
+    def deployment_report(
+        title: str,
+        environment: str,
+        status: str,
+        version: str | None = None,
+        url: str | None = None,
+    ) -> JobSummary:
+        """
+        Create a deployment report summary.
+
+        :param title: report title
+        :param environment: deployment environment (e.g., 'production', 'staging')
+        :param status: deployment status (e.g., 'success', 'failed')
+        :param version: optional version string
+        :param url: optional deployment URL
+        :returns: JobSummary with deployment report
+        """
+        summary = JobSummary()
+        summary.add_heading(title, 1)
+        summary.add_separator()
+
+        emoji = "✓" if status.lower() == "success" else "✗"
+        summary.add_quote(f"{emoji} Deployment {status}")
+
+        rows = [
+            ["Property", "Value"],
+            ["Environment", environment],
+            ["Status", status],
+        ]
+        if version:
+            rows.append(["Version", version])
+
+        summary.add_table(rows)
+
+        if url:
+            summary.add_break()
+            summary.add_link(f"View {environment}", url)
+
+        return summary
+
+    @staticmethod
+    def benchmark_report(title: str, benchmarks: dict[str, dict[str, str]]) -> JobSummary:
+        """
+        Create a benchmark report summary.
+
+        :param title: report title
+        :param benchmarks: dict mapping benchmark names to metric dicts
+        :returns: JobSummary with benchmark report
+        """
+        summary = JobSummary()
+        summary.add_heading(title, 1)
+        summary.add_separator()
+
+        if not benchmarks:
+            summary.add_raw("No benchmark data available")
+            return summary
+
+        for name, metrics in benchmarks.items():
+            summary.add_heading(name, 3)
+            rows = [["Metric", "Value"]]
+            for metric, value in metrics.items():
+                rows.append([metric, value])
+            summary.add_table(rows)
+            summary.add_break()
+
+        return summary

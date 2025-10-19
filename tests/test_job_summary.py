@@ -283,3 +283,81 @@ def test_job_summary_size_limit(tmpdir: Any) -> None:
 
         with pytest.raises(ValueError, match="Summary exceeds maximum size"):
             summary.write()
+
+
+# JobSummaryTemplate tests
+
+
+def test_template_test_report() -> None:
+    summary = gat.JobSummaryTemplate.test_report(
+        title="Unit Tests", passed=10, failed=2, skipped=1, duration="5.2s"
+    )
+    result = summary.stringify()
+    assert "<h1>Unit Tests</h1>" in result
+    assert "2 test(s) failed" in result
+    assert "<td>Total Tests</td>" in result
+    assert "<td>13</td>" in result
+    assert "<td>10</td>" in result
+    assert "<td>2</td>" in result
+    assert "<td>1</td>" in result
+    assert "5.2s" in result
+
+
+def test_template_test_report_all_passed() -> None:
+    summary = gat.JobSummaryTemplate.test_report(title="Unit Tests", passed=10, failed=0)
+    result = summary.stringify()
+    assert "All tests passed" in result
+    assert "<td>10</td>" in result
+
+
+def test_template_coverage_report() -> None:
+    modules = {"core": 95.5, "utils": 87.2, "api": 92.0}
+    summary = gat.JobSummaryTemplate.coverage_report("Code Coverage", modules)
+    result = summary.stringify()
+    assert "<h1>Code Coverage</h1>" in result
+    assert "Good coverage" in result
+    assert "91.6%" in result  # Average
+    assert "core" in result
+    assert "95.5%" in result
+
+
+def test_template_coverage_report_empty() -> None:
+    summary = gat.JobSummaryTemplate.coverage_report("Code Coverage", {})
+    result = summary.stringify()
+    assert "No coverage data available" in result
+
+
+def test_template_deployment_report() -> None:
+    summary = gat.JobSummaryTemplate.deployment_report(
+        title="Deployment",
+        environment="production",
+        status="success",
+        version="1.2.3",
+        url="https://example.com",
+    )
+    result = summary.stringify()
+    assert "<h1>Deployment</h1>" in result
+    assert "production" in result
+    assert "success" in result
+    assert "1.2.3" in result
+    assert "https://example.com" in result
+
+
+def test_template_benchmark_report() -> None:
+    benchmarks = {
+        "API Response Time": {"Average": "120ms", "P95": "250ms", "P99": "500ms"},
+        "Database Query": {"Average": "45ms", "P95": "80ms"},
+    }
+    summary = gat.JobSummaryTemplate.benchmark_report("Performance Benchmarks", benchmarks)
+    result = summary.stringify()
+    assert "<h1>Performance Benchmarks</h1>" in result
+    assert "API Response Time" in result
+    assert "120ms" in result
+    assert "Database Query" in result
+    assert "45ms" in result
+
+
+def test_template_benchmark_report_empty() -> None:
+    summary = gat.JobSummaryTemplate.benchmark_report("Performance Benchmarks", {})
+    result = summary.stringify()
+    assert "No benchmark data available" in result
