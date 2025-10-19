@@ -6,18 +6,15 @@
 # pyright: reportUnknownParameterType=false
 # pyright: reportUnknownMemberType=false
 
-import os
 import tarfile
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
 from unittest import mock
 
 import pytest
 
 from github_action_toolkit.github_cache import (
-    CacheNotFoundError,
-    CacheRestoreError,
-    CacheSaveError,
     GitHubCache,
 )
 
@@ -32,7 +29,7 @@ def mock_env(monkeypatch):
 
 
 @pytest.fixture
-def temp_cache_paths():
+def temp_cache_paths() -> Generator[list[Path], None, None]:
     """Create temporary files/directories for cache testing."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -98,7 +95,7 @@ def test_init_with_invalid_repo_format(monkeypatch):
 def test_get_cache_version(mock_env):
     """Test cache version generation."""
     cache = GitHubCache()
-    paths = [Path("/path/to/file1"), Path("/path/to/file2")]
+    paths: list[str | Path] = [Path("/path/to/file1"), Path("/path/to/file2")]
     version1 = cache._get_cache_version(paths)
 
     # Same paths should give same version
@@ -106,7 +103,7 @@ def test_get_cache_version(mock_env):
     assert version1 == version2
 
     # Different paths should give different version
-    paths2 = [Path("/path/to/file3")]
+    paths2: list[str | Path] = [Path("/path/to/file3")]
     version3 = cache._get_cache_version(paths2)
     assert version1 != version3
 
@@ -119,7 +116,8 @@ def test_compress_and_decompress(mock_env, temp_cache_paths):
         archive_path = Path(tmpdir) / "test.tgz"
 
         # Compress
-        size = cache._compress_paths(temp_cache_paths, archive_path)
+        paths: list[str | Path] = temp_cache_paths
+        size = cache._compress_paths(paths, archive_path)  # pyright: ignore[reportUnknownArgumentType]
         assert size > 0
         assert archive_path.exists()
 
@@ -140,7 +138,7 @@ def test_compress_nonexistent_path(mock_env):
 
     with tempfile.TemporaryDirectory() as tmpdir:
         archive_path = Path(tmpdir) / "test.tgz"
-        paths = [Path("/nonexistent/path")]
+        paths: list[str | Path] = [Path("/nonexistent/path")]
 
         with pytest.raises(FileNotFoundError):
             cache._compress_paths(paths, archive_path)
@@ -168,7 +166,8 @@ def test_save_cache_success(mock_patch, mock_post, mock_env, temp_cache_paths):
     mock_post.side_effect = [mock_reserve_response, mock_commit_response]
     mock_patch.return_value = mock_upload_response
 
-    cache_id = cache.save_cache(temp_cache_paths, "test-key")
+    paths: list[str | Path] = temp_cache_paths
+    cache_id = cache.save_cache(paths, "test-key")  # pyright: ignore[reportUnknownArgumentType]
     assert cache_id == 123
 
 
@@ -182,7 +181,8 @@ def test_save_cache_already_exists(mock_post, mock_env, temp_cache_paths):
     mock_response.status_code = 409
     mock_post.return_value = mock_response
 
-    cache_id = cache.save_cache(temp_cache_paths, "existing-key")
+    paths: list[str | Path] = temp_cache_paths
+    cache_id = cache.save_cache(paths, "existing-key")  # pyright: ignore[reportUnknownArgumentType]
     assert cache_id is None
 
 
@@ -199,7 +199,8 @@ def test_save_cache_empty_key(mock_env, temp_cache_paths):
     cache = GitHubCache()
 
     with pytest.raises(ValueError, match="Cache key must be specified"):
-        cache.save_cache(temp_cache_paths, "")
+        paths: list[str | Path] = temp_cache_paths
+        cache.save_cache(paths, "")  # pyright: ignore[reportUnknownArgumentType]
 
 
 @mock.patch("github_action_toolkit.github_cache.requests.get")
@@ -212,7 +213,7 @@ def test_restore_cache_success(mock_get, mock_env, temp_cache_paths):
         archive_path = Path(tmpdir) / "cache.tgz"
         with tarfile.open(archive_path, "w:gz") as tar:
             for path in temp_cache_paths:
-                tar.add(path, arcname=path.name)
+                tar.add(str(path), arcname=path.name)  # pyright: ignore[reportUnknownArgumentType]
 
         # Mock query response
         mock_query_response = mock.Mock()
@@ -230,7 +231,10 @@ def test_restore_cache_success(mock_get, mock_env, temp_cache_paths):
 
         mock_get.side_effect = [mock_query_response, mock_download_response]
 
-        matched_key = cache.restore_cache([Path(".")], "test-key")
+        # Use temporary directory for restore target
+        restore_dir = Path(tmpdir) / "restore"
+        restore_dir.mkdir()
+        matched_key = cache.restore_cache([restore_dir], "test-key")
         assert matched_key == "test-key"
 
 
@@ -248,7 +252,7 @@ def test_restore_cache_with_fallback(mock_get, mock_env, temp_cache_paths):
         archive_path = Path(tmpdir) / "cache.tgz"
         with tarfile.open(archive_path, "w:gz") as tar:
             for path in temp_cache_paths:
-                tar.add(path, arcname=path.name)
+                tar.add(str(path), arcname=path.name)  # pyright: ignore[reportUnknownArgumentType]
 
         mock_found_response = mock.Mock()
         mock_found_response.status_code = 200
@@ -264,8 +268,11 @@ def test_restore_cache_with_fallback(mock_get, mock_env, temp_cache_paths):
 
         mock_get.side_effect = [mock_not_found, mock_found_response, mock_download_response]
 
+        # Use temporary directory for restore target
+        restore_dir = Path(tmpdir) / "restore"
+        restore_dir.mkdir()
         matched_key = cache.restore_cache(
-            [Path(".")], "primary-key", restore_keys=["fallback-key"]
+            [restore_dir], "primary-key", restore_keys=["fallback-key"]
         )
         assert matched_key == "fallback-key"
 
@@ -279,8 +286,11 @@ def test_restore_cache_not_found(mock_get, mock_env):
     mock_response.status_code = 204
     mock_get.return_value = mock_response
 
-    matched_key = cache.restore_cache([Path(".")], "nonexistent-key")
-    assert matched_key is None
+    with tempfile.TemporaryDirectory() as tmpdir:
+        restore_dir = Path(tmpdir) / "restore"
+        restore_dir.mkdir()
+        matched_key = cache.restore_cache([restore_dir], "nonexistent-key")
+        assert matched_key is None
 
 
 def test_restore_cache_empty_paths(mock_env):

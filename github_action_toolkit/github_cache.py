@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import os
-import shutil
 import tarfile
 import tempfile
 from pathlib import Path
@@ -45,7 +44,7 @@ class GitHubCache:
         _token = github_token or os.environ.get("GITHUB_TOKEN")
         if not _token:
             raise ValueError("GitHub token not provided and GITHUB_TOKEN not set in environment.")
-        self.token = _token
+        self.token: str = _token
 
         if github_repo:
             if "/" not in github_repo:
@@ -56,15 +55,15 @@ class GitHubCache:
             raise ValueError(
                 "GitHub repository not provided and GITHUB_REPOSITORY not set in environment."
             )
-        self.repo = github_repo
+        self.repo: str = github_repo
 
         # Get workflow run ID for cache scope
-        self.run_id = os.environ.get("GITHUB_RUN_ID")
+        self.run_id: str | None = os.environ.get("GITHUB_RUN_ID")
         if not self.run_id:
             raise RuntimeError("GITHUB_RUN_ID not set")
 
-        self.api_url = os.environ.get("ACTIONS_CACHE_URL") or "https://api.github.com"
-        self.api_version = "6.0-preview.1"
+        self.api_url: str = os.environ.get("ACTIONS_CACHE_URL") or "https://api.github.com"
+        self.api_version: str = "6.0-preview.1"
 
     def _get_cache_version(self, paths: list[str | Path]) -> str:
         """
@@ -79,7 +78,7 @@ class GitHubCache:
         """Get headers for API requests."""
         return {
             "Authorization": f"Bearer {self.token}",
-            "Accept": f"application/vnd.github.v3+json",
+            "Accept": "application/vnd.github.v3+json",
             "Content-Type": "application/json",
         }
 
@@ -106,7 +105,7 @@ class GitHubCache:
         self,
         paths: list[str | Path],
         key: str,
-        enable_cross_os_archive: bool = False,
+        enable_cross_os_archive: bool = False,  # pyright: ignore[reportUnusedParameter]
     ) -> int | None:
         """
         Save cache with the specified key.
@@ -203,7 +202,7 @@ class GitHubCache:
         paths: list[str | Path],
         primary_key: str,
         restore_keys: list[str] | None = None,
-        enable_cross_os_archive: bool = False,
+        enable_cross_os_archive: bool = False,  # pyright: ignore[reportUnusedParameter]
     ) -> str | None:
         """
         Restore cache with fallback key hierarchy.
@@ -282,8 +281,15 @@ class GitHubCache:
                     with open(archive_path, "wb") as f:
                         f.write(download_response.content)
 
-                    # Extract to target paths
-                    target_dir = Path.cwd()
+                    # Extract to first path's parent directory or current directory
+                    if paths:
+                        first_path = Path(paths[0])
+                        if first_path.is_absolute():
+                            target_dir = first_path.parent if first_path.is_file() else first_path
+                        else:
+                            target_dir = Path.cwd()
+                    else:
+                        target_dir = Path.cwd()
                     self._decompress_archive(archive_path, target_dir)
 
                 return cache_entry.get("cacheKey", key)
@@ -301,9 +307,7 @@ class GitHubCache:
         Returns:
             True if cache is available, False otherwise
         """
-        return bool(
-            os.environ.get("ACTIONS_CACHE_URL") or os.environ.get("ACTIONS_RUNTIME_TOKEN")
-        )
+        return bool(os.environ.get("ACTIONS_CACHE_URL") or os.environ.get("ACTIONS_RUNTIME_TOKEN"))
 
 
 __all__ = ["GitHubCache", "CacheNotFoundError", "CacheRestoreError", "CacheSaveError"]
