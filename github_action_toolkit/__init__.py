@@ -52,6 +52,10 @@ __all__ = (  # noqa: F405
     "BaseEvent",
     "Repo",
     "GitHubArtifacts",
+    "GitHubCache",
+    "CacheNotFoundError",
+    "CacheRestoreError",
+    "CacheSaveError",
     "print_directory_tree",
 )
 
@@ -60,6 +64,7 @@ from .event_models import *  # noqa: F403
 from .event_payload import *  # noqa: F403
 from .git_manager import *  # noqa: F403
 from .github_artifacts import *  # noqa: F403
+from .github_cache import *  # noqa: F403
 from .input_output import *  # noqa: F403
 from .job_summary import *  # noqa: F403
 from .print_messages import *  # noqa: F403

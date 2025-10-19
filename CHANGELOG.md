@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+
+- Added GitHubCache class for Actions cache support with following functionality:
+  - save_cache: Save cache with composite keys
+  - restore_cache: Restore cache with fallback key hierarchy
+  - is_feature_available: Check if cache feature is available
+- Added cache-related exceptions: CacheNotFoundError, CacheRestoreError, CacheSaveError
+
 - `GitHubArtifacts.upload_artifact()`: New method to upload files as artifacts with pattern glob support, compression, and integrity checks
 - Pattern glob support for artifact file selection (e.g., `*.log`, `build/**/*.js`)
 - SHA-256 checksum calculation and verification for artifact integrity checks
