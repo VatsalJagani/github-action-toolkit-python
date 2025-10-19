@@ -11,7 +11,7 @@ class GitHubActionError(Exception):
     """Base exception for all github-action-toolkit errors."""
 
 
-class EnvironmentError(GitHubActionError):
+class EnvironmentVariableError(GitHubActionError):
     """
     Raised when required environment variables are missing or invalid.
 

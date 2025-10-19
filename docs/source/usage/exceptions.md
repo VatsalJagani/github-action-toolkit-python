@@ -8,7 +8,7 @@ The toolkit provides a comprehensive exception taxonomy for better error handlin
 ```python
 from github_action_toolkit.exceptions import (
     GitHubActionError,
-    EnvironmentError,
+    EnvironmentVariableError,
     InputError,
     GitOperationError,
     GitHubAPIError,
@@ -40,7 +40,7 @@ except GitHubActionError as e:
     print(f"Toolkit error: {e}")
 ```
 
-### **`EnvironmentError`**
+### **`EnvironmentVariableError`**
 
 Raised when required environment variables are missing or invalid. This typically occurs when the toolkit is not running in a GitHub Actions context or required environment variables are not set.
 
@@ -48,11 +48,11 @@ Raised when required environment variables are missing or invalid. This typicall
 
 ```python
 from github_action_toolkit import set_output
-from github_action_toolkit.exceptions import EnvironmentError
+from github_action_toolkit.exceptions import EnvironmentVariableError
 
 try:
     set_output("my_output", "value")
-except EnvironmentError as e:
+except EnvironmentVariableError as e:
     print(f"Missing environment variable: {e}")
     # Error message: "GITHUB_OUTPUT environment variable is not set..."
 ```
@@ -132,7 +132,7 @@ Catch specific exception types to handle different error scenarios appropriately
 ```python
 from github_action_toolkit import get_user_input_as, set_output
 from github_action_toolkit.exceptions import (
-    EnvironmentError,
+    EnvironmentVariableError,
     InputError,
     ConfigurationError,
 )
@@ -143,7 +143,7 @@ try:
 except InputError as e:
     print(f"Invalid timeout input: {e}")
     # Provide default or exit
-except EnvironmentError as e:
+except EnvironmentVariableError as e:
     print(f"Not running in GitHub Actions: {e}")
     # Handle non-GitHub Actions environment
 except Exception as e:

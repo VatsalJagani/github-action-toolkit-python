@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added custom exception taxonomy for better error handling:
   - `GitHubActionError` - Base exception for all toolkit errors
-  - `EnvironmentError` - For missing/invalid environment variables
+  - `EnvironmentVariableError` - For missing/invalid environment variables
   - `InputError` - For invalid user input
   - `GitOperationError` - For git operation failures
   - `GitHubAPIError` - For GitHub API failures
@@ -81,11 +81,11 @@ handler.enable()
 - Improved error messages with actionable context across all functions
 - Enhanced docstrings with detailed parameter descriptions and exception information
 - Functions now raise specific exception types instead of generic ValueError/RuntimeError:
-  - `set_output()`, `save_state()`, `set_env()`, `get_workflow_environment_variables()` raise `EnvironmentError`
+  - `set_output()`, `save_state()`, `set_env()`, `get_workflow_environment_variables()` raise `EnvironmentVariableError`
   - `get_user_input_as()` raises `InputError`
   - `Repo.__init__()` raises `ConfigurationError` or `GitOperationError`
   - `Repo.create_pr()` raises `ConfigurationError`, `GitOperationError`, or `GitHubAPIError`
-  - `GitHubArtifacts.__init__()` raises `ConfigurationError`, `EnvironmentError`, or `GitHubAPIError`
+  - `GitHubArtifacts.__init__()` raises `ConfigurationError`, `EnvironmentVariableError`, or `GitHubAPIError`
 
 
 ## [v0.7.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.7.0) - 2025-10-19

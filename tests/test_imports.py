@@ -47,7 +47,7 @@ def test_exceptions_imports():
         CacheSaveError,
         CancellationRequested,
         ConfigurationError,
-        EnvironmentError,
+        EnvironmentVariableError,
         GitHubActionError,
         GitHubAPIError,
         GitOperationError,
@@ -61,7 +61,7 @@ def test_exceptions_imports():
     assert CacheSaveError is not None
     assert CancellationRequested is not None
     assert ConfigurationError is not None
-    assert EnvironmentError is not None
+    assert EnvironmentVariableError is not None
     assert GitHubActionError is not None
     assert GitHubAPIError is not None
     assert GitOperationError is not None

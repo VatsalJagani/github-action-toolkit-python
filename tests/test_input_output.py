@@ -214,29 +214,29 @@ def test_with_env_context_manager():
 
 @mock.patch.dict(os.environ, {}, clear=True)
 def test_set_output_without_github_output_raises_error():
-    """Test set_output raises EnvironmentError when GITHUB_OUTPUT not set."""
-    with pytest.raises(gat.EnvironmentError):
+    """Test set_output raises EnvironmentVariableError when GITHUB_OUTPUT not set."""
+    with pytest.raises(gat.EnvironmentVariableError):
         gat.set_output("test", "value")
 
 
 @mock.patch.dict(os.environ, {}, clear=True)
 def test_save_state_without_github_state_raises_error():
-    """Test save_state raises EnvironmentError when GITHUB_STATE not set."""
-    with pytest.raises(gat.EnvironmentError):
+    """Test save_state raises EnvironmentVariableError when GITHUB_STATE not set."""
+    with pytest.raises(gat.EnvironmentVariableError):
         gat.save_state("test", "value")
 
 
 @mock.patch.dict(os.environ, {}, clear=True)
 def test_set_env_without_github_env_raises_error():
-    """Test set_env raises EnvironmentError when GITHUB_ENV not set."""
-    with pytest.raises(gat.EnvironmentError):
+    """Test set_env raises EnvironmentVariableError when GITHUB_ENV not set."""
+    with pytest.raises(gat.EnvironmentVariableError):
         gat.set_env("test", "value")
 
 
 @mock.patch.dict(os.environ, {}, clear=True)
 def test_get_workflow_environment_variables_without_github_env_raises_error():
     """Test get_workflow_environment_variables raises error when GITHUB_ENV not set."""
-    with pytest.raises(gat.EnvironmentError):
+    with pytest.raises(gat.EnvironmentVariableError):
         gat.get_workflow_environment_variables()
 
 
