@@ -55,7 +55,8 @@ Supported event types:
 **example:**
 
 ```python
-from github_action_toolkit import get_typed_event, PushEvent, PullRequestEvent
+from github_action_toolkit import get_typed_event
+from github_action_toolkit.event_models import PushEvent, PullRequestEvent
 
 event = get_typed_event()
 
@@ -69,7 +70,7 @@ elif isinstance(event, PullRequestEvent):
 
 ### Event Model Classes
 
-The following typed models are available:
+The following typed models are available from `github_action_toolkit.event_models`:
 
 - `PushEvent` - Push events with commits, refs, and change information
 - `PullRequestEvent` - Pull request events with PR details, labels, reviewers
@@ -85,6 +86,18 @@ Supporting models:
 - `Issue` - Issue details
 - `Comment` - Comment on issue or PR
 - `WorkflowRun` - Workflow run details
+
+**Note:** These models are imported from `github_action_toolkit.event_models`:
+
+```python
+from github_action_toolkit.event_models import (
+    PushEvent,
+    PullRequestEvent,
+    Actor,
+    Repository,
+    # ... other models
+)
+```
 
 ## Convenience Helpers
 
@@ -173,6 +186,29 @@ if "bug" in labels:
     print("This is a bug fix")
 ```
 
+## EventPayload Class
+
+The `EventPayload` class provides a unified interface for accessing event data:
+
+```python
+from github_action_toolkit import EventPayload
+
+# Create an instance
+event = EventPayload()
+
+# Access event data
+payload = event.get_payload()
+event_name = event.get_event_name()
+typed_event = event.get_typed_event()
+
+# Use helper methods
+if event.is_pr():
+    pr_number = event.get_pr_number()
+    head = event.head_ref()
+    base = event.base_ref()
+    labels = event.get_labels()
+```
+
 ## Complete Example
 
 ```python
@@ -185,9 +221,8 @@ from github_action_toolkit import (
     base_ref,
     get_labels,
     get_changed_files,
-    PushEvent,
-    PullRequestEvent,
 )
+from github_action_toolkit.event_models import PushEvent, PullRequestEvent
 
 # Get event information
 event_name = get_event_name()
