@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `GitHubArtifacts.upload_artifact()`: New method to upload files as artifacts with pattern glob support, compression, and integrity checks
+- Pattern glob support for artifact file selection (e.g., `*.log`, `build/**/*.js`)
+- SHA-256 checksum calculation and verification for artifact integrity checks
+- Retry logic with exponential backoff for all artifact operations (upload, download, delete)
+- Retention days configuration support for uploaded artifacts
+- `name_pattern` parameter to `get_artifacts()` for filtering artifacts by name pattern
+
+### Changed
+
+- `GitHubArtifacts.download_artifact()`: Added `verify_checksum`, `expected_checksum`, and `max_retries` parameters
+- `GitHubArtifacts.delete_artifact()`: Added `max_retries` parameter and improved error handling
+- `GitHubArtifacts.get_artifacts()`: Added `name_pattern` parameter for pattern-based filtering
+- Improved error handling for large files and edge cases with detailed error messages
+- All HTTP operations now include timeout and retry logic for robustness
 - Fluent Job Summary Builder API (`JobSummary` class) for constructing rich GitHub Actions job summaries
   - Support for headings, text, line breaks, and separators
   - Support for ordered and unordered lists
