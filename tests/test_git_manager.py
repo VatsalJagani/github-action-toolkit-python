@@ -8,6 +8,7 @@
 # pyright: reportUnknownArgumentType=false
 
 import tempfile
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -204,3 +205,284 @@ def test_create_pr(mock_github, mock_git_repo):
         title="Test PR", body="PR Body", head="feature/test", base="main"
     )
     assert pr_url == "https://github.com/test/repo/pull/1"
+
+
+def test_shallow_clone(mock_git_repo):
+    repo_url = "https://github.com/test/test.git"
+    with Repo(url=repo_url, depth=1) as repo:
+        mock_git_repo.clone_from.assert_called_once_with(repo_url, repo.repo_path, depth=1)
+
+
+def test_single_branch_clone(mock_git_repo):
+    repo_url = "https://github.com/test/test.git"
+    with Repo(url=repo_url, single_branch=True) as repo:
+        mock_git_repo.clone_from.assert_called_once_with(
+            repo_url, repo.repo_path, single_branch=True
+        )
+
+
+def test_shallow_single_branch_clone(mock_git_repo):
+    repo_url = "https://github.com/test/test.git"
+    with Repo(url=repo_url, depth=1, single_branch=True) as repo:
+        mock_git_repo.clone_from.assert_called_once_with(
+            repo_url, repo.repo_path, depth=1, single_branch=True
+        )
+
+
+@mock.patch("github_action_toolkit.git_manager.subprocess.run")
+def test_configure_safe_directory(mock_run, mock_git_repo):
+    with Repo(path="/test/path") as repo:
+        repo.configure_safe_directory()
+
+    mock_run.assert_called_once()
+    call_args = mock_run.call_args
+    assert call_args[0][0] == [
+        "git",
+        "config",
+        "--global",
+        "--add",
+        "safe.directory",
+        "/test/path",
+    ]
+
+
+def test_sparse_checkout_init(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.sparse_checkout_init()
+        repo.repo.git.config.assert_any_call("core.sparseCheckout", "true")
+        repo.repo.git.config.assert_any_call("core.sparseCheckoutCone", "true")
+
+
+def test_sparse_checkout_init_no_cone(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.sparse_checkout_init(cone_mode=False)
+        repo.repo.git.config.assert_called_once_with("core.sparseCheckout", "true")
+
+
+def test_submodule_init(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.submodule_init()
+        repo.repo.git.submodule.assert_called_once_with("init")
+
+
+def test_submodule_update(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.submodule_update()
+        repo.repo.git.submodule.assert_called_once_with("update")
+
+
+def test_submodule_update_recursive(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.submodule_update(recursive=True)
+        repo.repo.git.submodule.assert_called_once_with("update", "--recursive")
+
+
+def test_submodule_update_remote(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.submodule_update(remote=True)
+        repo.repo.git.submodule.assert_called_once_with("update", "--remote")
+
+
+def test_submodule_update_recursive_remote(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.submodule_update(recursive=True, remote=True)
+        repo.repo.git.submodule.assert_called_once_with("update", "--recursive", "--remote")
+
+
+def test_configure_gpg_signing(mock_git_repo):
+    mock_config_writer = mock.Mock()
+    mock_git_repo.return_value.config_writer.return_value = mock_config_writer
+
+    with Repo(path=".") as repo:
+        repo.configure_gpg_signing(key_id="ABC123", program="/usr/bin/gpg")
+
+    mock_config_writer.set_value.assert_any_call("commit", "gpgsign", "true")
+    mock_config_writer.set_value.assert_any_call("user", "signingkey", "ABC123")
+    mock_config_writer.set_value.assert_any_call("gpg", "program", "/usr/bin/gpg")
+    mock_config_writer.release.assert_called()
+
+
+def test_configure_ssh_signing(mock_git_repo):
+    mock_config_writer = mock.Mock()
+    mock_git_repo.return_value.config_writer.return_value = mock_config_writer
+
+    with Repo(path=".") as repo:
+        repo.configure_ssh_signing(key_path="/home/user/.ssh/id_ed25519.pub")
+
+    mock_config_writer.set_value.assert_any_call("gpg", "format", "ssh")
+    mock_config_writer.set_value.assert_any_call("commit", "gpgsign", "true")
+    mock_config_writer.set_value.assert_any_call(
+        "user", "signingkey", "/home/user/.ssh/id_ed25519.pub"
+    )
+    mock_config_writer.release.assert_called()
+
+
+def test_set_remote_url(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.set_remote_url("origin", "https://github.com/test/repo.git")
+        repo.repo.git.remote.assert_called_once_with(
+            "set-url", "origin", "https://github.com/test/repo.git"
+        )
+
+
+def test_set_remote_url_with_token(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.set_remote_url("origin", "https://github.com/test/repo.git", token="ghp_token123")
+        repo.repo.git.remote.assert_called_once_with(
+            "set-url",
+            "origin",
+            "https://x-access-token:ghp_token123@github.com/test/repo.git",
+        )
+
+
+def test_create_tag(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.create_tag("v1.0.0", message="Release 1.0.0")
+        repo.repo.git.tag.assert_called_once_with("-a", "v1.0.0", "-m", "Release 1.0.0")
+
+
+def test_create_tag_signed(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.create_tag("v1.0.0", message="Release 1.0.0", signed=True)
+        repo.repo.git.tag.assert_called_once_with("-s", "v1.0.0", "-m", "Release 1.0.0")
+
+
+def test_create_tag_lightweight(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.create_tag("v1.0.0")
+        repo.repo.git.tag.assert_called_once_with("v1.0.0")
+
+
+def test_list_tags(mock_git_repo):
+    mock_git_repo.return_value.git.tag.return_value = "v1.0.0\nv1.1.0\nv2.0.0"
+
+    with Repo(path=".") as repo:
+        tags = repo.list_tags()
+        assert tags == ["v1.0.0", "v1.1.0", "v2.0.0"]
+        repo.repo.git.tag.assert_called_once_with("-l")
+
+
+def test_list_tags_with_pattern(mock_git_repo):
+    mock_git_repo.return_value.git.tag.return_value = "v1.0.0\nv1.1.0"
+
+    with Repo(path=".") as repo:
+        tags = repo.list_tags(pattern="v1.*")
+        assert tags == ["v1.0.0", "v1.1.0"]
+        repo.repo.git.tag.assert_called_once_with("-l", "v1.*")
+
+
+def test_push_tag(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.push_tag("v1.0.0")
+        repo.repo.git.push.assert_called_once_with("origin", "v1.0.0")
+
+
+def test_push_all_tags(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.push_all_tags()
+        repo.repo.git.push.assert_called_once_with("origin", "--tags")
+
+
+def test_delete_tag(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.delete_tag("v1.0.0")
+        repo.repo.git.tag.assert_called_once_with("-d", "v1.0.0")
+
+
+def test_delete_tag_with_remote(mock_git_repo):
+    with Repo(path=".") as repo:
+        repo.delete_tag("v1.0.0", remote=True)
+        repo.repo.git.tag.assert_called_once_with("-d", "v1.0.0")
+        repo.repo.git.push.assert_called_once_with("origin", "--delete", "v1.0.0")
+
+
+def test_get_latest_tag(mock_git_repo):
+    mock_git_repo.return_value.git.describe.return_value = "v2.0.0"
+
+    with Repo(path=".") as repo:
+        latest = repo.get_latest_tag()
+        assert latest == "v2.0.0"
+        repo.repo.git.describe.assert_called_once_with("--tags", "--abbrev=0")
+
+
+def test_get_latest_tag_no_tags(mock_git_repo):
+    mock_git_repo.return_value.git.describe.side_effect = Exception("No tags")
+
+    with Repo(path=".") as repo:
+        latest = repo.get_latest_tag()
+        assert latest is None
+
+
+def test_extract_changelog_section():
+    changelog_content = """# Changelog
+
+## Unreleased
+
+- New feature A
+- Bug fix B
+
+## v1.0.0 - 2024-01-01
+
+- Initial release
+
+## v0.9.0 - 2023-12-01
+
+- Beta release
+"""
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        changelog_path = Path(tmpdir) / "CHANGELOG.md"
+        changelog_path.write_text(changelog_content)
+
+        with mock.patch("github_action_toolkit.git_manager.GitRepo"):
+            with Repo(path=tmpdir) as repo:
+                # Extract Unreleased
+                section = repo.extract_changelog_section()
+                assert "New feature A" in section
+                assert "Bug fix B" in section
+                assert "Initial release" not in section
+
+                # Extract specific version
+                section = repo.extract_changelog_section(version="v1.0.0")
+                assert "Initial release" in section
+                assert "New feature A" not in section
+
+
+def test_prepare_release():
+    changelog_content = """# Changelog
+
+## Unreleased
+
+- Feature for v2.0.0
+
+## v1.0.0 - 2024-01-01
+
+- Initial release
+"""
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        changelog_path = Path(tmpdir) / "CHANGELOG.md"
+        changelog_path.write_text(changelog_content)
+
+        with mock.patch("github_action_toolkit.git_manager.GitRepo"):
+            with Repo(path=tmpdir) as repo:
+                result = repo.prepare_release("v2.0.0")
+
+                assert result["version"] == "v2.0.0"
+                assert "Feature for v2.0.0" in result["changelog"]
+                assert "tag" in result
+                repo.repo.git.tag.assert_called_once()
+
+
+def test_prepare_release_no_tag():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        changelog_path = Path(tmpdir) / "CHANGELOG.md"
+        changelog_path.write_text("# Changelog\n\n## Unreleased\n\n- New feature")
+
+        with mock.patch("github_action_toolkit.git_manager.GitRepo"):
+            with Repo(path=tmpdir) as repo:
+                result = repo.prepare_release("v1.0.0", create_tag_flag=False)
+
+                assert result["version"] == "v1.0.0"
+                assert "tag" not in result
+                repo.repo.git.tag.assert_not_called()

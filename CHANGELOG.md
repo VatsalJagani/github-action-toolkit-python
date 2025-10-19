@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Advanced Git Manager features for `Repo` class:
+  - Safe directory configuration with `configure_safe_directory()`
+  - Shallow clone support with `depth` and `single_branch` parameters in constructor
+  - Sparse checkout functionality with `sparse_checkout_init()`, `sparse_checkout_set()`, and `sparse_checkout_add()`
+  - Submodule management with `submodule_init()` and `submodule_update()`
+  - GPG signing configuration with `configure_gpg_signing()`
+  - SSH signing configuration with `configure_ssh_signing()`
+  - Authenticated remote setup with `set_remote_url()` with token support
+  - Tagging operations: `create_tag()`, `list_tags()`, `push_tag()`, `push_all_tags()`, `delete_tag()`, and `get_latest_tag()`
+  - Changelog extraction with `extract_changelog_section()`
+  - Release preparation helper with `prepare_release()`
+  - Comprehensive documentation for all new features in `docs/source/usage/git_manager.md`
 - Added `GitHubAPIClient` - A typed GitHub API client with advanced features:
   - Automatic rate limit detection and handling with exponential backoff
   - Support for GitHub Enterprise Server (GHES) via custom base URL
