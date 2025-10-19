@@ -190,15 +190,38 @@ This repo uses Sphinx with MyST Markdown for docs.
   - For live preview while editing docs: `make docs-live`.
   - Fix broken links, missing references, or formatting warnings immediately.
 
-- Changelog and docs sync
-  - When updating user-facing behavior, update both `CHANGELOG.md` and `docs/source/CHANGELOG.md` in the same change.
-  - Ensure usage docs reflect actual behavior (keep tests and docs consistent).
+## Changelog updates (Keep a Changelog)
 
-- Style and scope
-  - Avoid heavy ASCII art or emojis; keep professional and skimmable.
-  - Prefer bullet lists and short paragraphs over dense prose.
-  - Do not paste long command outputs; summarize expected results.
-  - If documenting sequences (e.g., git flows), list steps explicitly and indicate non-fatal/error-tolerant steps.
+- Always update `CHANGELOG.md` whenever a change is user-facing. This includes, but isn’t limited to:
+  - Source code behavior changes
+  - Configuration/schema or environment variable changes
+  - Python package functions or classes changes
+  - Logging format or content that users see
+  - Documentation changes that affect how users use or understand the project (guides, examples, reference, navigation)
+- Add entries under the Unreleased section using concise bullets. Prefer the standard categories:
+  - Added, Changed, Fixed, Deprecated, Removed, Security
+  - If a docs-only change is clearly user-facing, include it under Added/Changed (don’t hide it under internal changes).
+- Keep entries short, specific, and actionable. Use imperative mood and avoid implementation detail.
+
+
+## Documentation and README updates
+
+Whenever a change is user-facing, update the documentation and README in the same pull request.
+
+- What to update in docs (`docs/source`):
+  - Pages that reflect behavior, inputs/outputs, configuration, environment variables, supported versions, CLI/entry points, defaults, and migration/deprecation notes.
+  - Examples and code snippets to match new APIs, flags, defaults, or workflows.
+  - Toctree entries when adding/removing pages; fix cross-references and anchors.
+  - Screenshots/diagrams if UI or output changes are visible to users.
+- What to update in `README.md`:
+  - Quickstart/installation, minimum supported versions, badges, and primary usage examples.
+  - High-level configuration summary and links into the docs for details.
+  - Any action usage snippets or copy-paste examples so they remain accurate.
+- Validation before submitting the PR:
+  - Run the docs validation task and ensure it passes with no warnings treated as errors: `make docs-check`.
+  - Ensure `CHANGELOG.md` has an Unreleased entry matching the change and links to updated docs when relevant.
+  - Confirm README and docs are consistent (no conflicting instructions).
+
 
 ## General Development Practices
 
