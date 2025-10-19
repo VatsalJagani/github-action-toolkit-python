@@ -57,6 +57,9 @@ __all__ = (  # noqa: F405
     "CacheRestoreError",
     "CacheSaveError",
     "print_directory_tree",
+    "simulate_github_action",
+    "SimulatorConfig",
+    "SimulatorResult",
     "GitHubAPIClient",
     "RateLimitError",
     "APIError",
@@ -71,5 +74,6 @@ from .github_artifacts import *  # noqa: F403
 from .github_cache import *  # noqa: F403
 from .input_output import *  # noqa: F403
 from .job_summary import *  # noqa: F403
+from .local_simulator import *  # noqa: F403
 from .print_messages import *  # noqa: F403
 from .version import VERSION, VERSION_SHORT  # noqa: F403

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Local development simulator for testing GitHub Actions locally without pushing to GitHub
+  - `simulate_github_action()` context manager for full environment simulation
+  - `SimulatorResult` for accessing outputs, summaries, state, and environment variables
+
+
 ## [v0.7.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.7.0) - 2025-10-19
 
 ### Added
