@@ -38,8 +38,11 @@ Always use full type annotations, generics, and other modern practices.
   
   # Run tests:
   make test
+
+  # Validate docs
+  make docs-check
   
-  # Run uv sync, lint, and test in one command:
+  # Run uv sync, lint, and test, docs-check in one command:
   make
   ```
 
@@ -55,32 +58,70 @@ Always use full type annotations, generics, and other modern practices.
 
 This project uses a comprehensive set of tools to ensure code quality:
 
-- **codespell**: Automatically checks and fixes spelling errors in code and documentation.
-  It runs with `--write-changes` flag, so it will automatically fix typos.
+- codespell: Automatically checks and fixes spelling errors in code and documentation. Runs with --write-changes, so typos are auto-fixed.
+- ruff check: Fast linter; runs with --fix to auto-fix where possible.
+- ruff format: Formatter compatible with Black; formats code and sorts imports.
+- basedpyright: Modern type checker; shows coverage stats with --stats.
 
-- **ruff check**: Fast Python linter that checks for code issues and style violations.
-  It runs with `--fix` flag to automatically fix issues where possible.
-
-- **ruff format**: Fast Python formatter (compatible with Black).
-  Automatically formats code and sorts imports.
-
-- **basedpyright**: Modern type checker (fork of pyright) with strict type checking.
-  Shows type coverage statistics with `--stats` flag.
-
-All these tools run together with `make lint`. The lint process will:
+All these run together via `make lint`. It will:
 1. Fix spelling errors automatically
-2. Fix linting issues automatically where possible
+2. Fix lint issues where possible
 3. Format all code consistently
-4. Check types and show any type errors
+4. Check types and report any errors
 
-After running `make lint`, you only need to address remaining type errors or linting
-issues that couldn't be auto-fixed. The formatted code will already be properly styled.
+After `make lint`, address any remaining issues that couldn’t be auto-fixed. Prefer adding types over ignores; use `# pyright: ignore` only for justified false positives. See pyproject.toml for configured rules.
 
-When you see type errors:
-- Read the error message carefully - basedpyright gives helpful suggestions
-- Add type annotations where missing
-- Use `# pyright: ignore` comments only as a last resort for false positives
-- See pyproject.toml for configured type checking rules
+## Documentation (Sphinx + MyST) Guidelines
+
+This repo uses Sphinx with MyST Markdown for docs.
+
+- Structure
+  - Sources live in `docs/source/`.
+  - Top-level landing page is `docs/source/index.md` with MyST `toctree` entries.
+  - Feature/usage guides live under `docs/source/usage/` and are plain `.md` files.
+  - Static assets go under `docs/source/_static/` (CSS, images, etc.).
+
+- Authoring conventions
+  - Use MyST Markdown (not reStructuredText) for new pages.
+  - One top-level `#` heading per page; use `##` and below for subsections.
+  - File naming: snake_case to match existing pages (e.g., `git_manager.md`).
+  - Prefer concise “what/why/how” sections; avoid restating code or obvious facts.
+  - Code blocks: use fenced code blocks with a language, e.g.,
+    ```
+    ```python
+    from github_action_toolkit import Repo
+    ```
+    ```
+  - Commands: use `bash` fenced blocks. Keep one command per line; make them copyable.
+  - Admonitions: use MyST directives for notes/warnings when helpful, e.g.,
+    ```
+    ```{note}
+    This step is non-fatal and only logs on failure.
+    ```
+    ```
+  - Links: prefer relative links to other docs pages; external links must be full URLs.
+  - Cross-references: rely on headings/anchors (MyST auto-generates anchors for headings).
+
+- Adding a new usage page
+  - Create `docs/source/usage/<topic>.md` with a clear `#` title.
+  - Add it to the Usage `toctree` in `docs/source/index.md` (e.g., `/usage/<topic>`).
+  - Keep examples minimal and runnable; prefer Python snippets or short command blocks.
+
+- Validation
+  - Build docs locally and keep them warning-free:
+    - `make docs-check` (runs `uv sync` and Sphinx via the Makefile target).
+  - For live preview while editing docs: `make docs-live`.
+  - Fix broken links, missing references, or formatting warnings immediately.
+
+- Changelog and docs sync
+  - When updating user-facing behavior, update both `CHANGELOG.md` and `docs/source/CHANGELOG.md` in the same change.
+  - Ensure usage docs reflect actual behavior (keep tests and docs consistent).
+
+- Style and scope
+  - Avoid heavy ASCII art or emojis; keep professional and skimmable.
+  - Prefer bullet lists and short paragraphs over dense prose.
+  - Do not paste long command outputs; summarize expected results.
+  - If documenting sequences (e.g., git flows), list steps explicitly and indicate non-fatal/error-tolerant steps.
 
 ## General Development Practices
 
