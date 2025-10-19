@@ -1,4 +1,4 @@
-name: Build, Test, Checks
+name: Build, Test, Run-Checks, Validate Package
 
 on:
   push:
@@ -48,6 +48,21 @@ jobs:
         with:
           pytest_results_file: "junit/test-results.xml"
           pytest_cov_file: "coverage.xml"
+
+      - name: Build package
+        run: uv build
+
+      - name: Check package metadata
+        run: |
+          uv run twine check dist/*
+
+      - name: Install package from wheel
+        run: |
+          uv run python -m pip install dist/*.whl
+
+      - name: Test import
+        run: |
+          uv run python -c "import github_action_toolkit; print(f'Successfully imported version: {github_action_toolkit.version.VERSION}')"
 
       - name: Docs Check
         run: make docs-check

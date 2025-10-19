@@ -47,13 +47,6 @@ clean:
 	-rm -rf CLAUDE.md AGENTS.md .copilot-instructions.md
 	-find . -type d -name "__pycache__" -exec rm -rf {} +
 
-pre-commit-install:
-	uv sync --extra pre-commit
-	uv run pre-commit install
-
-pre-commit-run:
-	uv run pre-commit run --all-files
-
 
 .PHONY : docs-live
 docs-live :

@@ -109,45 +109,6 @@ When you're ready to contribute code to address an open issue, please follow the
     
     </details>
 
-5. **Use conventional commits**
-
-    <details><summary>Expand details 👇</summary><br/>
-
-    This project follows [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
-    This enables automatic changelog generation and semantic versioning.
-
-    Commit message format:
-    ```
-    <type>[optional scope]: <description>
-
-    [optional body]
-
-    [optional footer(s)]
-    ```
-
-    Common types:
-    - `feat`: A new feature
-    - `fix`: A bug fix
-    - `docs`: Documentation only changes
-    - `style`: Changes that don't affect code meaning
-    - `refactor`: Code change that neither fixes a bug nor adds a feature
-    - `test`: Adding or updating tests
-    - `chore`: Changes to build process or auxiliary tools
-
-    Examples:
-    ```
-    feat: add support for GitHub artifacts API
-    fix: correct input validation in get_user_input_as
-    docs: update README with new examples
-    ```
-
-    You can use commitizen to help format commits:
-    ```shell
-    uv sync --extra commits
-    uv run cz commit
-    ```
-    
-    </details>
 
 **Then Read the `development.md` file on GitHub for this project for development guidelines.**
 

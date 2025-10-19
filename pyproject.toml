@@ -83,20 +83,14 @@ utils = [
     "funlog>=0.2.1",
 ]
 
-# Pre-commit hooks
-pre-commit = [
-    "pre-commit>=4.0.1",
-    "pyproject-fmt>=2.7.6",
-]
-
-# Conventional commits support
-commits = [
-    "commitizen>=4.1.0",
+release = [
+    "pip>=25.2",
+    "twine>=6.2.0",
 ]
 
 # All development dependencies (meta-extra)
 dev = [
-    "github-action-toolkit[test,lint,typing,docs,utils,pre-commit,commits]",
+    "github-action-toolkit[test,lint,typing,docs,utils,release]",
 ]
 
 [project.scripts]
@@ -215,20 +209,3 @@ testpaths = [
 ]
 norecursedirs = []
 filterwarnings = []
-
-[tool.commitizen]
-name = "cz_conventional_commits"
-tag_format = "v$version"
-version_scheme = "semver"
-version_provider = "pep621"
-update_changelog_on_bump = true
-major_version_zero = true
-
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = false
-check_untyped_defs = true
-ignore_missing_imports = true
-files = ["github_action_toolkit", "tests", "devtools"]
