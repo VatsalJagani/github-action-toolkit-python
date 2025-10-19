@@ -17,29 +17,11 @@ from github.Repository import Repository
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-__all__ = (
-    "GitHubAPIClient",
-    "RateLimitError",
-    "APIError",
-)
+from .exceptions import APIError, RateLimitError
+
+__all__ = ("GitHubAPIClient",)
 
 T = TypeVar("T", bound=GithubObject)
-
-
-class RateLimitError(Exception):
-    """Raised when GitHub API rate limit is exceeded."""
-
-    def __init__(self, reset_time: int | None = None):
-        self.reset_time: int | None = reset_time
-        super().__init__("GitHub API rate limit exceeded")
-
-
-class APIError(Exception):
-    """Raised when GitHub API returns an error."""
-
-    def __init__(self, status_code: int, message: str):
-        self.status_code: int = status_code
-        super().__init__(f"GitHub API error ({status_code}): {message}")
 
 
 class GitHubAPIClient:

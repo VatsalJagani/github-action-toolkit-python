@@ -1,6 +1,7 @@
 __all__ = (  # noqa: F405
     "VERSION",
     "VERSION_SHORT",
+    # Print messages
     "echo",
     "info",
     "debug",
@@ -11,11 +12,13 @@ __all__ = (  # noqa: F405
     "start_group",
     "end_group",
     "group",
+    # Job summary
     "append_job_summary",
     "overwrite_job_summary",
     "remove_job_summary",
     "JobSummary",
     "JobSummaryTemplate",
+    # Input/Output
     "get_state",
     "save_state",
     "get_all_user_inputs",
@@ -29,6 +32,7 @@ __all__ = (  # noqa: F405
     "with_env",
     "export_variable",
     "add_path",
+    # Event payload functions (for backward compatibility)
     "event_payload",
     "get_event_name",
     "get_typed_event",
@@ -38,56 +42,57 @@ __all__ = (  # noqa: F405
     "base_ref",
     "get_changed_files",
     "get_labels",
-    "PushEvent",
-    "PullRequestEvent",
-    "IssueCommentEvent",
-    "WorkflowRunEvent",
-    "Actor",
-    "Repository",
-    "Commit",
-    "Label",
-    "PullRequest",
-    "Issue",
-    "Comment",
-    "WorkflowRun",
-    "BaseEvent",
+    # Event payload class
+    "EventPayload",
+    # Git manager
     "Repo",
+    "GitRepo",
+    # GitHub resources
     "GitHubArtifacts",
     "GitHubCache",
-    "CacheNotFoundError",
-    "CacheRestoreError",
-    "CacheSaveError",
+    "GitHubAPIClient",
+    # Debugging
     "print_directory_tree",
-    "GitHubActionError",
-    "EnvironmentError",
-    "InputError",
-    "GitOperationError",
-    "GitHubAPIError",
-    "ConfigurationError",
-    "CancellationRequested",
+    "Debugging",
+    # Signal handling (for backward compatibility)
     "register_cancellation_handler",
     "enable_cancellation_support",
     "disable_cancellation_support",
     "is_cancellation_enabled",
+    # Signal handling class
+    "CancellationHandler",
+    # Simulator
     "simulate_github_action",
     "SimulatorConfig",
     "SimulatorResult",
-    "GitHubAPIClient",
-    "RateLimitError",
-    "APIError",
 )
 
-from .debugging import *  # noqa: F403
-from .event_models import *  # noqa: F403
-from .event_payload import *  # noqa: F403
-from .exceptions import *  # noqa: F403
-from .git_manager import *  # noqa: F403
-from .github_api_client import *  # noqa: F403
-from .github_artifacts import *  # noqa: F403
-from .github_cache import *  # noqa: F403
+from .debugging import Debugging, print_directory_tree  # noqa: F403
+from .event_payload import (  # noqa: F403
+    EventPayload,
+    base_ref,
+    event_payload,
+    get_changed_files,
+    get_event_name,
+    get_labels,
+    get_pr_number,
+    get_typed_event,
+    head_ref,
+    is_pr,
+)
+from .git_manager import GitRepo, Repo  # noqa: F403
+from .github_api_client import GitHubAPIClient  # noqa: F403
+from .github_artifacts import GitHubArtifacts  # noqa: F403
+from .github_cache import GitHubCache  # noqa: F403
 from .input_output import *  # noqa: F403
 from .job_summary import *  # noqa: F403
 from .local_simulator import *  # noqa: F403
 from .print_messages import *  # noqa: F403
-from .signal_handling import *  # noqa: F403
+from .signal_handling import (  # noqa: F403
+    CancellationHandler,
+    disable_cancellation_support,
+    enable_cancellation_support,
+    is_cancellation_enabled,
+    register_cancellation_handler,
+)
 from .version import VERSION, VERSION_SHORT  # noqa: F403

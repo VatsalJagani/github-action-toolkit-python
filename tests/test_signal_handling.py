@@ -8,6 +8,7 @@ import signal
 import pytest
 
 import github_action_toolkit as gat
+from github_action_toolkit.exceptions import CancellationRequested
 
 
 def test_enable_disable_cancellation_support():
@@ -48,7 +49,7 @@ def test_register_cancellation_handler():
     gat.enable_cancellation_support()
 
     try:
-        with pytest.raises(gat.CancellationRequested):
+        with pytest.raises(CancellationRequested):
             signal.raise_signal(signal.SIGTERM)
 
         assert len(handler_called) == 1
@@ -71,7 +72,7 @@ def test_multiple_cancellation_handlers():
     gat.enable_cancellation_support()
 
     try:
-        with pytest.raises(gat.CancellationRequested):
+        with pytest.raises(CancellationRequested):
             signal.raise_signal(signal.SIGTERM)
 
         assert call_order == [1, 2]
@@ -95,7 +96,7 @@ def test_cancellation_handler_exceptions_are_caught():
     gat.enable_cancellation_support()
 
     try:
-        with pytest.raises(gat.CancellationRequested):
+        with pytest.raises(CancellationRequested):
             signal.raise_signal(signal.SIGTERM)
 
         assert call_order == [1, 2]

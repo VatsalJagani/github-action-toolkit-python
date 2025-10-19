@@ -12,6 +12,7 @@ from typing import Any
 from unittest import mock
 
 import github_action_toolkit as gat
+from github_action_toolkit.event_models import PullRequestEvent, PushEvent
 
 
 def test_event_payload(tmpdir: Any) -> None:
@@ -86,13 +87,13 @@ def test_get_pr_number(tmpdir: Any) -> None:
         os.environ, {"GITHUB_EVENT_PATH": file.strpath, "GITHUB_EVENT_NAME": "pull_request"}
     ):
         # Clear cache
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         assert gat.get_pr_number() == 123
 
     with mock.patch.dict(
         os.environ, {"GITHUB_EVENT_PATH": file.strpath, "GITHUB_EVENT_NAME": "push"}
     ):
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         assert gat.get_pr_number() is None
 
 
@@ -138,7 +139,7 @@ def test_head_ref(tmpdir: Any) -> None:
     with mock.patch.dict(
         os.environ, {"GITHUB_EVENT_PATH": push_file.strpath, "GITHUB_EVENT_NAME": "push"}
     ):
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         assert gat.head_ref() == "refs/heads/feature-branch"
 
     # Test pull_request event
@@ -185,7 +186,7 @@ def test_head_ref(tmpdir: Any) -> None:
     with mock.patch.dict(
         os.environ, {"GITHUB_EVENT_PATH": pr_file.strpath, "GITHUB_EVENT_NAME": "pull_request"}
     ):
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         assert gat.head_ref() == "feature-branch"
 
 
@@ -233,13 +234,13 @@ def test_base_ref(tmpdir: Any) -> None:
     with mock.patch.dict(
         os.environ, {"GITHUB_EVENT_PATH": pr_file.strpath, "GITHUB_EVENT_NAME": "pull_request"}
     ):
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         assert gat.base_ref() == "main"
 
     with mock.patch.dict(
         os.environ, {"GITHUB_EVENT_PATH": pr_file.strpath, "GITHUB_EVENT_NAME": "push"}
     ):
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         assert gat.base_ref() is None
 
 
@@ -292,7 +293,7 @@ def test_get_changed_files(tmpdir: Any) -> None:
     with mock.patch.dict(
         os.environ, {"GITHUB_EVENT_PATH": push_file.strpath, "GITHUB_EVENT_NAME": "push"}
     ):
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         files = gat.get_changed_files()
         assert sorted(files) == [
             "existing.py",
@@ -349,7 +350,7 @@ def test_get_labels(tmpdir: Any) -> None:
     with mock.patch.dict(
         os.environ, {"GITHUB_EVENT_PATH": pr_file.strpath, "GITHUB_EVENT_NAME": "pull_request"}
     ):
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         labels = gat.get_labels()
         assert labels == ["bug", "enhancement"]
 
@@ -398,9 +399,9 @@ def test_get_typed_event_push(tmpdir: Any) -> None:
     with mock.patch.dict(
         os.environ, {"GITHUB_EVENT_PATH": push_file.strpath, "GITHUB_EVENT_NAME": "push"}
     ):
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         event = gat.get_typed_event()
-        assert isinstance(event, gat.PushEvent)
+        assert isinstance(event, PushEvent)
         assert event.ref == "refs/heads/main"
         assert event.before == "abc123"
         assert event.after == "def456"
@@ -471,9 +472,9 @@ def test_get_typed_event_pull_request(tmpdir: Any) -> None:
     with mock.patch.dict(
         os.environ, {"GITHUB_EVENT_PATH": pr_file.strpath, "GITHUB_EVENT_NAME": "pull_request"}
     ):
-        gat.event_payload.cache_clear()
+        gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
         event = gat.get_typed_event()
-        assert isinstance(event, gat.PullRequestEvent)
+        assert isinstance(event, PullRequestEvent)
         assert event.action == "opened"
         assert event.number == 42
         assert event.pull_request.title == "Test PR"
@@ -545,7 +546,7 @@ def test_get_pr_number_with_various_payloads(pr_number: int, repo_name: str) -> 
         with mock.patch.dict(
             os.environ, {"GITHUB_EVENT_PATH": filepath, "GITHUB_EVENT_NAME": "pull_request"}
         ):
-            gat.event_payload.cache_clear()
+            gat.event_payload.cache_clear()  # pyright: ignore[reportFunctionMemberAccess]
             result = gat.get_pr_number()
             assert result == pr_number
     finally:
