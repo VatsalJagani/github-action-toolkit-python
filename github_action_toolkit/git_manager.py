@@ -1,6 +1,8 @@
 import os
 import re
+import subprocess
 import tempfile
+from pathlib import Path
 from types import TracebackType
 
 from git import Repo as GitRepo
@@ -16,7 +18,14 @@ class Repo:
     base_branch: str
     cleanup: bool
 
-    def __init__(self, url: str | None = None, path: str | None = None, cleanup: bool = False):
+    def __init__(
+        self,
+        url: str | None = None,
+        path: str | None = None,
+        cleanup: bool = False,
+        depth: int | None = None,
+        single_branch: bool = False,
+    ):
         if not url and not path:
             raise ValueError("Either 'url' or 'path' must be provided")
 
@@ -25,7 +34,12 @@ class Repo:
 
         if url:
             info(f"Cloning repository from {url} to {self.repo_path}")
-            self.repo = GitRepo.clone_from(url, self.repo_path)
+            clone_kwargs = {}
+            if depth is not None:
+                clone_kwargs["depth"] = depth
+            if single_branch:
+                clone_kwargs["single_branch"] = single_branch
+            self.repo = GitRepo.clone_from(url, self.repo_path, **clone_kwargs)  # pyright: ignore[reportUnknownArgumentType]
         else:
             info(f"Using existing repository at {self.repo_path}")
             self.repo = GitRepo(path)
@@ -149,6 +163,277 @@ class Repo:
         pr = repo.create_pull(title=title, body=body, head=head, base=base)
 
         return pr.html_url
+
+    def configure_safe_directory(self):
+        """
+        Configure the current repository as a git safe directory.
+        Useful when running in containers or with different users.
+        """
+        info(f"Configuring safe directory for {self.repo_path}")
+        try:
+            subprocess.run(
+                ["git", "config", "--global", "--add", "safe.directory", self.repo_path],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError as e:
+            warning(f"Failed to configure safe directory: {e.stderr}")
+
+    def sparse_checkout_init(self, cone_mode: bool = True):
+        """
+        Initialize sparse checkout for the repository.
+
+        :param cone_mode: Use cone mode (default True) for better performance
+        """
+        info("Initializing sparse checkout")
+        self.repo.git.config("core.sparseCheckout", "true")
+        if cone_mode:
+            self.repo.git.config("core.sparseCheckoutCone", "true")
+
+    def sparse_checkout_set(self, paths: list[str]):
+        """
+        Set sparse checkout paths.
+
+        :param paths: List of paths to include in sparse checkout
+        """
+        info(f"Setting sparse checkout paths: {paths}")
+        sparse_checkout_file = Path(self.repo_path) / ".git" / "info" / "sparse-checkout"
+        sparse_checkout_file.parent.mkdir(parents=True, exist_ok=True)
+        sparse_checkout_file.write_text("\n".join(paths) + "\n")
+        self.repo.git.read_tree("-mu", "HEAD")
+
+    def sparse_checkout_add(self, paths: list[str]):
+        """
+        Add paths to existing sparse checkout configuration.
+
+        :param paths: List of paths to add
+        """
+        info(f"Adding sparse checkout paths: {paths}")
+        sparse_checkout_file = Path(self.repo_path) / ".git" / "info" / "sparse-checkout"
+        existing = ""
+        if sparse_checkout_file.exists():
+            existing = sparse_checkout_file.read_text()
+        all_paths = set(existing.strip().split("\n") if existing.strip() else [])
+        all_paths.update(paths)
+        sparse_checkout_file.write_text("\n".join(sorted(all_paths)) + "\n")
+        self.repo.git.read_tree("-mu", "HEAD")
+
+    def submodule_init(self):
+        """Initialize git submodules."""
+        info("Initializing submodules")
+        self.repo.git.submodule("init")
+
+    def submodule_update(self, recursive: bool = False, remote: bool = False):
+        """
+        Update git submodules.
+
+        :param recursive: Update submodules recursively
+        :param remote: Update to latest remote commit
+        """
+        info("Updating submodules")
+        args: list[str] = ["update"]
+        if recursive:
+            args.append("--recursive")
+        if remote:
+            args.append("--remote")
+        self.repo.git.submodule(*args)
+
+    def configure_gpg_signing(self, key_id: str | None = None, program: str | None = None):
+        """
+        Configure GPG signing for commits.
+
+        :param key_id: GPG key ID to use for signing (optional)
+        :param program: GPG program path (optional)
+        """
+        info("Configuring GPG signing")
+        config_writer = self.repo.config_writer()
+        config_writer.set_value("commit", "gpgsign", "true")
+        if key_id:
+            config_writer.set_value("user", "signingkey", key_id)
+        if program:
+            config_writer.set_value("gpg", "program", program)
+        config_writer.release()
+
+    def configure_ssh_signing(self, key_path: str | None = None):
+        """
+        Configure SSH signing for commits.
+
+        :param key_path: Path to SSH key for signing (optional)
+        """
+        info("Configuring SSH signing")
+        config_writer = self.repo.config_writer()
+        config_writer.set_value("gpg", "format", "ssh")
+        config_writer.set_value("commit", "gpgsign", "true")
+        if key_path:
+            config_writer.set_value("user", "signingkey", key_path)
+        config_writer.release()
+
+    def set_remote_url(self, remote: str, url: str, token: str | None = None):
+        """
+        Set or update remote URL with optional token authentication.
+
+        :param remote: Remote name (e.g., 'origin')
+        :param url: Remote URL
+        :param token: Authentication token to embed in URL (optional)
+        """
+        if token and "github.com" in url:
+            # Inject token into GitHub URL
+            if url.startswith("https://"):
+                auth_url = url.replace("https://", f"https://x-access-token:{token}@")
+            else:
+                auth_url = url
+            info(f"Setting remote {remote} with authentication")
+            self.repo.git.remote("set-url", remote, auth_url)
+        else:
+            info(f"Setting remote {remote} to {url}")
+            self.repo.git.remote("set-url", remote, url)
+
+    def create_tag(self, tag: str, message: str | None = None, signed: bool = False):
+        """
+        Create a git tag.
+
+        :param tag: Tag name
+        :param message: Tag message (creates annotated tag if provided)
+        :param signed: Create a signed tag
+        """
+        info(f"Creating tag: {tag}")
+        args: list[str] = []
+        if signed:
+            args.append("-s")
+        elif message:
+            args.append("-a")
+        args.append(tag)
+        if message:
+            args.extend(["-m", message])
+        self.repo.git.tag(*args)
+
+    def list_tags(self, pattern: str | None = None) -> list[str]:
+        """
+        List tags in the repository.
+
+        :param pattern: Optional pattern to filter tags
+        :returns: List of tag names
+        """
+        args = ["-l"]
+        if pattern:
+            args.append(pattern)
+        result = self.repo.git.tag(*args)
+        return [tag.strip() for tag in result.split("\n") if tag.strip()]
+
+    def push_tag(self, tag: str, remote: str = "origin"):
+        """
+        Push a specific tag to remote.
+
+        :param tag: Tag name
+        :param remote: Remote name (default: 'origin')
+        """
+        info(f"Pushing tag {tag} to {remote}")
+        self.repo.git.push(remote, tag)
+
+    def push_all_tags(self, remote: str = "origin"):
+        """
+        Push all tags to remote.
+
+        :param remote: Remote name (default: 'origin')
+        """
+        info(f"Pushing all tags to {remote}")
+        self.repo.git.push(remote, "--tags")
+
+    def delete_tag(self, tag: str, remote: bool = False, remote_name: str = "origin"):
+        """
+        Delete a tag.
+
+        :param tag: Tag name
+        :param remote: Also delete from remote
+        :param remote_name: Remote name (default: 'origin')
+        """
+        info(f"Deleting tag: {tag}")
+        self.repo.git.tag("-d", tag)
+        if remote:
+            info(f"Deleting tag {tag} from {remote_name}")
+            self.repo.git.push(remote_name, "--delete", tag)
+
+    def get_latest_tag(self) -> str | None:
+        """
+        Get the most recent tag.
+
+        :returns: Latest tag name or None if no tags exist
+        """
+        try:
+            return self.repo.git.describe("--tags", "--abbrev=0")
+        except Exception:  # noqa: BLE001
+            return None
+
+    def extract_changelog_section(
+        self, changelog_path: str = "CHANGELOG.md", version: str | None = None
+    ) -> str:
+        """
+        Extract a specific version section from a changelog file.
+
+        :param changelog_path: Path to CHANGELOG.md relative to repo root
+        :param version: Version to extract (defaults to Unreleased section)
+        :returns: Changelog text for the version
+        """
+        changelog_file = Path(self.repo_path) / changelog_path
+        if not changelog_file.exists():
+            warning(f"Changelog file not found: {changelog_path}")
+            return ""
+
+        content = changelog_file.read_text()
+        lines = content.split("\n")
+
+        # Find the section for the requested version
+        target = version or "Unreleased"
+        section_lines: list[str] = []
+        in_section = False
+        header_pattern = re.compile(r"^##\s+")
+
+        for line in lines:
+            if header_pattern.match(line):
+                if target in line:
+                    in_section = True
+                    continue  # Skip the header line
+                elif in_section:
+                    # We've hit the next section, stop
+                    break
+            elif in_section:
+                section_lines.append(line)
+
+        return "\n".join(section_lines).strip()
+
+    def prepare_release(
+        self,
+        version: str,
+        changelog_path: str = "CHANGELOG.md",
+        create_tag_flag: bool = True,
+        tag_message: str | None = None,
+    ) -> dict[str, str]:
+        """
+        Helper for preparing a release.
+
+        :param version: Version number (e.g., 'v1.0.0')
+        :param changelog_path: Path to CHANGELOG.md
+        :param create_tag_flag: Whether to create a tag
+        :param tag_message: Message for the tag (defaults to changelog section)
+        :returns: Dictionary with 'version', 'changelog', and optionally 'tag'
+        """
+        info(f"Preparing release for version {version}")
+
+        # Extract changelog
+        changelog = self.extract_changelog_section(changelog_path, version)
+        if not changelog:
+            changelog = self.extract_changelog_section(changelog_path, "Unreleased")
+
+        result = {"version": version, "changelog": changelog}
+
+        # Create tag if requested
+        if create_tag_flag:
+            message = tag_message or changelog or f"Release {version}"
+            self.create_tag(version, message=message)
+            result["tag"] = version
+
+        return result
 
     def _sync_to_base_branch(self) -> None:
         """

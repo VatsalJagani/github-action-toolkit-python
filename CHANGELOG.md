@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Advanced Git Manager features for `Repo` class:
+  - Safe directory configuration with `configure_safe_directory()`
+  - Shallow clone support with `depth` and `single_branch` parameters in constructor
+  - Sparse checkout functionality with `sparse_checkout_init()`, `sparse_checkout_set()`, and `sparse_checkout_add()`
+  - Submodule management with `submodule_init()` and `submodule_update()`
+  - GPG signing configuration with `configure_gpg_signing()`
+  - SSH signing configuration with `configure_ssh_signing()`
+  - Authenticated remote setup with `set_remote_url()` with token support
+  - Tagging operations: `create_tag()`, `list_tags()`, `push_tag()`, `push_all_tags()`, `delete_tag()`, and `get_latest_tag()`
+  - Changelog extraction with `extract_changelog_section()`
+  - Release preparation helper with `prepare_release()`
+
 ## [v0.6.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.6.0) - 2025-10-15
 
 ### Added
