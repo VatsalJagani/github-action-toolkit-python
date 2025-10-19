@@ -292,10 +292,3 @@ def cache_build_artifacts():
     
     return False
 ```
-
-## See Also
-
-- {doc}`/usage/github_artifacts` - Uploading and downloading artifacts
-- {doc}`/usage/exceptions` - Cache-specific exceptions
-- {doc}`/examples` - Complete workflow examples using caching
-- [GitHub Actions Cache Documentation](https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows)
