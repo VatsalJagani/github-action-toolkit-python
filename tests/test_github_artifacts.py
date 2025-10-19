@@ -180,7 +180,7 @@ def test_get_artifacts_with_pattern(mock_repo, mock_env):
     mock_repo.get_artifacts.return_value = [mock_artifact_1, mock_artifact_2]
 
     gh_artifact = GitHubArtifacts()
-    artifacts = gh_artifact.get_artifacts(name_pattern="test-*")
+    artifacts = list(gh_artifact.get_artifacts(name_pattern="test-*"))
 
     assert len(artifacts) == 1
     assert artifacts[0].name == "test-results"
