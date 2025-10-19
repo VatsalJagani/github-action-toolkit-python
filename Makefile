@@ -4,7 +4,7 @@
 
 .DEFAULT_GOAL := default
 
-.PHONY: default install lint test upgrade build clean agent-rules pre-commit-install pre-commit-run
+.PHONY: default install lint test upgrade build clean agent-rules
 
 default: agent-rules install lint test docs-check
 
