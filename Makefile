@@ -23,18 +23,21 @@ upgrade:
 build:
 	uv build
 
-agent-rules: CLAUDE.md AGENTS.md .copilot-instructions.md
+agent-rules: .cursorrules CLAUDE.md AGENTS.md .github/copilot-instructions.md
 
 # Use .cursor/rules for sources of rules.
-# Create Claude, Codex, and GitHub Copilot rules from these.
+# Create Cursor, Claude, and GitHub Copilot rules from these.
+.cursorrules: .cursor/rules/general.mdc .cursor/rules/python.mdc
+	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > .cursorrules
+
 CLAUDE.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
 	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > CLAUDE.md
 
 AGENTS.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
 	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > AGENTS.md
 
-.copilot-instructions.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
-	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > .copilot-instructions.md
+.github/copilot-instructions.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
+	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > .github/copilot-instructions.md
 
 clean:
 	-rm -rf dist/
@@ -44,7 +47,7 @@ clean:
 	-rm -rf .ruff_cache/
 	-rm -rf .venv/
 	-rm -rf docs/build/
-	-rm -rf CLAUDE.md AGENTS.md .copilot-instructions.md
+	-rm -rf .cursorrules CLAUDE.md AGENTS.md .github/copilot-instructions.md
 	-find . -type d -name "__pycache__" -exec rm -rf {} +
 
 

@@ -77,17 +77,33 @@ See [uv docs](https://docs.astral.sh/uv/) for details.
 
 ## Agent Rules
 
-See [.cursor/rules](.cursor/rules) for agent rules.
-These rules are written for [Cursor](https://www.cursor.com/).
-However, they are also used by other agents.
-The Makefile will generate the following files from the same rules:
-- `CLAUDE.md` (for Claude AI)
-- `AGENTS.md` (for general agents)
-- `.copilot-instructions.md` (for GitHub Copilot)
+This project includes instructions for AI coding assistants. The source rules are in
+[.cursor/rules/](.cursor/rules/) directory.
+
+The `make agent-rules` command generates AI assistant instruction files from these source
+rules for different AI tools:
+
+- **Cursor**: `.cursorrules` (root) and `.cursor/rules/*.mdc` files
+- **Claude**: `CLAUDE.md` (root) 
+- **GitHub Copilot**: `.github/copilot-instructions.md`
+- **Other agents**: `AGENTS.md` (root)
+
+These generated files are in `.gitignore` and are regenerated as part of `make` default
+target. To manually regenerate them:
 
 ```shell
 make agent-rules
 ```
+
+### File Locations for Each AI Tool
+
+- **Cursor**: Automatically reads from `.cursorrules` or `.cursor/rules/` directory
+- **Claude**: Uses `CLAUDE.md` in the project root
+- **GitHub Copilot**: Automatically reads from `.github/copilot-instructions.md`
+- **Other agents**: Can use `AGENTS.md` in the project root
+
+All these files contain the same instructions, just in the locations where each tool
+expects to find them.
 
 ## IDE setup
 
