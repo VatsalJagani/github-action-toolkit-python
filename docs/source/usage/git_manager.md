@@ -1,12 +1,18 @@
-Git and GitHub Repo related Functions
-================
+# Git Repository Manager
 
-**NOTE** - You can use `Repo` and `GitRepo` classes alternatively.
+Manage Git repositories with operations like clone, commit, push, and PR creation.
 
+## Overview
 
-### **`Repo(url: str = None, path: str = None, cleanup: bool = False, depth: int = None, single_branch: bool = False)` Class**
+The `Repo` and `GitRepo` classes provide a high-level interface for Git operations in GitHub Actions, including repository management, branch operations, tagging, and pull request creation.
 
-Initializes the Git repository with this class.
+**Note:** You can use `Repo` and `GitRepo` classes interchangeably - they are aliases.
+
+## API Reference
+
+### `Repo(url=None, path=None, cleanup=False, depth=None, single_branch=False)`
+
+Initializes the Git repository manager.
 
 Either url or path parameter is required.
 
@@ -62,7 +68,7 @@ This synchronization happens twice: once on `__enter__` (before your work) and o
 
 ## Basic Operations
 
-### **`Repo.get_current_branch()`**
+### `Repo.get_current_branch()`
 
 Returns the name of the currently active Git branch.
 
@@ -75,7 +81,7 @@ Returns the name of the currently active Git branch.
 # feature/my-branch
 ```
 
-### **`Repo.create_new_branch(branch_name)`**
+### `Repo.create_new_branch(branch_name)`
 
 Creates and checks out a new branch from the current branch.
 
@@ -85,7 +91,7 @@ Creates and checks out a new branch from the current branch.
 >> repo.create_new_branch("feature/auto-update")
 ```
 
-### **`Repo.add(file_path)`**
+### `Repo.add(file_path)`
 
 Stages a specific file for commit.
 
@@ -95,7 +101,7 @@ Stages a specific file for commit.
 >> repo.add("README.md")
 ```
 
-### **`Repo.commit(message)`**
+### `Repo.commit(message)`
 
 Commits the currently staged files with the specified message.
 
@@ -105,7 +111,7 @@ Commits the currently staged files with the specified message.
 >> repo.commit("Update README")
 ```
 
-### **`Repo.add_all_and_commit(message)`**
+### `Repo.add_all_and_commit(message)`
 
 Stages all changes in the repository and commits them with the given message.
 
@@ -115,7 +121,7 @@ Stages all changes in the repository and commits them with the given message.
 >> repo.add_all_and_commit("Auto-update configuration files")
 ```
 
-### **`Repo.push(remote="origin", branch=None)`**
+### `Repo.push(remote="origin", branch=None)`
 
 Pushes the current branch to the specified remote (default is origin). If branch is not provided, pushes the currently active branch.
 
@@ -125,7 +131,7 @@ Pushes the current branch to the specified remote (default is origin). If branch
 >> repo.push()
 ```
 
-### **`Repo.pull(remote="origin", branch=None)`**
+### `Repo.pull(remote="origin", branch=None)`
 
 Pulls the latest changes for the current branch from the specified remote (default is origin). If branch is not provided, pulls the currently active branch.
 
@@ -135,7 +141,7 @@ Pulls the latest changes for the current branch from the specified remote (defau
 >> repo.pull()
 ```
 
-### **`Repo.create_pr(github_token=None, title=None, body=None, head=None, base=None)`**
+### `Repo.create_pr(github_token=None, title=None, body=None, head=None, base=None)`
 
 Creates a pull request on GitHub.
 
@@ -193,7 +199,7 @@ Or, using full automatic inference:
 
 ## Advanced Git Operations
 
-### **`Repo.configure_safe_directory()`**
+### `Repo.configure_safe_directory()`
 
 Configures the current repository as a git safe directory. This is essential when running in containers or with different users to avoid "dubious ownership" errors.
 
@@ -203,7 +209,7 @@ Configures the current repository as a git safe directory. This is essential whe
 >> repo.configure_safe_directory()
 ```
 
-### **`Repo.sparse_checkout_init(cone_mode=True)`**
+### `Repo.sparse_checkout_init(cone_mode=True)`
 
 Initialize sparse checkout for the repository. Sparse checkout allows you to check out only specific paths from a repository, which is useful for large repositories.
 
@@ -216,7 +222,7 @@ Initialize sparse checkout for the repository. Sparse checkout allows you to che
 >> repo.sparse_checkout_init()
 ```
 
-### **`Repo.sparse_checkout_set(paths)`**
+### `Repo.sparse_checkout_set(paths)`
 
 Set the paths to include in sparse checkout.
 
@@ -229,7 +235,7 @@ Set the paths to include in sparse checkout.
 >> repo.sparse_checkout_set(["src/", "docs/", "README.md"])
 ```
 
-### **`Repo.sparse_checkout_add(paths)`**
+### `Repo.sparse_checkout_add(paths)`
 
 Add additional paths to the existing sparse checkout configuration.
 
@@ -251,7 +257,7 @@ Add additional paths to the existing sparse checkout configuration.
 >>     # Now only src/, docs/, and README.md are checked out
 ```
 
-### **`Repo.submodule_init()`**
+### `Repo.submodule_init()`
 
 Initialize git submodules in the repository.
 
@@ -261,7 +267,7 @@ Initialize git submodules in the repository.
 >> repo.submodule_init()
 ```
 
-### **`Repo.submodule_update(recursive=False, remote=False)`**
+### `Repo.submodule_update(recursive=False, remote=False)`
 
 Update git submodules.
 
@@ -275,7 +281,7 @@ Update git submodules.
 >> repo.submodule_update(recursive=True, remote=True)
 ```
 
-### **`Repo.configure_gpg_signing(key_id=None, program=None)`**
+### `Repo.configure_gpg_signing(key_id=None, program=None)`
 
 Configure GPG signing for commits.
 
@@ -289,7 +295,7 @@ Configure GPG signing for commits.
 >> repo.configure_gpg_signing(key_id="ABC123DEF456", program="/usr/bin/gpg")
 ```
 
-### **`Repo.configure_ssh_signing(key_path=None)`**
+### `Repo.configure_ssh_signing(key_path=None)`
 
 Configure SSH signing for commits (Git 2.34+).
 
@@ -302,7 +308,7 @@ Configure SSH signing for commits (Git 2.34+).
 >> repo.configure_ssh_signing(key_path="/home/user/.ssh/id_ed25519.pub")
 ```
 
-### **`Repo.set_remote_url(remote, url, token=None)`**
+### `Repo.set_remote_url(remote, url, token=None)`
 
 Set or update remote URL with optional token authentication.
 
@@ -320,7 +326,7 @@ Set or update remote URL with optional token authentication.
 
 ## Tag Management
 
-### **`Repo.create_tag(tag, message=None, signed=False)`**
+### `Repo.create_tag(tag, message=None, signed=False)`
 
 Create a git tag.
 
@@ -342,7 +348,7 @@ Create a git tag.
 >> repo.create_tag("v1.0.0", message="Release version 1.0.0", signed=True)
 ```
 
-### **`Repo.list_tags(pattern=None)`**
+### `Repo.list_tags(pattern=None)`
 
 List tags in the repository.
 
@@ -364,7 +370,7 @@ List tags in the repository.
 # Output: ['v1.0.0', 'v1.1.0']
 ```
 
-### **`Repo.push_tag(tag, remote="origin")`**
+### `Repo.push_tag(tag, remote="origin")`
 
 Push a specific tag to remote.
 
@@ -378,7 +384,7 @@ Push a specific tag to remote.
 >> repo.push_tag("v1.0.0")
 ```
 
-### **`Repo.push_all_tags(remote="origin")`**
+### `Repo.push_all_tags(remote="origin")`
 
 Push all tags to remote.
 
@@ -391,7 +397,7 @@ Push all tags to remote.
 >> repo.push_all_tags()
 ```
 
-### **`Repo.delete_tag(tag, remote=False, remote_name="origin")`**
+### `Repo.delete_tag(tag, remote=False, remote_name="origin")`
 
 Delete a tag locally and optionally from remote.
 
@@ -410,7 +416,7 @@ Delete a tag locally and optionally from remote.
 >> repo.delete_tag("v1.0.0", remote=True)
 ```
 
-### **`Repo.get_latest_tag()`**
+### `Repo.get_latest_tag()`
 
 Get the most recent tag.
 
@@ -427,7 +433,7 @@ Get the most recent tag.
 
 ## Release Preparation
 
-### **`Repo.extract_changelog_section(changelog_path="CHANGELOG.md", version=None)`**
+### `Repo.extract_changelog_section(changelog_path="CHANGELOG.md", version=None)`
 
 Extract a specific version section from a changelog file (Keep a Changelog format).
 
@@ -450,7 +456,7 @@ Extract a specific version section from a changelog file (Keep a Changelog forma
 >> print(v1_changes)
 ```
 
-### **`Repo.prepare_release(version, changelog_path="CHANGELOG.md", create_tag_flag=True, tag_message=None)`**
+### `Repo.prepare_release(version, changelog_path="CHANGELOG.md", create_tag_flag=True, tag_message=None)`
 
 Helper for preparing a release with changelog extraction and automatic tagging.
 

@@ -1,5 +1,12 @@
-Annotations
-================
+# Annotations
+
+Create file annotations and code review comments in GitHub Actions workflows.
+
+## Overview
+
+Annotations allow you to create warnings, errors, and notices that appear in the GitHub Actions UI and pull request files view. They can point to specific files and line numbers, making them perfect for linting, testing, and code quality tools.
+
+## Examples
 
 ### File Annotations
 

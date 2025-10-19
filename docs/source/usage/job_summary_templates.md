@@ -1,5 +1,12 @@
-Job Summary Templates
-=============
+# Job Summary Templates
+
+Pre-built templates for common job summary use cases.
+
+## Overview
+
+This page provides template patterns for creating job summaries for common scenarios like test reports, coverage reports, deployment summaries, and benchmark results.
+
+## Examples
 
 ### Test Report with Details
 

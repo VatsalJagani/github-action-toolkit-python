@@ -1,21 +1,20 @@
-GitHub Action Event Payload
-=============
+# GitHub Event Payload
+
+Access event data from GitHub Actions workflow triggers.
 
 ## Overview
 
-The event payload module provides tools to work with GitHub Actions event data, including:
+The `EventPayload` class provides a typed interface for accessing GitHub Actions event data from workflow triggers like push, pull_request, release, and more. It includes strongly typed event models using Pydantic and convenience helper methods for common operations.
 
-- The `EventPayload` class for accessing event data
-- Strongly typed event models using Pydantic
-- Convenience helper methods for common event operations
+Learn more: [GitHub Actions Event Payload](https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads)
 
-More details: [GitHub Actions Event Payload](https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads)
+## API Reference
 
-## EventPayload Class
+### `EventPayload()`
 
 The `EventPayload` class provides a unified interface for accessing GitHub Actions event data.
 
-### **`get_payload()`**
+### `get_payload()`
 
 Get GitHub Event payload that triggered the workflow as a dictionary.
 
@@ -30,7 +29,7 @@ payload = event.get_payload()
 # {"action": "opened", "number": 1, "pull_request": {...}, "repository": {...}, "sender": {...}}
 ```
 
-### **`get_event_name()`**
+### `get_event_name()`
 
 Get the name of the event that triggered the workflow.
 
@@ -46,7 +45,7 @@ event_name = event.get_event_name()
 
 ## Typed Event Models
 
-### **`get_typed_event()`**
+### `get_typed_event()`
 
 Parse the event payload into a strongly typed Pydantic model based on the event type.
 
@@ -106,7 +105,7 @@ from github_action_toolkit.event_models import (
 
 ## Convenience Helpers
 
-### **`is_pr()`**
+### `is_pr()`
 
 Check if the current event is a pull request event.
 
@@ -120,7 +119,7 @@ if event.is_pr():
     print("This is a pull request event")
 ```
 
-### **`get_pr_number()`**
+### `get_pr_number()`
 
 Get the pull request number for PR events.
 
@@ -135,7 +134,7 @@ if pr_number:
     print(f"PR number: {pr_number}")
 ```
 
-### **`head_ref()`**
+### `head_ref()`
 
 Get the head reference for the event.
 
@@ -152,7 +151,7 @@ ref = event.head_ref()
 print(f"Head ref: {ref}")
 ```
 
-### **`base_ref()`**
+### `base_ref()`
 
 Get the base reference for pull request events.
 
@@ -167,7 +166,7 @@ if ref:
     print(f"Base ref: {ref}")
 ```
 
-### **`get_changed_files()`**
+### `get_changed_files()`
 
 Get the list of changed files for push events.
 
@@ -182,7 +181,7 @@ for file in files:
     print(f"Changed: {file}")
 ```
 
-### **`get_labels()`**
+### `get_labels()`
 
 Get the list of labels for pull request or issue events.
 

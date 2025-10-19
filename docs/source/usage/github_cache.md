@@ -1,9 +1,16 @@
-GitHub Cache Functions
-================
+# GitHub Cache
 
-### **`GitHubCache(github_token=None, github_repo=None)` Class**
+Cache dependencies and build outputs across workflow runs for faster execution.
 
-Initializes the cache client for GitHub Actions cache operations. Enables performance optimizations through caching across workflow runs, supporting hierarchical key fallbacks and cross-job data sharing.
+## Overview
+
+The `GitHubCache` class provides a typed interface for GitHub Actions cache operations. It enables performance optimizations through caching across workflow runs, supporting hierarchical key fallbacks and cross-job data sharing.
+
+## API Reference
+
+### `GitHubCache(github_token=None, github_repo=None)`
+
+Initializes the cache client for GitHub Actions cache operations.
 
 Both parameters are optional but environment variables for them need to be present: GITHUB_TOKEN and GITHUB_REPOSITORY respectively.
 
@@ -14,7 +21,7 @@ Both parameters are optional but environment variables for them need to be prese
 >> cache = GitHubCache()
 ```
 
-### **`GitHubCache.save_cache(paths, key, enable_cross_os_archive=False)`**
+### `GitHubCache.save_cache(paths, key, enable_cross_os_archive=False)`
 
 Save cache with the specified key. Supports composite keys for fine-grained cache management.
 
@@ -50,7 +57,7 @@ Returns the cache ID if successful, None if cache already exists.
 # Cache saved with ID: 123456
 ```
 
-### **`GitHubCache.restore_cache(paths, primary_key, restore_keys=None, enable_cross_os_archive=False)`**
+### `GitHubCache.restore_cache(paths, primary_key, restore_keys=None, enable_cross_os_archive=False)`
 
 Restore cache with fallback key hierarchy. Tries the primary key first, then falls back to restore keys in order.
 
@@ -90,7 +97,7 @@ Returns the matched cache key if found and restored, None if no cache found.
 # Cache restored from key: npm-Linux-abc12345
 ```
 
-### **`GitHubCache.is_feature_available()`**
+### `GitHubCache.is_feature_available()`
 
 Check if the cache feature is available in the current environment. Useful for gracefully handling cases where cache is not available.
 

@@ -1,7 +1,10 @@
-User Inputs
-=============
+# User Inputs
 
-### **`get_all_user_inputs()`**
+Get and validate user inputs from GitHub Actions workflow configuration.
+
+## API Reference
+
+### `get_all_user_inputs()`
 
 Gets all user inputs from environment variables prefixed with INPUT_, and returns them as a dictionary.
 
@@ -23,7 +26,7 @@ The input names are normalized to lowercase (e.g., INPUT_USERNAME becomes "usern
 
 ```
 
-### **`print_all_user_inputs()`**
+### `print_all_user_inputs()`
 
 Prints all user inputs (from environment variables prefixed with INPUT_) in a readable format.
 
@@ -49,7 +52,7 @@ If no user inputs are found, it prints a fallback message.
 # No user inputs found.
 ```
 
-### **`get_user_input(name)`**
+### `get_user_input(name)`
 
 Gets user input from running workflow.
 
@@ -64,7 +67,7 @@ Gets user input from running workflow.
 # my value
 ```
 
-### **`get_user_input_as(name, input_type, default_value)`**
+### `get_user_input_as(name, input_type, default_value)`
 
 Gets user input from running workflow with type-casting into choice.
 

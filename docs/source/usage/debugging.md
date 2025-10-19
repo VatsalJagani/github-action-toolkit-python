@@ -1,11 +1,14 @@
-Debugging Functions
-================
+# Debugging Utilities
 
-## Debugging Class
+Debug and troubleshoot GitHub Actions workflows with directory inspection tools.
 
-The `Debugging` class provides utilities for debugging GitHub Actions workflows.
+## Overview
 
-### **`Debugging.print_directory_tree(max_level: int = 3)`**
+The `Debugging` class provides utilities for inspecting the execution environment and troubleshooting file/directory issues in GitHub Actions.
+
+## API Reference
+
+### `Debugging.print_directory_tree(max_level=3)`
 
 Prints directory and file information in tree format. This helps developers troubleshoot file or folder not found issues and understand GitHub Action's directory structure.
 

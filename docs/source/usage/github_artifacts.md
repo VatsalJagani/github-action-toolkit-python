@@ -1,9 +1,16 @@
-Github Artifact related Functions
-================
+# GitHub Artifacts
 
-### **`GitHubArtifacts(github_token=None, github_repo=None)` Class**
+Upload and download workflow artifacts for sharing data between jobs.
 
-Initializes the necessary functions and pre-requisites for artifacts related operations with robust upload/download, pattern matching, integrity checks, and error handling.
+## Overview
+
+The `GitHubArtifacts` class provides robust artifact management with upload/download capabilities, pattern matching, integrity checks, and error handling.
+
+## API Reference
+
+### `GitHubArtifacts(github_token=None, github_repo=None)`
+
+Initializes the artifact manager for GitHub Actions artifact operations.
 
 Both parameters are optional but environment variables for it needs to be present GITHUB_TOKEN and GITHUB_REPOSITORY respectively.
 
@@ -14,7 +21,7 @@ Both parameters are optional but environment variables for it needs to be presen
 >> artifacts = GitHubArtifacts()
 ```
 
-### **`GitHubArtifacts.get_artifacts(current_run_only=False, name_pattern=None)`**
+### `GitHubArtifacts.get_artifacts(current_run_only=False, name_pattern=None)`
 
 Returns a list of GitHub Actions artifacts for the current repository with optional filtering.
 
@@ -42,7 +49,7 @@ Returns a list of GitHub Actions artifacts for the current repository with optio
 # test-coverage
 ```
 
-### **`GitHubArtifacts.get_artifact(artifact_id)`**
+### `GitHubArtifacts.get_artifact(artifact_id)`
 
 Fetches a specific artifact by its ID.
 
@@ -56,7 +63,7 @@ Fetches a specific artifact by its ID.
 # running-tests
 ```
 
-### **`GitHubArtifacts.upload_artifact(name, paths=None, patterns=None, root_dir=None, retention_days=None, verify_checksum=True, max_retries=3)`**
+### `GitHubArtifacts.upload_artifact(name, paths=None, patterns=None, root_dir=None, retention_days=None, verify_checksum=True, max_retries=3)`
 
 Upload files as an artifact with pattern matching, compression, and integrity checks.
 
@@ -93,7 +100,7 @@ Returns a dictionary with artifact info including checksum.
 >> )
 ```
 
-### **`GitHubArtifacts.download_artifact(artifact, is_extract=False, extract_dir=None, verify_checksum=False, expected_checksum=None, max_retries=3)`**
+### `GitHubArtifacts.download_artifact(artifact, is_extract=False, extract_dir=None, verify_checksum=False, expected_checksum=None, max_retries=3)`
 
 Downloads a given artifact as a zip file with optional extraction and integrity verification.
 
@@ -134,7 +141,7 @@ Extracting it:
 # Folder 'artifact_running-tests' created with extracted contents.
 ```
 
-### **`GitHubArtifacts.delete_artifact(artifact, max_retries=3)`**
+### `GitHubArtifacts.delete_artifact(artifact, max_retries=3)`
 
 Deletes the given artifact from the repository with retry logic for robustness.
 

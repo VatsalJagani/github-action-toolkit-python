@@ -1,7 +1,10 @@
-Action Outputs
-=============
+# Action Outputs
 
-### **`set_output(name, value)`**
+Set outputs and manage PATH for subsequent workflow steps.
+
+## API Reference
+
+### `set_output(name, value)`
 
 Sets a step's output parameter by writing to `GITHUB_OUTPUT` environment file. Note that the step will need an `id` to be defined to later retrieve the output value.
 GitHub Actions Docs: [set_output](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter)
@@ -14,7 +17,7 @@ GitHub Actions Docs: [set_output](https://docs.github.com/en/actions/using-workf
 >> set_output("my_output", "test value")
 ```
 
-### **`add_path(path)`**
+### `add_path(path)`
 
 Prepends a directory to the system PATH for all subsequent actions in the current job. The newly added path is available in the current action and all subsequent actions.
 
