@@ -33,7 +33,7 @@
   
   '''
 # ---
-# name: test_job_summary_overwrite
+# name: test_job_summary_overwrite_snapshot
   '''
   # New content
   - New point

@@ -9,6 +9,8 @@
 from typing import Any
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 import github_action_toolkit as gat
 import github_action_toolkit.print_messages as gat_print_messages
@@ -285,13 +287,6 @@ def test_end_group(capfd: Any) -> None:
     gat.end_group()
     out, err = capfd.readouterr()
     assert out == "::endgroup::\n"
-
-
-# Property-based tests using Hypothesis for testing invariants and edge cases
-
-
-from hypothesis import given
-from hypothesis import strategies as st
 
 
 @given(st.text())
