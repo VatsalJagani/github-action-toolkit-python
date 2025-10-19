@@ -71,6 +71,12 @@ All these run together via `make lint`. It will:
 
 After `make lint`, address any remaining issues that couldn’t be auto-fixed. Prefer adding types over ignores; use `# pyright: ignore` only for justified false positives. See pyproject.toml for configured rules.
 
+For test files prefer to fix the test-cases issues first before coming to fix the linting and type-checking issues.
+As some type-checking issues are common for test-files, ignore specific rule for particular line in the test file. And if the same rule ignore needs to be ignores for more than 1 line then ignore it at file level.
+
+File level pyright ignore can be written in this format, example `# pyright: reportUnusedVariable=false`.
+Line specific pyright ignore can be written in this format, example `# pyright: ignore[reportMissingImports]`.
+
 ## Documentation (Sphinx + MyST) Guidelines
 
 This repo uses Sphinx with MyST Markdown for docs.
