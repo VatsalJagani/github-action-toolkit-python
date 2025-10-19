@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `GitHubAPIClient` - A typed GitHub API client with advanced features:
+  - Automatic rate limit detection and handling with exponential backoff
+  - Support for GitHub Enterprise Server (GHES) via custom base URL
+  - Pagination helpers for easy iteration over large result sets
+  - Conditional request support with ETag caching
+  - GraphQL query execution
+  - Built-in retry logic with configurable backoff
+  - Comprehensive error handling with `RateLimitError` and `APIError` exceptions
 
 - Added GitHubCache class for Actions cache support with following functionality:
   - save_cache: Save cache with composite keys
@@ -22,8 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retry logic with exponential backoff for all artifact operations (upload, download, delete)
 - Retention days configuration support for uploaded artifacts
 - `name_pattern` parameter to `get_artifacts()` for filtering artifacts by name pattern
-
-### Changed
 
 - `GitHubArtifacts.download_artifact()`: Added `verify_checksum`, `expected_checksum`, and `max_retries` parameters
 - `GitHubArtifacts.delete_artifact()`: Added `max_retries` parameter and improved error handling
@@ -49,8 +55,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive documentation for Job Summary API with examples
 - Added `export_variable` function as an alias for `set_env` to match Node.js @actions/core naming convention
 - Added `add_path` function to prepend directories to the system PATH for subsequent workflow steps
-
-### Changed
 
 - Enhanced all environment file operations (`GITHUB_OUTPUT`, `GITHUB_ENV`, `GITHUB_STATE`, `GITHUB_PATH`) with thread-safe atomic writes
 - Improved security with delimiter injection prevention and enhanced input validation
