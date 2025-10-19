@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 from types import TracebackType
+from urllib.parse import urlparse, urlunparse
 
 from git import Repo as GitRepo
 from github import Github
@@ -277,14 +278,26 @@ class Repo:
         :param url: Remote URL
         :param token: Authentication token to embed in URL (optional)
         """
-        if token and "github.com" in url:
-            # Inject token into GitHub URL
-            if url.startswith("https://"):
-                auth_url = url.replace("https://", f"https://x-access-token:{token}@")
+        if token:
+            # Parse URL and inject token for HTTPS URLs
+            parsed = urlparse(url)
+            if parsed.scheme == "https" and parsed.hostname == "github.com":
+                # Inject token into GitHub URL
+                auth_url = urlunparse(
+                    (
+                        parsed.scheme,
+                        f"x-access-token:{token}@{parsed.hostname}",
+                        parsed.path,
+                        parsed.params,
+                        parsed.query,
+                        parsed.fragment,
+                    )
+                )
+                info(f"Setting remote {remote} with authentication")
+                self.repo.git.remote("set-url", remote, auth_url)
             else:
-                auth_url = url
-            info(f"Setting remote {remote} with authentication")
-            self.repo.git.remote("set-url", remote, auth_url)
+                info(f"Setting remote {remote} to {url}")
+                self.repo.git.remote("set-url", remote, url)
         else:
             info(f"Setting remote {remote} to {url}")
             self.repo.git.remote("set-url", remote, url)
