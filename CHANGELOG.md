@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Fluent Job Summary Builder API (`JobSummary` class) for constructing rich GitHub Actions job summaries
+  - Support for headings, text, line breaks, and separators
+  - Support for ordered and unordered lists
+  - Support for tables with headers, rows, and advanced cell options (colspan, rowspan)
+  - Support for code blocks with optional syntax highlighting
+  - Support for images with alt text and dimensions
+  - Support for collapsible details sections
+  - Support for quotes and links
+  - Automatic content sanitization to prevent XSS attacks
+  - Size limit enforcement (1 MiB maximum)
+  - Buffer management with `write()`, `clear()`, `is_empty()`, and `stringify()` methods
+- Template API (`JobSummaryTemplate` class) with pre-built templates for:
+  - Test reports with pass/fail/skip counts
+  - Code coverage reports with per-module breakdowns
+  - Deployment reports with environment and version details
+  - Benchmark reports with performance metrics
+  - Comprehensive documentation for Job Summary API with examples
 - Added `export_variable` function as an alias for `set_env` to match Node.js @actions/core naming convention
 - Added `add_path` function to prepend directories to the system PATH for subsequent workflow steps
 
