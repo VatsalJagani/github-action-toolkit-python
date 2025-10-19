@@ -17,6 +17,8 @@ usage
 /usage/print_messages
 /usage/job_summary
 /usage/input_output
+/usage/exceptions
+/usage/signal_handling
 /usage/event_payload
 /usage/git_manager
 /usage/github_artifacts

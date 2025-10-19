@@ -12,6 +12,10 @@ This section documents all the functions provided by `github-action-toolkit`. Th
 
 * **[Input, Output, Environment Variables & States](/usage/input_output)**
 
+* **[Exception Handling](/usage/exceptions)**
+
+* **[Signal Handling & Cancellation](/usage/signal_handling)**
+
 * **[GitHub Action Event Payload](/usage/event_payload)**
 
 * **[Git Repo Functions](/usage/git_manager)**

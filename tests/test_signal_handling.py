@@ -1,8 +1,9 @@
 # pyright: reportPrivateUsage=false
 # pyright: reportUnusedVariable=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownArgumentType=false
 
 import signal
-import time
 
 import pytest
 
