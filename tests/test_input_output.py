@@ -212,35 +212,6 @@ def test_with_env_context_manager():
     os.environ.pop("EXISTING_VAR", None)
 
 
-def test_to_env_file_with_github_env(tmpdir: Any):
-    """Test to_env_file writes to GITHUB_ENV file."""
-    file = tmpdir.join("envfile")
-
-    with mock.patch.dict(os.environ, {"GITHUB_ENV": file.strpath}):
-        gat.to_env_file({"VAR1": "value1", "VAR2": 42})
-
-    content = file.read()
-    assert "VAR1<<__ENV_DELIMITER__\nvalue1\n__ENV_DELIMITER__\n" in content
-    assert "VAR2<<__ENV_DELIMITER__\n42\n__ENV_DELIMITER__\n" in content
-
-
-def test_to_env_file_with_custom_path(tmpdir: Any):
-    """Test to_env_file writes to custom file path."""
-    file = tmpdir.join("custom.env")
-
-    gat.to_env_file({"VAR1": "value1"}, file.strpath)
-
-    content = file.read()
-    assert "VAR1<<__ENV_DELIMITER__\nvalue1\n__ENV_DELIMITER__\n" in content
-
-
-@mock.patch.dict(os.environ, {}, clear=True)
-def test_to_env_file_without_github_env_raises_error():
-    """Test to_env_file raises error when GITHUB_ENV not set and no path provided."""
-    with pytest.raises(gat.EnvironmentError):
-        gat.to_env_file({"VAR1": "value1"})
-
-
 @mock.patch.dict(os.environ, {}, clear=True)
 def test_set_output_without_github_output_raises_error():
     """Test set_output raises EnvironmentError when GITHUB_OUTPUT not set."""
@@ -267,3 +238,75 @@ def test_get_workflow_environment_variables_without_github_env_raises_error():
     """Test get_workflow_environment_variables raises error when GITHUB_ENV not set."""
     with pytest.raises(gat.EnvironmentError):
         gat.get_workflow_environment_variables()
+
+
+def test_export_variable(tmpdir: Any) -> None:
+    """Test that export_variable works as an alias for set_env"""
+    file = tmpdir.join("envfile")
+
+    with mock.patch.dict(os.environ, {"GITHUB_ENV": file.strpath}):
+        gat.export_variable("test", "test_value")
+        gat.export_variable("another", 42)
+
+    assert file.read() == (
+        "test<<__ENV_DELIMITER__\n"
+        "test_value\n__ENV_DELIMITER__\n"
+        "another<<__ENV_DELIMITER__\n42\n"
+        "__ENV_DELIMITER__\n"
+    )
+
+
+def test_add_path_with_string(tmpdir: Any) -> None:
+    """Test adding a path using a string"""
+    file = tmpdir.join("pathfile")
+    test_path = "/usr/local/bin"
+
+    with mock.patch.dict(os.environ, {"GITHUB_PATH": file.strpath}):
+        gat.add_path(test_path)
+
+    assert file.read() == f"{test_path}\n"
+
+
+def test_add_path_with_pathlib(tmpdir: Any) -> None:
+    """Test adding a path using pathlib.Path"""
+    from pathlib import Path
+
+    file = tmpdir.join("pathfile")
+    test_path = Path("/opt/bin")
+
+    with mock.patch.dict(os.environ, {"GITHUB_PATH": file.strpath}):
+        gat.add_path(test_path)
+
+    assert file.read() == f"{test_path}\n"
+
+
+def test_add_path_multiple(tmpdir: Any) -> None:
+    """Test adding multiple paths"""
+    file = tmpdir.join("pathfile")
+
+    with mock.patch.dict(os.environ, {"GITHUB_PATH": file.strpath}):
+        gat.add_path("/usr/local/bin")
+        gat.add_path("/opt/bin")
+
+    assert file.read() == "/usr/local/bin\n/opt/bin\n"
+
+
+def test_add_path_relative_raises_error(tmpdir: Any) -> None:
+    """Test that relative paths raise a ValueError"""
+    file = tmpdir.join("pathfile")
+
+    with mock.patch.dict(os.environ, {"GITHUB_PATH": file.strpath}):
+        with pytest.raises(ValueError, match="must be an absolute path"):
+            gat.add_path("relative/path")
+
+
+def test_delimiter_in_value_raises_error(tmpdir: Any) -> None:
+    """Test that values containing the delimiter raise a ValueError"""
+    from github_action_toolkit.consts import ACTION_ENV_DELIMITER
+
+    file = tmpdir.join("envfile")
+    malicious_value = f"test{ACTION_ENV_DELIMITER}injection"
+
+    with mock.patch.dict(os.environ, {"GITHUB_ENV": file.strpath}):
+        with pytest.raises(ValueError, match="contains the delimiter"):
+            gat.set_env("test", malicious_value)

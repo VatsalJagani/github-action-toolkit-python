@@ -1,0 +1,52 @@
+# serializer version: 1
+# name: test_job_summary_complex_markdown
+  '''
+  
+  # GitHub Action Summary
+  
+  ## Build Results
+  - ✅ Build passed
+  - ✅ Tests passed
+  - ⚠️  Coverage at 85%
+  
+  ## Details
+  | Metric | Value |
+  |--------|-------|
+  | Tests  | 104   |
+  | Lines  | 397   |
+  
+  ### Code Quality
+  All checks passed successfully!
+  
+  
+  '''
+# ---
+# name: test_job_summary_formatting
+  '''
+  # Test Summary
+  ## Section 1
+  - Item 1
+  - Item 2
+  
+  ## Section 2
+  Some **bold** text and *italic* text.
+  
+  '''
+# ---
+# name: test_job_summary_overwrite_snapshot
+  '''
+  # New content
+  - New point
+  
+  '''
+# ---
+# name: test_job_summary_with_special_chars
+  '''
+  # Test with % percent
+  Line with 
+   newline
+  Line with 
+   carriage return
+  
+  '''
+# ---

@@ -55,19 +55,6 @@ def demo_scoped_environment():
     restored_value = os.environ.get("MY_TEMP_VAR", "not set")
     gat.info(f"After context: MY_TEMP_VAR = {restored_value}")
 
-    # Example 2: Writing multiple env vars at once
-    env_vars = {"BUILD_NUMBER": "123", "BUILD_STATUS": "success", "BUILD_TIME": "2025-10-19"}
-
-    # In a GitHub Actions context, this writes to GITHUB_ENV
-    # For demo purposes, we'll use a temp file
-    import tempfile
-
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
-        temp_file = f.name
-
-    gat.to_env_file(env_vars, temp_file)
-    gat.info(f"Written {len(env_vars)} environment variables to {temp_file}")
-
 
 def demo_cancellation_support():
     """Demonstrate graceful cancellation support."""

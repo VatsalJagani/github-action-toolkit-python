@@ -10,7 +10,6 @@ This example demonstrates the developer experience improvements including:
 
 - **Exception Handling**: Using specific exception types (`InputError`, `EnvironmentError`, `ConfigurationError`, etc.)
 - **Scoped Environment Variables**: Temporary environment variables with `with_env()` context manager
-- **Batch Environment Writing**: Writing multiple env vars at once with `to_env_file()`
 - **Cancellation Support**: Graceful shutdown with SIGTERM/SIGINT handling
 - **Actionable Error Messages**: Clear error messages that explain what went wrong and how to fix it
 

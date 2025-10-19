@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import threading
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
@@ -11,12 +12,64 @@ from .consts import ACTION_ENV_DELIMITER
 from .exceptions import EnvironmentError, InputError
 from .print_messages import echo, escape_data, escape_property, group
 
+# Thread-local lock for file operations to ensure thread-safety
+_file_locks: dict[str, threading.Lock] = {}
+_locks_lock = threading.Lock()
+
+
+def _get_file_lock(filepath: str) -> threading.Lock:
+    """Get or create a lock for a specific file path."""
+    with _locks_lock:
+        if filepath not in _file_locks:
+            _file_locks[filepath] = threading.Lock()
+        return _file_locks[filepath]
+
+
+def _write_to_file(filepath: str, content: bytes) -> None:
+    """
+    Thread-safe atomic write to a file.
+
+    :param filepath: Path to the file
+    :param content: Content to write (as bytes)
+    :raises: IOError if file cannot be written
+    """
+    lock = _get_file_lock(filepath)
+    with lock:
+        try:
+            with open(filepath, "ab") as f:
+                f.write(content)
+                f.flush()  # Ensure data is written to disk
+                os.fsync(f.fileno())  # Force write to disk for atomicity
+        except OSError as e:
+            raise OSError(f"Failed to write to {filepath}: {e}") from e
+
 
 def _build_file_input(name: str, value: Any) -> bytes:
+    """
+    Build properly formatted and escaped environment file input.
+
+    Uses heredoc-style delimiters to safely handle multi-line values.
+    Validates that the delimiter doesn't appear in the value to prevent injection.
+
+    :param name: Variable name
+    :param value: Variable value
+    :returns: Properly formatted bytes for writing to env file
+    :raises ValueError: If the delimiter appears in the value (extremely rare)
+    """
+    escaped_value = escape_data(value)
+
+    # Validate that our delimiter doesn't appear in the escaped value
+    # This is extremely unlikely but we check for safety
+    if ACTION_ENV_DELIMITER in escaped_value:
+        raise ValueError(
+            f"Value contains the delimiter '{ACTION_ENV_DELIMITER}'. "
+            "This is not supported for security reasons."
+        )
+
     return (
         f"{escape_property(name)}"
         f"<<{ACTION_ENV_DELIMITER}\n"
-        f"{escape_data(value)}\n"
+        f"{escaped_value}\n"
         f"{ACTION_ENV_DELIMITER}\n".encode()
     )
 
@@ -120,8 +173,7 @@ def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> Non
             "This function must be run in a GitHub Actions context."
         )
 
-    with open(output_file, "ab") as f:
-        f.write(_build_file_input(name, value))
+    _write_to_file(output_file, _build_file_input(name, value))
 
 
 def get_state(name: str) -> str | None:
@@ -159,8 +211,7 @@ def save_state(name: str, value: Any, use_subprocess: bool | None = None) -> Non
             "This function must be run in a GitHub Actions context."
         )
 
-    with open(state_file, "ab") as f:
-        f.write(_build_file_input(name, value))
+    _write_to_file(state_file, _build_file_input(name, value))
 
 
 def get_workflow_environment_variables() -> dict[str, Any]:
@@ -260,33 +311,31 @@ def with_env(**env_vars: str) -> Generator[None, None, None]:
                 os.environ[key] = original_value
 
 
-def to_env_file(env_vars: dict[str, Any], file_path: str | Path | None = None) -> None:
+def export_variable(name: str, value: Any) -> None:
     """
-    Write environment variables to a file in GitHub Actions format.
+    Sets an environment variable for your workflows (alias for set_env).
+    This matches the naming convention from the Node.js actions/toolkit.
 
-    If no file path is provided, writes to the GITHUB_ENV file.
-    This is useful for setting multiple environment variables at once or
-    writing to custom environment files.
-
-    Example:
-        to_env_file({"MY_VAR": "value", "ANOTHER": 123})
-        to_env_file({"MY_VAR": "value"}, "/tmp/custom.env")
-
-    :param env_vars: Dictionary of environment variables to write
-    :param file_path: Path to write to (defaults to GITHUB_ENV)
-    :raises EnvironmentError: When file_path is None and GITHUB_ENV is not set
+    :param name: name of the environment variable
+    :param value: value of the environment variable
+    :returns: None
     """
-    if file_path is None:
-        env_file = os.environ.get("GITHUB_ENV")
-        if not env_file:
-            raise EnvironmentError(
-                "GITHUB_ENV environment variable is not set and no file_path provided. "
-                "Either provide a file_path or run in a GitHub Actions context."
-            )
-        file_path = env_file
+    set_env(name, value)
 
-    target_path = Path(file_path) if isinstance(file_path, str) else file_path
 
-    with open(target_path, "ab") as f:
-        for name, value in env_vars.items():
-            f.write(_build_file_input(name, value))
+def add_path(path: str | Path) -> None:
+    """
+    Prepends a directory to the system PATH for all subsequent actions in the current job.
+    The newly added path is available in the current action and all subsequent actions.
+
+    :param path: Absolute path to add to PATH
+    :returns: None
+    """
+    path_str = str(path) if isinstance(path, Path) else path
+
+    # Validate that the path is absolute
+    if not os.path.isabs(path_str):
+        raise ValueError(f"Path '{path_str}' must be an absolute path")
+
+    # Write to GITHUB_PATH file
+    _write_to_file(os.environ["GITHUB_PATH"], f"{path_str}\n".encode())
