@@ -556,5 +556,4 @@ See [SECURITY.md](https://github.com/VatsalJagani/github-action-toolkit-python/b
 - [GitHub Actions Security Best Practices](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [Python Security Best Practices](https://python.readthedocs.io/en/stable/library/security_warnings.html)
-- {doc}`/recipes` - Secure coding patterns
-- {doc}`/usage/input_output` - Input handling reference
+

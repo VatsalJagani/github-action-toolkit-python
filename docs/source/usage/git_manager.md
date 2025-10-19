@@ -1,6 +1,9 @@
 Git and GitHub Repo related Functions
 ================
 
+**NOTE** - You can use `Repo` and `GitRepo` classes alternatively.
+
+
 ### **`Repo(url: str = None, path: str = None, cleanup: bool = False, depth: int = None, single_branch: bool = False)` Class**
 
 Initializes the Git repository with this class.

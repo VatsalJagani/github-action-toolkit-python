@@ -56,21 +56,24 @@ compare_with_js_toolkit
 :hidden:
 :caption: Guides
 
-recipes
-security
 examples
 local_development
+error_handling
+security
 ```
 
 ```{toctree}
 :maxdepth: 2
 :hidden:
-:caption: API Reference
+:caption: API Reference and Guide
 
-usage
 /usage/print_messages
+/usage/file_annotation
+/usage/input
+/usage/output
+/usage/environment_variables
 /usage/job_summary
-/usage/input_output
+/usage/job_summary_templates
 /usage/exceptions
 /usage/signal_handling
 /usage/event_payload
@@ -129,7 +132,6 @@ uv add github-action-toolkit
 ## Getting Help
 
 - {doc}`/quickstart` - Get started in minutes
-- {doc}`/recipes` - Common patterns and best practices
 - {doc}`/compare_with_js_toolkit` - Compare with @actions/toolkit
 - {doc}`/examples` - Complete example workflows
 - [GitHub Issues](https://github.com/VatsalJagani/github-action-toolkit-python/issues) - Report bugs

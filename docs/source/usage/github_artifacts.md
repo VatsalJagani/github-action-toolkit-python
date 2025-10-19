@@ -163,3 +163,72 @@ The artifact management system includes:
 * **Retention Configuration**: Set custom retention periods for artifacts
 * **Retry Logic**: Automatic retry with exponential backoff for transient failures
 * **Error Handling**: Robust handling of large files and edge cases with detailed error messages
+
+
+## Artifact Patterns
+
+### Uploading Test Results
+
+```python
+from pathlib import Path
+from github_action_toolkit import GitHubArtifacts, info
+
+def upload_test_results(results_dir: Path):
+    """Upload all test result files as artifacts."""
+    artifacts = GitHubArtifacts()
+    
+    # Upload with pattern matching
+    artifacts.upload_artifact(
+        name='test-results',
+        paths=[results_dir],
+        retention_days=30
+    )
+    
+    info(f'Uploaded test results from {results_dir}')
+```
+
+### Downloading from Previous Run
+
+```python
+from github_action_toolkit import GitHubArtifacts, info
+
+def download_previous_artifact(artifact_name: str, dest: str):
+    """Download artifact from previous workflow run."""
+    artifacts = GitHubArtifacts()
+    
+    # Get latest artifact with this name
+    artifact_list = artifacts.get_artifacts(name_pattern=artifact_name)
+    
+    if not artifact_list:
+        info(f'No artifact found: {artifact_name}')
+        return None
+    
+    latest = artifact_list[0]
+    artifacts.download_artifact(latest.id, dest)
+    info(f'Downloaded {artifact_name} to {dest}')
+    return dest
+```
+
+### Conditional Artifact Upload
+
+```python
+from github_action_toolkit import GitHubArtifacts, get_user_input_as
+
+def upload_artifacts_if_enabled():
+    """Only upload artifacts if configured."""
+    upload_artifacts = get_user_input_as(
+        'upload-artifacts',
+        bool,
+        default_value=True
+    )
+    
+    if not upload_artifacts:
+        info('Artifact upload disabled')
+        return
+    
+    artifacts = GitHubArtifacts()
+    artifacts.upload_artifact(
+        name='build-output',
+        paths=['dist/']
+    )
+```

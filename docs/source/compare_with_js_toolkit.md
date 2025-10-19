@@ -467,7 +467,7 @@ runs:
 5. **Scientific Computing**: Access to ML/AI libraries if needed
 
 
-## Example Migration
+## Example Comparison
 
 See the [examples directory](https://github.com/VatsalJagani/github-action-toolkit-python/tree/main/examples) for complete before/after examples of migrated actions.
 

@@ -219,3 +219,69 @@ except CacheRestoreError as e:
    ```python
    key = f"build-v1.2.3-{platform.system()}"
    ```
+
+## Caching Strategies
+
+### Dependency Caching
+
+```python
+from pathlib import Path
+from github_action_toolkit import GitHubCache, info
+
+def cache_dependencies(requirements_file: Path):
+    """Cache Python dependencies."""
+    cache = GitHubCache()
+    
+    # Generate cache key from requirements hash
+    key = f"python-deps-{hash_file(requirements_file)}"
+    restore_keys = ['python-deps-']  # Fallback to any python deps
+    
+    # Try to restore
+    cache_hit = cache.restore_cache(
+        paths=['.venv'],
+        key=key,
+        restore_keys=restore_keys
+    )
+    
+    if cache_hit:
+        info(f'Cache hit: {key}')
+        return True
+    
+    info('Cache miss, installing dependencies...')
+    # Install dependencies
+    install_dependencies()
+    
+    # Save for next time
+    cache.save_cache(paths=['.venv'], key=key)
+    return False
+
+def hash_file(path: Path) -> str:
+    """Generate hash of file contents."""
+    import hashlib
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:8]
+```
+
+### Build Output Caching
+
+```python
+from github_action_toolkit import GitHubCache, info
+
+def cache_build_artifacts():
+    """Cache build outputs."""
+    cache = GitHubCache()
+    
+    # Include environment in key for cross-OS safety
+    import platform
+    os_name = platform.system().lower()
+    
+    key = f'build-{os_name}-{get_git_commit_hash()}'
+    
+    try:
+        if cache.restore_cache(paths=['dist', 'build'], key=key):
+            info('Using cached build artifacts')
+            return True
+    except Exception as e:
+        info(f'Cache restore failed: {e}')
+    
+    return False
+```

@@ -215,11 +215,12 @@ print(sim.outputs)  # {"greeting": "Hello, Local Test!"}
 
 ## Next Steps
 
-- {doc}`/usage/input_output` - Learn about inputs, outputs, and environment variables
 - {doc}`/usage/print_messages` - Master console output and annotations
+- {doc}`/usage/input` - Learn about user inputs handling
+- {doc}`/usage/output` - Learn about setting outputs
+- {doc}`/usage/environment_variables` - Learn about working with environment variables
 - {doc}`/usage/job_summary` - Create rich workflow summaries
 - {doc}`/compare_with_js_toolkit` - Compare with @actions/toolkit
-- {doc}`/recipes` - Common patterns and best practices
 - {doc}`/examples` - Complete example workflows
 
 ## Getting Help

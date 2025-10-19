@@ -749,14 +749,115 @@ if __name__ == '__main__':
     raise SystemExit(main())
 ```
 
-## More Examples
+## Complete Example: Build and Test Action
 
-For more examples, see:
+Here's a complete example combining multiple patterns:
 
-- [Examples Directory](https://github.com/VatsalJagani/github-action-toolkit-python/tree/main/examples) - Complete working examples
-- {doc}`/recipes` - Code patterns and best practices
-- {doc}`/quickstart` - Getting started guide
-- {doc}`/compare_with_js_toolkit` - Examples of comparison with JS toolkit library
+```python
+"""
+Complete action that builds, tests, and reports results.
+"""
+from pathlib import Path
+from github_action_toolkit import (
+    get_user_input,
+    get_user_input_as,
+    set_output,
+    info,
+    warning,
+    error,
+    group,
+    JobSummary,
+    GitHubCache,
+    GitHubArtifacts,
+)
+
+def main():
+    # Get inputs
+    with group('Configuration'):
+        python_version = get_user_input('python-version') or '3.11'
+        coverage_threshold = get_user_input_as(
+            'coverage-threshold',
+            float,
+            default_value=80.0
+        )
+        upload_artifacts = get_user_input_as(
+            'upload-artifacts',
+            bool,
+            default_value=True
+        )
+        info(f'Python version: {python_version}')
+        info(f'Coverage threshold: {coverage_threshold}%')
+    
+    # Try cache
+    with group('Cache'):
+        cache = GitHubCache()
+        cache_hit = cache.restore_cache(
+            paths=['.venv'],
+            key=f'deps-{python_version}'
+        )
+        if not cache_hit:
+            info('Installing dependencies...')
+            # Install logic here
+            cache.save_cache(paths=['.venv'], key=f'deps-{python_version}')
+    
+    # Build
+    with group('Build'):
+        try:
+            # Build logic here
+            info('Build successful')
+            set_output('build-status', 'success')
+        except Exception as e:
+            error(f'Build failed: {e}', title='Build Error')
+            set_output('build-status', 'failure')
+            return 1
+    
+    # Test
+    with group('Test'):
+        results = run_tests()  # Your test logic
+        set_output('tests-passed', str(results['passed']))
+        set_output('tests-failed', str(results['failed']))
+    
+    # Create summary
+    summary = JobSummary()
+    summary.add_heading('Build & Test Results', 1)
+    summary.add_table([
+        ['Metric', 'Value'],
+        ['Build Status', '✓ Success'],
+        ['Tests Passed', str(results['passed'])],
+        ['Tests Failed', str(results['failed'])],
+        ['Coverage', f"{results['coverage']:.1f}%"],
+    ])
+    
+    if results['coverage'] < coverage_threshold:
+        warning(
+            f"Coverage {results['coverage']:.1f}% is below "
+            f"threshold {coverage_threshold}%",
+            title='Low Coverage'
+        )
+        summary.add_quote(
+            f"⚠️ Coverage below threshold: "
+            f"{results['coverage']:.1f}% < {coverage_threshold}%"
+        )
+    
+    summary.write()
+    
+    # Upload artifacts
+    if upload_artifacts:
+        with group('Artifacts'):
+            artifacts = GitHubArtifacts()
+            artifacts.upload_artifact(
+                name='test-results',
+                paths=['test-results/'],
+                retention_days=30
+            )
+            info('Uploaded test results')
+    
+    return 0
+
+if __name__ == '__main__':
+    raise SystemExit(main())
+```
+
 
 ## Contributing Examples
 

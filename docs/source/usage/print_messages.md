@@ -168,3 +168,53 @@ GitHub Actions Docs: [group](https://docs.github.com/en/actions/using-workflows/
 # Hello World
 # ::endgroup::
 ```
+
+
+## Grouping and Organization
+
+### Progress Groups
+
+```python
+from github_action_toolkit import group, info
+
+stages = ['setup', 'build', 'test', 'deploy']
+
+for stage in stages:
+    with group(f'Stage: {stage}'):
+        info(f'Starting {stage}...')
+        # Do work
+        info(f'Completed {stage}')
+```
+
+### Nested Groups
+
+```python
+from github_action_toolkit import group, info
+
+with group('Build Process'):
+    info('Starting build...')
+    
+    with group('Compile Source'):
+        info('Compiling main.py...')
+        info('Compiling utils.py...')
+    
+    with group('Run Tests'):
+        info('Running unit tests...')
+        info('Running integration tests...')
+    
+    info('Build complete!')
+```
+
+### Conditional Groups
+
+```python
+from github_action_toolkit import group, info, get_user_input_as
+
+verbose = get_user_input_as('verbose', bool, default_value=False)
+
+if verbose:
+    with group('Detailed Information'):
+        info('Python version: 3.11')
+        info('Platform: Linux')
+        info('Working directory: /home/runner/work')
+```
