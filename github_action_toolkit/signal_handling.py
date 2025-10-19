@@ -11,107 +11,101 @@ import signal
 from collections.abc import Callable
 from typing import Any
 
+from .exceptions import CancellationRequested
 from .print_messages import warning
 
 
-class CancellationRequested(Exception):
+class CancellationHandler:
     """
-    Raised when a cancellation signal (SIGTERM, SIGINT) is received.
+    Unified handler for managing cancellation signals in GitHub Actions workflows.
 
-    This allows code to handle cancellation gracefully by catching this exception.
+    Provides methods to enable/disable signal handling, register cleanup handlers,
+    and check cancellation status.
     """
 
+    def __init__(self) -> None:
+        self._handlers: list[Callable[[], None]] = []
+        self._original_handlers: dict[signal.Signals, Any] = {}
+        self._enabled: bool = False
 
-_cancellation_handlers: list[Callable[[], None]] = []
-_original_handlers: dict[signal.Signals, Any] = {}
-_cancellation_registered = False
+    def register(self, handler: Callable[[], None]) -> None:
+        """
+        Register a handler to be called on cancellation.
 
+        The handler will be called when SIGTERM or SIGINT is received, before
+        raising CancellationRequested. Handlers should perform cleanup operations.
 
-def _handle_cancellation_signal(signum: int, frame: Any) -> None:  # pyright: ignore[reportUnusedParameter]
-    """Handle cancellation signals by calling registered handlers and raising exception."""
-    signal_name = signal.Signals(signum).name
-    warning(f"Received {signal_name} signal. Initiating graceful shutdown...")
+        Example:
+            def cleanup():
+                print("Cleaning up resources...")
 
-    for handler in _cancellation_handlers:
-        try:
-            handler()
-        except Exception as e:  # noqa: BLE001
-            warning(f"Error in cancellation handler: {e}")
+            cancellation.register(cleanup)
 
-    raise CancellationRequested(f"Operation cancelled by {signal_name} signal")
+        :param handler: Function to call on cancellation (takes no arguments)
+        """
+        self._handlers.append(handler)
 
+    def enable(self) -> None:
+        """
+        Enable automatic handling of cancellation signals.
 
-def register_cancellation_handler(handler: Callable[[], None]) -> None:
-    """
-    Register a handler to be called on cancellation.
+        Sets up signal handlers for SIGTERM and SIGINT that will:
+        1. Call all registered cancellation handlers
+        2. Raise CancellationRequested exception
 
-    The handler will be called when SIGTERM or SIGINT is received, before
-    raising CancellationRequested. Handlers should perform cleanup operations.
+        This allows code to gracefully handle cancellation in GitHub Actions workflows.
 
-    Example:
-        def cleanup():
-            print("Cleaning up resources...")
+        Example:
+            cancellation = CancellationHandler()
+            cancellation.enable()
+            try:
+                # Your long-running operation
+                pass
+            except CancellationRequested:
+                print("Operation was cancelled")
+        """
+        if self._enabled:
+            return
 
-        register_cancellation_handler(cleanup)
+        self._original_handlers[signal.SIGTERM] = signal.signal(signal.SIGTERM, self._handle_signal)
+        self._original_handlers[signal.SIGINT] = signal.signal(signal.SIGINT, self._handle_signal)
 
-    :param handler: Function to call on cancellation (takes no arguments)
-    """
-    _cancellation_handlers.append(handler)
+        self._enabled = True
 
+    def disable(self) -> None:
+        """
+        Disable automatic handling of cancellation signals.
 
-def enable_cancellation_support() -> None:
-    """
-    Enable automatic handling of cancellation signals.
+        Restores original signal handlers. Useful for testing or when you need
+        to temporarily disable cancellation handling.
+        """
+        if not self._enabled:
+            return
 
-    Sets up signal handlers for SIGTERM and SIGINT that will:
-    1. Call all registered cancellation handlers
-    2. Raise CancellationRequested exception
+        for sig, original_handler in self._original_handlers.items():
+            if original_handler is not None:
+                signal.signal(sig, original_handler)
 
-    This allows code to gracefully handle cancellation in GitHub Actions workflows.
+        self._original_handlers.clear()
+        self._enabled = False
 
-    Example:
-        enable_cancellation_support()
-        try:
-            # Your long-running operation
-            pass
-        except CancellationRequested:
-            print("Operation was cancelled")
-    """
-    global _cancellation_registered  # noqa: PLW0603
+    def is_enabled(self) -> bool:
+        """
+        Check if cancellation support is currently enabled.
 
-    if _cancellation_registered:
-        return
+        :returns: True if cancellation handlers are registered, False otherwise
+        """
+        return self._enabled
 
-    _original_handlers[signal.SIGTERM] = signal.signal(signal.SIGTERM, _handle_cancellation_signal)
-    _original_handlers[signal.SIGINT] = signal.signal(signal.SIGINT, _handle_cancellation_signal)
+    def _handle_signal(self, signum: int, frame: Any) -> None:  # pyright: ignore[reportUnusedParameter]
+        """Handle cancellation signals by calling registered handlers and raising exception."""
+        signal_name = signal.Signals(signum).name
+        warning(f"Received {signal_name} signal. Initiating graceful shutdown...")
 
-    _cancellation_registered = True
+        for handler in self._handlers:
+            try:
+                handler()
+            except Exception as e:  # noqa: BLE001
+                warning(f"Error in cancellation handler: {e}")
 
-
-def disable_cancellation_support() -> None:
-    """
-    Disable automatic handling of cancellation signals.
-
-    Restores original signal handlers. Useful for testing or when you need
-    to temporarily disable cancellation handling.
-    """
-    global _cancellation_registered  # noqa: PLW0603
-
-    if not _cancellation_registered:
-        return
-
-    for sig, original_handler in _original_handlers.items():
-        if original_handler is not None:
-            signal.signal(sig, original_handler)
-
-    _original_handlers.clear()
-    _cancellation_registered = False
-
-
-def is_cancellation_enabled() -> bool:
-    """
-    Check if cancellation support is currently enabled.
-
-    :returns: True if cancellation handlers are registered, False otherwise
-    """
-    return _cancellation_registered
+        raise CancellationRequested(f"Operation cancelled by {signal_name} signal")

@@ -16,11 +16,8 @@ from unittest.mock import Mock, patch
 import pytest
 from github import GithubException
 
-from github_action_toolkit.github_api_client import (
-    APIError,
-    GitHubAPIClient,
-    RateLimitError,
-)
+from github_action_toolkit.exceptions import APIError, RateLimitError
+from github_action_toolkit.github_api_client import GitHubAPIClient
 
 
 @pytest.fixture

@@ -11,7 +11,7 @@ class GitHubActionError(Exception):
     """Base exception for all github-action-toolkit errors."""
 
 
-class EnvironmentError(GitHubActionError):
+class EnvironmentVariableError(GitHubActionError):
     """
     Raised when required environment variables are missing or invalid.
 
@@ -51,3 +51,39 @@ class ConfigurationError(GitHubActionError):
 
     This occurs when required configuration parameters are missing or invalid.
     """
+
+
+class CacheNotFoundError(GitHubActionError):
+    """Raised when a cache entry is not found."""
+
+
+class CacheRestoreError(GitHubActionError):
+    """Raised when cache restoration fails."""
+
+
+class CacheSaveError(GitHubActionError):
+    """Raised when cache save fails."""
+
+
+class CancellationRequested(GitHubActionError):
+    """
+    Raised when a cancellation signal (SIGTERM, SIGINT) is received.
+
+    This allows code to handle cancellation gracefully by catching this exception.
+    """
+
+
+class RateLimitError(GitHubActionError):
+    """Raised when GitHub API rate limit is exceeded."""
+
+    def __init__(self, reset_time: int | None = None):
+        self.reset_time: int | None = reset_time
+        super().__init__("GitHub API rate limit exceeded")
+
+
+class APIError(GitHubActionError):
+    """Raised when GitHub API returns an error."""
+
+    def __init__(self, status_code: int, message: str):
+        self.status_code: int = status_code
+        super().__init__(f"GitHub API error ({status_code}): {message}")

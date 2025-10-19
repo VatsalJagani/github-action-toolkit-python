@@ -119,7 +119,7 @@ def demo_actionable_errors():
 
     try:
         gat.set_output("test", "value")
-    except gat.EnvironmentError as e:
+    except gat.EnvironmentVariableError as e:
         gat.warning("Got expected environment error:")
         gat.info(f"  {e}")
         # Error message explains the requirement and solution

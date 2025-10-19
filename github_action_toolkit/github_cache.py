@@ -8,17 +8,7 @@ from pathlib import Path
 
 import requests
 
-
-class CacheNotFoundError(Exception):
-    """Raised when a cache entry is not found."""
-
-
-class CacheRestoreError(Exception):
-    """Raised when cache restoration fails."""
-
-
-class CacheSaveError(Exception):
-    """Raised when cache save fails."""
+from .exceptions import CacheNotFoundError, CacheRestoreError, CacheSaveError
 
 
 class GitHubCache:

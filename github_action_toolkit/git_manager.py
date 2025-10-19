@@ -8,7 +8,7 @@ from pathlib import Path
 from types import TracebackType
 from urllib.parse import urlparse, urlunparse
 
-from git import Repo as GitRepo
+from git import Repo as GitPythonRepo
 from github import Github
 
 from .exceptions import ConfigurationError, GitHubAPIError, GitOperationError
@@ -18,7 +18,7 @@ from .print_messages import info, warning
 class Repo:
     url: str | None
     repo_path: str
-    repo: GitRepo
+    repo: GitPythonRepo
     base_branch: str
     cleanup: bool
 
@@ -58,10 +58,10 @@ class Repo:
                     clone_kwargs["depth"] = depth
                 if single_branch:
                     clone_kwargs["single_branch"] = single_branch
-                self.repo = GitRepo.clone_from(url, self.repo_path, **clone_kwargs)  # pyright: ignore[reportUnknownArgumentType]
+                self.repo = GitPythonRepo.clone_from(url, self.repo_path, **clone_kwargs)  # pyright: ignore[reportUnknownArgumentType]
             else:
                 info(f"Using existing repository at {self.repo_path}")
-                self.repo = GitRepo(path)
+                self.repo = GitPythonRepo(path)
         except Exception as e:
             raise GitOperationError(
                 f"Failed to initialize repository: {e}. "
@@ -582,3 +582,7 @@ class Repo:
             self.repo.git.pull("origin", current_base)
         except Exception as exc:  # noqa: BLE001
             info(f"Pull failed: {exc}")
+
+
+# Alias for backward compatibility and convenience
+GitRepo = Repo

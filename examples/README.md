@@ -8,7 +8,7 @@ This directory contains example code demonstrating the features of `github-actio
 
 This example demonstrates the developer experience improvements including:
 
-- **Exception Handling**: Using specific exception types (`InputError`, `EnvironmentError`, `ConfigurationError`, etc.)
+- **Exception Handling**: Using specific exception types (`InputError`, `EnvironmentVariableError`, `ConfigurationError`, etc.)
 - **Scoped Environment Variables**: Temporary environment variables with `with_env()` context manager
 - **Cancellation Support**: Graceful shutdown with SIGTERM/SIGINT handling
 - **Actionable Error Messages**: Clear error messages that explain what went wrong and how to fix it

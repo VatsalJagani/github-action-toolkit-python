@@ -5,24 +5,27 @@ GitHub Action Event Payload
 
 The event payload module provides tools to work with GitHub Actions event data, including:
 
-- Raw event payload access
+- The `EventPayload` class for accessing event data
 - Strongly typed event models using Pydantic
-- Convenience helper functions for common event operations
+- Convenience helper methods for common event operations
 
 More details: [GitHub Actions Event Payload](https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads)
 
-## Raw Event Payload
+## EventPayload Class
 
-### **`event_payload()`**
+The `EventPayload` class provides a unified interface for accessing GitHub Actions event data.
+
+### **`get_payload()`**
 
 Get GitHub Event payload that triggered the workflow as a dictionary.
 
 **example:**
 
 ```python
-from github_action_toolkit import event_payload
+from github_action_toolkit import EventPayload
 
-payload = event_payload()
+event = EventPayload()
+payload = event.get_payload()
 # Output:
 # {"action": "opened", "number": 1, "pull_request": {...}, "repository": {...}, "sender": {...}}
 ```
@@ -34,9 +37,10 @@ Get the name of the event that triggered the workflow.
 **example:**
 
 ```python
-from github_action_toolkit import get_event_name
+from github_action_toolkit import EventPayload
 
-event_name = get_event_name()
+event = EventPayload()
+event_name = event.get_event_name()
 # Returns: "push", "pull_request", "issue_comment", etc.
 ```
 
@@ -55,21 +59,23 @@ Supported event types:
 **example:**
 
 ```python
-from github_action_toolkit import get_typed_event, PushEvent, PullRequestEvent
+from github_action_toolkit import EventPayload
+from github_action_toolkit.event_models import PushEvent, PullRequestEvent
 
-event = get_typed_event()
+event = EventPayload()
+typed_event = event.get_typed_event()
 
-if isinstance(event, PushEvent):
-    print(f"Push to {event.ref}")
-    print(f"Commits: {len(event.commits)}")
-elif isinstance(event, PullRequestEvent):
-    print(f"PR #{event.number}: {event.pull_request.title}")
-    print(f"Action: {event.action}")
+if isinstance(typed_event, PushEvent):
+    print(f"Push to {typed_event.ref}")
+    print(f"Commits: {len(typed_event.commits)}")
+elif isinstance(typed_event, PullRequestEvent):
+    print(f"PR #{typed_event.number}: {typed_event.pull_request.title}")
+    print(f"Action: {typed_event.action}")
 ```
 
 ### Event Model Classes
 
-The following typed models are available:
+The following typed models are available from `github_action_toolkit.event_models`:
 
 - `PushEvent` - Push events with commits, refs, and change information
 - `PullRequestEvent` - Pull request events with PR details, labels, reviewers
@@ -86,6 +92,18 @@ Supporting models:
 - `Comment` - Comment on issue or PR
 - `WorkflowRun` - Workflow run details
 
+**Note:** These models are imported from `github_action_toolkit.event_models`:
+
+```python
+from github_action_toolkit.event_models import (
+    PushEvent,
+    PullRequestEvent,
+    Actor,
+    Repository,
+    # ... other models
+)
+```
+
 ## Convenience Helpers
 
 ### **`is_pr()`**
@@ -95,9 +113,10 @@ Check if the current event is a pull request event.
 **example:**
 
 ```python
-from github_action_toolkit import is_pr
+from github_action_toolkit import EventPayload
 
-if is_pr():
+event = EventPayload()
+if event.is_pr():
     print("This is a pull request event")
 ```
 
@@ -108,9 +127,10 @@ Get the pull request number for PR events.
 **example:**
 
 ```python
-from github_action_toolkit import get_pr_number
+from github_action_toolkit import EventPayload
 
-pr_number = get_pr_number()
+event = EventPayload()
+pr_number = event.get_pr_number()
 if pr_number:
     print(f"PR number: {pr_number}")
 ```
@@ -125,9 +145,10 @@ Get the head reference for the event.
 **example:**
 
 ```python
-from github_action_toolkit import head_ref
+from github_action_toolkit import EventPayload
 
-ref = head_ref()
+event = EventPayload()
+ref = event.head_ref()
 print(f"Head ref: {ref}")
 ```
 
@@ -138,9 +159,10 @@ Get the base reference for pull request events.
 **example:**
 
 ```python
-from github_action_toolkit import base_ref
+from github_action_toolkit import EventPayload
 
-ref = base_ref()
+event = EventPayload()
+ref = event.base_ref()
 if ref:
     print(f"Base ref: {ref}")
 ```
@@ -152,9 +174,10 @@ Get the list of changed files for push events.
 **example:**
 
 ```python
-from github_action_toolkit import get_changed_files
+from github_action_toolkit import EventPayload
 
-files = get_changed_files()
+event = EventPayload()
+files = event.get_changed_files()
 for file in files:
     print(f"Changed: {file}")
 ```
@@ -166,9 +189,10 @@ Get the list of labels for pull request or issue events.
 **example:**
 
 ```python
-from github_action_toolkit import get_labels
+from github_action_toolkit import EventPayload
 
-labels = get_labels()
+event = EventPayload()
+labels = event.get_labels()
 if "bug" in labels:
     print("This is a bug fix")
 ```
@@ -176,45 +200,38 @@ if "bug" in labels:
 ## Complete Example
 
 ```python
-from github_action_toolkit import (
-    get_event_name,
-    get_typed_event,
-    is_pr,
-    get_pr_number,
-    head_ref,
-    base_ref,
-    get_labels,
-    get_changed_files,
-    PushEvent,
-    PullRequestEvent,
-)
+from github_action_toolkit import EventPayload
+from github_action_toolkit.event_models import PushEvent, PullRequestEvent
+
+# Create event instance
+event = EventPayload()
 
 # Get event information
-event_name = get_event_name()
+event_name = event.get_event_name()
 print(f"Event: {event_name}")
 
 # Use typed event models
-event = get_typed_event()
+typed_event = event.get_typed_event()
 
-if isinstance(event, PushEvent):
-    print(f"Push to {event.ref}")
-    print(f"Before: {event.before}")
-    print(f"After: {event.after}")
+if isinstance(typed_event, PushEvent):
+    print(f"Push to {typed_event.ref}")
+    print(f"Before: {typed_event.before}")
+    print(f"After: {typed_event.after}")
     
-    files = get_changed_files()
+    files = event.get_changed_files()
     print(f"Changed files: {', '.join(files)}")
 
-elif isinstance(event, PullRequestEvent):
-    print(f"PR #{event.number}: {event.pull_request.title}")
-    print(f"Action: {event.action}")
-    print(f"Head: {head_ref()}")
-    print(f"Base: {base_ref()}")
+elif isinstance(typed_event, PullRequestEvent):
+    print(f"PR #{typed_event.number}: {typed_event.pull_request.title}")
+    print(f"Action: {typed_event.action}")
+    print(f"Head: {event.head_ref()}")
+    print(f"Base: {event.base_ref()}")
     
-    labels = get_labels()
+    labels = event.get_labels()
     print(f"Labels: {', '.join(labels)}")
 
-# Use helper functions
-if is_pr():
-    pr_num = get_pr_number()
+# Use helper methods
+if event.is_pr():
+    pr_num = event.get_pr_number()
     print(f"Working on PR #{pr_num}")
 ```

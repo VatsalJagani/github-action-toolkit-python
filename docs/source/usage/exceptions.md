@@ -3,6 +3,25 @@ Exception Handling
 
 The toolkit provides a comprehensive exception taxonomy for better error handling and debugging. All exceptions inherit from `GitHubActionError`.
 
+**Note:** All exceptions can be imported from `github_action_toolkit.exceptions`:
+
+```python
+from github_action_toolkit.exceptions import (
+    GitHubActionError,
+    EnvironmentVariableError,
+    InputError,
+    GitOperationError,
+    GitHubAPIError,
+    ConfigurationError,
+    CacheNotFoundError,
+    CacheRestoreError,
+    CacheSaveError,
+    CancellationRequested,
+    RateLimitError,
+    APIError,
+)
+```
+
 ## Exception Hierarchy
 
 ### **`GitHubActionError`**
@@ -12,7 +31,8 @@ Base exception for all github-action-toolkit errors. You can catch this to handl
 **example:**
 
 ```python
-from github_action_toolkit import GitHubActionError, set_output
+from github_action_toolkit import set_output
+from github_action_toolkit.exceptions import GitHubActionError
 
 try:
     set_output("my_output", "value")
@@ -20,18 +40,19 @@ except GitHubActionError as e:
     print(f"Toolkit error: {e}")
 ```
 
-### **`EnvironmentError`**
+### **`EnvironmentVariableError`**
 
 Raised when required environment variables are missing or invalid. This typically occurs when the toolkit is not running in a GitHub Actions context or required environment variables are not set.
 
 **example:**
 
 ```python
-from github_action_toolkit import EnvironmentError, set_output
+from github_action_toolkit import set_output
+from github_action_toolkit.exceptions import EnvironmentVariableError
 
 try:
     set_output("my_output", "value")
-except EnvironmentError as e:
+except EnvironmentVariableError as e:
     print(f"Missing environment variable: {e}")
     # Error message: "GITHUB_OUTPUT environment variable is not set..."
 ```
@@ -43,7 +64,8 @@ Raised when user input is invalid or cannot be parsed. This occurs when converti
 **example:**
 
 ```python
-from github_action_toolkit import InputError, get_user_input_as
+from github_action_toolkit import get_user_input_as
+from github_action_toolkit.exceptions import InputError
 
 try:
     port = get_user_input_as("port", int)
@@ -59,7 +81,8 @@ Raised when git operations fail. This occurs during repository operations like c
 **example:**
 
 ```python
-from github_action_toolkit import GitOperationError, Repo
+from github_action_toolkit import Repo
+from github_action_toolkit.exceptions import GitOperationError
 
 try:
     repo = Repo(url="https://invalid-url.com/repo.git")
@@ -74,7 +97,8 @@ Raised when GitHub API operations fail. This occurs when interacting with GitHub
 **example:**
 
 ```python
-from github_action_toolkit import GitHubAPIError, GitHubArtifacts
+from github_action_toolkit import GitHubArtifacts
+from github_action_toolkit.exceptions import GitHubAPIError
 
 try:
     artifacts = GitHubArtifacts(github_token="invalid_token")
@@ -89,7 +113,8 @@ Raised when configuration is invalid or incomplete. This occurs when required co
 **example:**
 
 ```python
-from github_action_toolkit import ConfigurationError, Repo
+from github_action_toolkit import Repo
+from github_action_toolkit.exceptions import ConfigurationError
 
 try:
     repo = Repo()  # Neither url nor path provided
@@ -105,12 +130,11 @@ except ConfigurationError as e:
 Catch specific exception types to handle different error scenarios appropriately:
 
 ```python
-from github_action_toolkit import (
-    EnvironmentError,
+from github_action_toolkit import get_user_input_as, set_output
+from github_action_toolkit.exceptions import (
+    EnvironmentVariableError,
     InputError,
     ConfigurationError,
-    get_user_input_as,
-    set_output,
 )
 
 try:
@@ -119,7 +143,7 @@ try:
 except InputError as e:
     print(f"Invalid timeout input: {e}")
     # Provide default or exit
-except EnvironmentError as e:
+except EnvironmentVariableError as e:
     print(f"Not running in GitHub Actions: {e}")
     # Handle non-GitHub Actions environment
 except Exception as e:
@@ -135,7 +159,8 @@ All exceptions provide actionable error messages that explain:
 - How to fix it
 
 ```python
-from github_action_toolkit import GitHubArtifacts, ConfigurationError
+from github_action_toolkit import GitHubArtifacts
+from github_action_toolkit.exceptions import ConfigurationError
 
 try:
     artifacts = GitHubArtifacts(github_repo="invalid")
@@ -143,4 +168,59 @@ except ConfigurationError as e:
     # Error message includes: "github_repo must be in 'owner/repo' format, got 'invalid'"
     # and suggests: "Example: 'octocat/hello-world'"
     print(e)
+```
+
+### Cache-Related Exceptions
+
+The toolkit also provides specialized exceptions for cache operations:
+
+- **`CacheNotFoundError`** - Raised when a cache entry is not found
+- **`CacheRestoreError`** - Raised when cache restoration fails
+- **`CacheSaveError`** - Raised when cache save fails
+
+```python
+from github_action_toolkit import GitHubCache
+from github_action_toolkit.exceptions import CacheNotFoundError, CacheSaveError
+
+cache = GitHubCache()
+
+try:
+    cache.save_cache(["node_modules"], "npm-cache-v1")
+except CacheSaveError as e:
+    print(f"Failed to save cache: {e}")
+```
+
+### API-Related Exceptions
+
+- **`APIError`** - Raised when GitHub API returns an error
+- **`RateLimitError`** - Raised when GitHub API rate limit is exceeded
+
+```python
+from github_action_toolkit import GitHubAPIClient
+from github_action_toolkit.exceptions import APIError, RateLimitError
+
+try:
+    client = GitHubAPIClient()
+    repo = client.get_repository("owner/repo")
+except RateLimitError as e:
+    print(f"Rate limit exceeded. Resets at: {e.reset_time}")
+except APIError as e:
+    print(f"API error {e.status_code}: {e}")
+```
+
+### Cancellation Exception
+
+- **`CancellationRequested`** - Raised when a cancellation signal (SIGTERM, SIGINT) is received
+
+```python
+from github_action_toolkit import enable_cancellation_support
+from github_action_toolkit.exceptions import CancellationRequested
+
+enable_cancellation_support()
+
+try:
+    # Your long-running operation
+    pass
+except CancellationRequested:
+    print("Operation cancelled gracefully")
 ```

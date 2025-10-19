@@ -1,16 +1,20 @@
 Debugging Functions
 ================
 
-### **`print_directory_tree(max_level: int = 3)`**
+## Debugging Class
 
-Prints directory and file information in tree manner. This will help developer troubleshoot file or folder not found issues and help understand GitHub action's directory structure.
+The `Debugging` class provides utilities for debugging GitHub Actions workflows.
+
+### **`Debugging.print_directory_tree(max_level: int = 3)`**
+
+Prints directory and file information in tree format. This helps developers troubleshoot file or folder not found issues and understand GitHub Action's directory structure.
 
 **example:**
 
 ```python
->> from github_action_toolkit import print_directory_tree
+from github_action_toolkit import Debugging
 
->> print_directory_tree()
+Debugging.print_directory_tree()
 
 # Output:
 # > Group - DEBUG: Printing Directory Structure. CWD="/root/github-action-toolkit-python"
@@ -41,7 +45,7 @@ Prints directory and file information in tree manner. This will help developer t
 # │   ├── test_job_summary.py
 # │   ├── test_print_messages.py
 
->> print_directory_tree(max_level=1)
+Debugging.print_directory_tree(max_level=1)
 
 # Output:
 # > Group - DEBUG: Printing Directory Structure. CWD="/root/github-action-toolkit-python"

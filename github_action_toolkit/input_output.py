@@ -9,7 +9,7 @@ from typing import Any
 from warnings import warn
 
 from .consts import ACTION_ENV_DELIMITER
-from .exceptions import EnvironmentError, InputError
+from .exceptions import EnvironmentVariableError, InputError
 from .print_messages import echo, escape_data, escape_property, group
 
 # Thread-local lock for file operations to ensure thread-safety
@@ -156,7 +156,7 @@ def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> Non
     :param name: name of the output
     :param value: value of the output
     :returns: None
-    :raises EnvironmentError: When GITHUB_OUTPUT environment variable is not set
+    :raises EnvironmentVariableError: When GITHUB_OUTPUT environment variable is not set
     """
     if use_subprocess is not None:
         warn(
@@ -168,7 +168,7 @@ def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> Non
 
     output_file = os.environ.get("GITHUB_OUTPUT")
     if not output_file:
-        raise EnvironmentError(
+        raise EnvironmentVariableError(
             "GITHUB_OUTPUT environment variable is not set. "
             "This function must be run in a GitHub Actions context."
         )
@@ -194,7 +194,7 @@ def save_state(name: str, value: Any, use_subprocess: bool | None = None) -> Non
     :param name: Name of the state environment variable (e.g: STATE_{name})
     :param value: value of the state environment variable
     :returns: None
-    :raises EnvironmentError: When GITHUB_STATE environment variable is not set
+    :raises EnvironmentVariableError: When GITHUB_STATE environment variable is not set
     """
     if use_subprocess is not None:
         warn(
@@ -206,7 +206,7 @@ def save_state(name: str, value: Any, use_subprocess: bool | None = None) -> Non
 
     state_file = os.environ.get("GITHUB_STATE")
     if not state_file:
-        raise EnvironmentError(
+        raise EnvironmentVariableError(
             "GITHUB_STATE environment variable is not set. "
             "This function must be run in a GitHub Actions context."
         )
@@ -219,11 +219,11 @@ def get_workflow_environment_variables() -> dict[str, Any]:
     get a dictionary of all environment variables set in the GitHub Actions workflow.
 
     :returns: dictionary of all environment variables
-    :raises EnvironmentError: When GITHUB_ENV environment variable is not set
+    :raises EnvironmentVariableError: When GITHUB_ENV environment variable is not set
     """
     env_file = os.environ.get("GITHUB_ENV")
     if not env_file:
-        raise EnvironmentError(
+        raise EnvironmentVariableError(
             "GITHUB_ENV environment variable is not set. "
             "This function must be run in a GitHub Actions context."
         )
@@ -264,11 +264,11 @@ def set_env(name: str, value: Any) -> None:
     :param name: name of the environment variable
     :param value: value of the environment variable
     :returns: None
-    :raises EnvironmentError: When GITHUB_ENV environment variable is not set
+    :raises EnvironmentVariableError: When GITHUB_ENV environment variable is not set
     """
     env_file = os.environ.get("GITHUB_ENV")
     if not env_file:
-        raise EnvironmentError(
+        raise EnvironmentVariableError(
             "GITHUB_ENV environment variable is not set. "
             "This function must be run in a GitHub Actions context."
         )

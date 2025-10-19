@@ -12,7 +12,7 @@ from github.Artifact import Artifact
 from github.PaginatedList import PaginatedList
 from github.Repository import Repository
 
-from .exceptions import ConfigurationError, EnvironmentError, GitHubAPIError
+from .exceptions import ConfigurationError, EnvironmentVariableError, GitHubAPIError
 
 
 class GitHubArtifacts:
@@ -35,7 +35,7 @@ class GitHubArtifacts:
         :param github_token: GitHub token with repo access (optional, defaults to env variable)
         :param github_repo: Repository in 'owner/repo' format (optional, defaults to env variable)
         :raises ConfigurationError: When required configuration is missing or invalid
-        :raises EnvironmentError: When required environment variables are not set
+        :raises EnvironmentVariableError: When required environment variables are not set
         :raises GitHubAPIError: When GitHub API operations fail
         """
         _token = github_token or os.environ.get("GITHUB_TOKEN")
@@ -55,7 +55,7 @@ class GitHubArtifacts:
         elif os.environ.get("GITHUB_REPOSITORY"):
             github_repo = os.environ.get("GITHUB_REPOSITORY")
         if not github_repo:
-            raise EnvironmentError(
+            raise EnvironmentVariableError(
                 "GitHub repository not provided and GITHUB_REPOSITORY not set in environment. "
                 "Provide github_repo parameter or run in GitHub Actions context."
             )
@@ -64,7 +64,7 @@ class GitHubArtifacts:
         if _a_run_id:
             self.action_run_id = _a_run_id
         else:
-            raise EnvironmentError(
+            raise EnvironmentVariableError(
                 "GITHUB_RUN_ID not set in environment. "
                 "This class must be used in a GitHub Actions workflow context."
             )
