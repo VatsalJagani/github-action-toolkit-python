@@ -341,3 +341,60 @@ def test_escape_data_with_numbers(num: int) -> None:
     result = gat_print_messages.escape_data(str(num))
     assert isinstance(result, str)
     assert str(num) in result or gat_print_messages.escape_data(str(num)) == result
+
+
+# Additional property-based tests
+
+
+@given(st.lists(st.text(), min_size=0, max_size=10))
+def test_make_string_with_lists(items: list[str]) -> None:
+    """Property test: _make_string handles lists correctly."""
+    result = gat_print_messages._make_string(items)
+    assert isinstance(result, str)
+    assert result.startswith("[") and result.endswith("]")
+
+
+@given(st.dictionaries(st.text(min_size=1, max_size=20), st.integers(), min_size=0, max_size=5))
+def test_make_string_with_dicts(data: dict[str, int]) -> None:
+    """Property test: _make_string handles dictionaries correctly."""
+    result = gat_print_messages._make_string(data)
+    assert isinstance(result, str)
+    assert result.startswith("{") and result.endswith("}")
+
+
+@given(st.text(alphabet=st.characters(blacklist_characters="%\r\n")))
+def test_escape_data_with_safe_text(text: str) -> None:
+    """Property test: escape_data preserves text without special chars."""
+    result = gat_print_messages.escape_data(text)
+    assert result == text
+
+
+@given(st.text(alphabet=st.characters(blacklist_characters="%\r\n:,")))
+def test_escape_property_with_safe_text(text: str) -> None:
+    """Property test: escape_property preserves text without special chars."""
+    result = gat_print_messages.escape_property(text)
+    assert result == text
+
+
+@given(st.text(alphabet=st.characters(blacklist_characters="%\r\n")))
+def test_escape_data_preserves_already_escaped(text: str) -> None:
+    """Property test: text without special chars doesn't change when escaped."""
+    result = gat_print_messages.escape_data(text)
+    # Since text has no special chars, it should remain the same
+    assert result == text
+
+
+@given(
+    st.text(min_size=1, max_size=50),
+    st.text(min_size=0, max_size=50),
+    st.text(min_size=0, max_size=50),
+)
+def test_build_options_string_with_various_values(key: str, val1: str, val2: str) -> None:
+    """Property test: _build_options_string handles various inputs."""
+    result = gat_print_messages._build_options_string(**{key: val1, f"{key}_2": val2})
+    assert isinstance(result, str)
+    # Should contain camelCased keys
+    if val1:
+        assert gat_print_messages._to_camel_case(key) in result or "=" in result
+    if val2:
+        assert gat_print_messages._to_camel_case(f"{key}_2") in result or "=" in result

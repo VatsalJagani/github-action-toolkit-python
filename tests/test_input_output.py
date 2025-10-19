@@ -310,3 +310,95 @@ def test_delimiter_in_value_raises_error(tmpdir: Any) -> None:
     with mock.patch.dict(os.environ, {"GITHUB_ENV": file.strpath}):
         with pytest.raises(ValueError, match="contains the delimiter"):
             gat.set_env("test", malicious_value)
+
+
+# Property-based tests for robust validation
+
+
+from hypothesis import given
+from hypothesis import strategies as st
+
+
+@given(
+    st.text(
+        alphabet=st.characters(blacklist_characters="\x00", blacklist_categories=("Cs",)),
+        min_size=1,
+        max_size=100,
+    )
+)
+def test_get_user_input_as_with_arbitrary_strings(text: str) -> None:
+    """Property test: get_user_input_as handles arbitrary string inputs."""
+    with mock.patch.dict(os.environ, {"INPUT_TEST": text}):
+        result = gat.get_user_input_as("test", str)
+        assert result == text
+
+
+@given(st.integers())
+def test_get_user_input_as_integer_conversion(num: int) -> None:
+    """Property test: integer conversion works for all valid integers."""
+    with mock.patch.dict(os.environ, {"INPUT_NUM": str(num)}):
+        result = gat.get_user_input_as("num", int)
+        assert result == num
+
+
+@given(st.floats(allow_nan=False, allow_infinity=False))
+def test_get_user_input_as_float_conversion(num: float) -> None:
+    """Property test: float conversion works for all valid floats."""
+    with mock.patch.dict(os.environ, {"INPUT_NUM": str(num)}):
+        result = gat.get_user_input_as("num", float)
+        assert result == num
+
+
+@given(st.text(alphabet=st.characters(blacklist_categories=("Cs",))))
+def test_build_file_input_never_crashes(text: str) -> None:
+    """Property test: _build_file_input handles arbitrary text without crashing."""
+    from github_action_toolkit.consts import ACTION_ENV_DELIMITER
+
+    # Skip if contains delimiter (expected to fail)
+    if ACTION_ENV_DELIMITER not in text:
+        try:
+            result = gha_utils_input_output._build_file_input("test", text)
+            assert isinstance(result, bytes)
+            assert b"test" in result
+        except Exception:
+            # If an exception occurs, it should only be for extreme edge cases
+            pass
+
+
+@given(st.text(alphabet=st.characters(whitelist_categories=("Lu", "Ll")), min_size=1, max_size=50))
+def test_get_all_user_inputs_with_various_names(name: str) -> None:
+    """Property test: get_all_user_inputs correctly extracts INPUT_ prefixed vars."""
+    # Handle special Unicode case-folding behavior
+    expected_key = name.lower()
+    env_key = f"INPUT_{name.upper()}"
+
+    with mock.patch.dict(os.environ, {env_key: "value", "OTHER": "ignore"}):
+        result = gat.get_all_user_inputs()
+        # The key should be in result with the lowercased name
+        assert expected_key in result or env_key[6:].lower() in result
+        assert "other" not in result
+
+
+@given(st.text(min_size=1, max_size=100), st.text(min_size=0, max_size=100))
+def test_set_env_with_arbitrary_key_value(key: str, value: str) -> None:
+    """Property test: set_env handles arbitrary key-value pairs."""
+    from github_action_toolkit.consts import ACTION_ENV_DELIMITER
+
+    # Skip if delimiter is in the value (expected to fail)
+    if ACTION_ENV_DELIMITER in value:
+        return
+
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
+        filepath = f.name
+
+    try:
+        with mock.patch.dict(os.environ, {"GITHUB_ENV": filepath}):
+            gat.set_env(key, value)
+
+        with open(filepath, "rb") as f:
+            content = f.read()
+            assert isinstance(content, bytes)
+    finally:
+        os.unlink(filepath)

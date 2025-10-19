@@ -112,6 +112,87 @@ When you're ready to contribute code to address an open issue, please follow the
 **Then Read the `development.md` file on GitHub for this project for development guidelines.**
 
 
+### Writing Tests
+
+This project uses a comprehensive testing approach with multiple testing techniques:
+
+#### Property-Based Testing with Hypothesis
+
+For robust validation of edge cases, we use [Hypothesis](https://hypothesis.readthedocs.io/) for property-based testing. Property-based tests are particularly useful for:
+
+- Input validation functions (testing with arbitrary strings, integers, floats)
+- String escaping and formatting functions
+- Type conversion functions
+- Functions that should handle a wide range of inputs
+
+Example:
+```python
+from hypothesis import given, strategies as st
+
+@given(st.text(min_size=1, max_size=100))
+def test_function_handles_arbitrary_strings(text: str):
+    """Property test: function handles arbitrary string inputs."""
+    result = my_function(text)
+    assert isinstance(result, str)
+```
+
+When writing property-based tests:
+- Use appropriate strategies that match your input domain
+- Blacklist invalid characters (e.g., null bytes, surrogates)
+- Test properties that should always hold true, not specific values
+- Consider idempotency, commutativity, and other mathematical properties
+
+#### Snapshot Testing with Syrupy
+
+For validating formatted output consistency, we use [Syrupy](https://github.com/tophat/syrupy) for snapshot testing. Snapshot tests are ideal for:
+
+- HTML/Markdown output
+- Template rendering
+- Complex formatted strings
+- Command output that should remain stable
+
+Example:
+```python
+def test_html_output_snapshot(snapshot):
+    """Snapshot test for HTML output."""
+    result = generate_html_report(data)
+    assert result == snapshot
+```
+
+When writing snapshot tests:
+- Use descriptive test names that indicate what's being tested
+- Keep snapshots focused on one aspect of output
+- Update snapshots when intentional changes are made: `pytest --snapshot-update`
+- Review snapshot diffs carefully in PRs
+
+#### Test Organization
+
+- Place tests in the `tests/` directory matching the module structure
+- Use descriptive test function names: `test_<function>_<scenario>`
+- Group related tests using test classes when appropriate
+- Use fixtures for common setup/teardown
+- Add docstrings to complex tests explaining what property is being tested
+
+#### Running Tests
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run specific test file
+uv run pytest tests/test_input_output.py
+
+# Run with verbose output
+uv run pytest -v
+
+# Update snapshots after intentional changes
+uv run pytest --snapshot-update
+
+# Run only property-based tests
+uv run pytest -k "hypothesis"
+```
+
+
 ### Writing docstrings
 
 We use [Sphinx](https://www.sphinx-doc.org/en/master/index.html) to build our API docs, which automatically parses all docstrings
