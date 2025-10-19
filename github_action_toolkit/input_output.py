@@ -23,7 +23,7 @@ def _get_file_lock(filepath: str) -> threading.Lock:
 def _write_to_file(filepath: str, content: bytes) -> None:
     """
     Thread-safe atomic write to a file.
-    
+
     :param filepath: Path to the file
     :param content: Content to write (as bytes)
     :raises: IOError if file cannot be written
@@ -35,24 +35,24 @@ def _write_to_file(filepath: str, content: bytes) -> None:
                 f.write(content)
                 f.flush()  # Ensure data is written to disk
                 os.fsync(f.fileno())  # Force write to disk for atomicity
-        except (OSError, IOError) as e:
-            raise IOError(f"Failed to write to {filepath}: {e}") from e
+        except OSError as e:
+            raise OSError(f"Failed to write to {filepath}: {e}") from e
 
 
 def _build_file_input(name: str, value: Any) -> bytes:
     """
     Build properly formatted and escaped environment file input.
-    
+
     Uses heredoc-style delimiters to safely handle multi-line values.
     Validates that the delimiter doesn't appear in the value to prevent injection.
-    
+
     :param name: Variable name
     :param value: Variable value
     :returns: Properly formatted bytes for writing to env file
     :raises ValueError: If the delimiter appears in the value (extremely rare)
     """
     escaped_value = escape_data(value)
-    
+
     # Validate that our delimiter doesn't appear in the escaped value
     # This is extremely unlikely but we check for safety
     if ACTION_ENV_DELIMITER in escaped_value:
@@ -60,12 +60,12 @@ def _build_file_input(name: str, value: Any) -> bytes:
             f"Value contains the delimiter '{ACTION_ENV_DELIMITER}'. "
             "This is not supported for security reasons."
         )
-    
+
     return (
         f"{escape_property(name)}"
         f"<<{ACTION_ENV_DELIMITER}\n"
         f"{escaped_value}\n"
-        f"{ACTION_ENV_DELIMITER}\n".encode("utf-8")
+        f"{ACTION_ENV_DELIMITER}\n".encode()
     )
 
 
@@ -256,10 +256,10 @@ def add_path(path: str | Path) -> None:
     :returns: None
     """
     path_str = str(path) if isinstance(path, Path) else path
-    
+
     # Validate that the path is absolute
     if not os.path.isabs(path_str):
         raise ValueError(f"Path '{path_str}' must be an absolute path")
-    
+
     # Write to GITHUB_PATH file
-    _write_to_file(os.environ["GITHUB_PATH"], f"{path_str}\n".encode("utf-8"))
+    _write_to_file(os.environ["GITHUB_PATH"], f"{path_str}\n".encode())

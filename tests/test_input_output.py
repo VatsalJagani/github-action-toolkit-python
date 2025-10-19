@@ -260,7 +260,7 @@ def test_add_path_relative_raises_error(tmpdir: Any) -> None:
 def test_delimiter_in_value_raises_error(tmpdir: Any) -> None:
     """Test that values containing the delimiter raise a ValueError"""
     from github_action_toolkit.consts import ACTION_ENV_DELIMITER
-    
+
     file = tmpdir.join("envfile")
     malicious_value = f"test{ACTION_ENV_DELIMITER}injection"
 

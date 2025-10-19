@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Added `export_variable` function as an alias for `set_env` to match Node.js @actions/core naming convention
+- Added `add_path` function to prepend directories to the system PATH for subsequent workflow steps
+
+### Changed
+
+- Enhanced all environment file operations (`GITHUB_OUTPUT`, `GITHUB_ENV`, `GITHUB_STATE`, `GITHUB_PATH`) with thread-safe atomic writes
+- Improved security with delimiter injection prevention and enhanced input validation
+- All file operations now use `fsync()` for atomic writes ensuring data durability
+
 ## [v0.6.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.6.0) - 2025-10-15
 
 ### Added
