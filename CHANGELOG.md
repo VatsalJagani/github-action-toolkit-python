@@ -11,8 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Local development simulator for testing GitHub Actions locally without pushing to GitHub
   - `simulate_github_action()` context manager for full environment simulation
-  - `run_action_locally()` convenience function for quick testing
-  - `SimulatorConfig` class for customizing simulated environment
   - `SimulatorResult` for accessing outputs, summaries, state, and environment variables
 - Property-based testing with Hypothesis for robust validation of edge cases
 - Snapshot testing with Syrupy for validating formatted output consistency

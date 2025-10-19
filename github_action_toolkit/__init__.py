@@ -58,7 +58,6 @@ __all__ = (  # noqa: F405
     "CacheSaveError",
     "print_directory_tree",
     "simulate_github_action",
-    "run_action_locally",
     "SimulatorConfig",
     "SimulatorResult",
     "GitHubAPIClient",

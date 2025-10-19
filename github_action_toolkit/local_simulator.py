@@ -8,11 +8,9 @@ allowing developers to test their actions without pushing to GitHub.
 import json
 import os
 import tempfile
-from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 
 @dataclass
@@ -281,39 +279,3 @@ class SimulatorResult:
         """Return paths added to PATH."""
         content = self.path_file.read_text()
         return [line for line in content.split("\n") if line.strip()]
-
-
-def run_action_locally(
-    action_func: Callable[[], None], config: SimulatorConfig | None = None
-) -> dict[str, Any]:
-    """
-    Run a GitHub Action function locally with simulated environment.
-
-    This is a convenience wrapper around simulate_github_action for simple use cases.
-    Returns a dictionary with the captured outputs, summary, state, etc.
-
-    Usage:
-    ```python
-    from github_action_toolkit.local_simulator import run_action_locally, SimulatorConfig
-
-    def my_action():
-        import github_action_toolkit as gat
-        name = gat.get_user_input("name")
-        gat.info(f"Hello, {name}!")
-        gat.set_output("greeting", f"Hello, {name}!")
-
-    config = SimulatorConfig(inputs={"name": "World"})
-    result = run_action_locally(my_action, config)
-    print(result["outputs"])  # {"greeting": "Hello, World!"}
-    ```
-    """
-    with simulate_github_action(config) as sim:
-        action_func()
-        # Capture results before exiting context (and deleting temp files)
-        return {
-            "outputs": sim.outputs,
-            "env_vars": sim.env_vars,
-            "summary": sim.summary,
-            "state": sim.state,
-            "paths": sim.paths,
-        }

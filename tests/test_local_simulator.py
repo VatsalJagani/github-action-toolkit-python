@@ -8,7 +8,6 @@ import json
 import github_action_toolkit as gat
 from github_action_toolkit.local_simulator import (
     SimulatorConfig,
-    run_action_locally,
     simulate_github_action,
 )
 
@@ -66,22 +65,6 @@ def test_simulate_github_action_event_payload() -> None:
 
         assert event_data["repository"]["full_name"] == "owner/repo"
         assert event_data["ref"] == "refs/heads/main"
-
-
-def test_run_action_locally_basic() -> None:
-    """Test run_action_locally convenience function."""
-
-    def my_action() -> None:
-        name = gat.get_user_input("name")
-        gat.info(f"Hello, {name}!")
-        gat.set_output("greeting", f"Hello, {name}!")
-        gat.append_job_summary(f"# Greeted {name}")
-
-    config = SimulatorConfig(inputs={"name": "World"})
-    result = run_action_locally(my_action, config)
-
-    assert result["outputs"]["greeting"] == "Hello, World!"
-    assert "# Greeted World" in result["summary"]
 
 
 def test_simulator_multi_line_output() -> None:
@@ -146,14 +129,3 @@ def test_simulator_summary_multiple_appends() -> None:
         assert "## Section 1" in summary
         assert "- Item 1" in summary
         assert "- Item 2" in summary
-
-
-def test_run_action_locally_without_config() -> None:
-    """Test run_action_locally with default config."""
-
-    def simple_action() -> None:
-        gat.set_output("result", "success")
-
-    result = run_action_locally(simple_action)
-
-    assert result["outputs"]["result"] == "success"
