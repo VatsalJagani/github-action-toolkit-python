@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Added custom exception taxonomy for better error handling:
+  - `GitHubActionError` - Base exception for all toolkit errors
+  - `EnvironmentError` - For missing/invalid environment variables
+  - `InputError` - For invalid user input
+  - `GitOperationError` - For git operation failures
+  - `GitHubAPIError` - For GitHub API failures
+  - `ConfigurationError` - For invalid configuration
+- Added scoped environment helpers:
+  - `with_env()` - Context manager for temporary environment variables
+  - `to_env_file()` - Write multiple env vars to GITHUB_ENV or custom file
+- Added cancellation support for graceful shutdown:
+  - `CancellationRequested` - Exception raised on SIGTERM/SIGINT
+  - `enable_cancellation_support()` - Enable signal handling
+  - `disable_cancellation_support()` - Disable signal handling
+  - `register_cancellation_handler()` - Register cleanup handlers
+  - `is_cancellation_enabled()` - Check if cancellation is enabled
+
+### Changed
+
+- Improved error messages with actionable context across all functions
+- Enhanced docstrings with detailed parameter descriptions and exception information
+- Functions now raise specific exception types instead of generic ValueError/RuntimeError:
+  - `set_output()`, `save_state()`, `set_env()`, `get_workflow_environment_variables()` raise `EnvironmentError`
+  - `get_user_input_as()` raises `InputError`
+  - `Repo.__init__()` raises `ConfigurationError` or `GitOperationError`
+  - `Repo.create_pr()` raises `ConfigurationError`, `GitOperationError`, or `GitHubAPIError`
+  - `GitHubArtifacts.__init__()` raises `ConfigurationError`, `EnvironmentError`, or `GitHubAPIError`
+
 ## [v0.6.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.6.0) - 2025-10-15
 
 ### Added
