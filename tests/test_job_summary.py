@@ -56,3 +56,230 @@ def test_remove_job_summary(tmpdir: Any) -> None:
         gat.remove_job_summary()
 
     assert os.path.isfile(file.strpath) is False
+
+
+# JobSummary builder tests
+
+
+def test_job_summary_basic_usage() -> None:
+    summary = gat.JobSummary()
+    assert summary.is_empty()
+
+    summary.add_raw("Hello World")
+    assert not summary.is_empty()
+    assert summary.stringify() == "Hello World"
+
+    summary.clear()
+    assert summary.is_empty()
+
+
+def test_job_summary_add_heading() -> None:
+    summary = gat.JobSummary()
+    summary.add_heading("Test Heading", 1)
+    assert "<h1>Test Heading</h1>" in summary.stringify()
+
+    summary.clear()
+    summary.add_heading("Subheading", 2)
+    assert "<h2>Subheading</h2>" in summary.stringify()
+
+    summary.clear()
+    summary.add_heading("Test", 10)  # Invalid level, should default to 1
+    assert "<h1>Test</h1>" in summary.stringify()
+
+
+def test_job_summary_add_separator() -> None:
+    summary = gat.JobSummary()
+    summary.add_separator()
+    assert "<hr>" in summary.stringify()
+
+
+def test_job_summary_add_break() -> None:
+    summary = gat.JobSummary()
+    summary.add_break()
+    assert "<br>" in summary.stringify()
+
+
+def test_job_summary_add_quote() -> None:
+    summary = gat.JobSummary()
+    summary.add_quote("This is a quote")
+    assert "<blockquote>This is a quote</blockquote>" in summary.stringify()
+
+    summary.clear()
+    summary.add_quote("Quote with citation", "Author")
+    result = summary.stringify()
+    assert "<blockquote" in result
+    assert 'cite="Author"' in result
+    assert "Quote with citation" in result
+
+
+def test_job_summary_add_link() -> None:
+    summary = gat.JobSummary()
+    summary.add_link("GitHub", "https://github.com")
+    result = summary.stringify()
+    assert '<a href="https://github.com">GitHub</a>' in result
+
+
+def test_job_summary_add_code_block() -> None:
+    summary = gat.JobSummary()
+    summary.add_code_block("print('hello')")
+    assert "<pre><code>print('hello')</code></pre>" in summary.stringify()
+
+    summary.clear()
+    summary.add_code_block("def test(): pass", "python")
+    result = summary.stringify()
+    assert '<pre lang="python">' in result
+    assert "def test(): pass" in result
+
+
+def test_job_summary_add_list() -> None:
+    summary = gat.JobSummary()
+    summary.add_list(["Item 1", "Item 2", "Item 3"])
+    result = summary.stringify()
+    assert "<ul>" in result
+    assert "<li>Item 1</li>" in result
+    assert "<li>Item 2</li>" in result
+    assert "<li>Item 3</li>" in result
+    assert "</ul>" in result
+
+    summary.clear()
+    summary.add_list(["First", "Second"], ordered=True)
+    result = summary.stringify()
+    assert "<ol>" in result
+    assert "<li>First</li>" in result
+    assert "</ol>" in result
+
+
+def test_job_summary_add_table_simple() -> None:
+    summary = gat.JobSummary()
+    rows = [
+        ["Header 1", "Header 2"],
+        ["Row 1 Col 1", "Row 1 Col 2"],
+        ["Row 2 Col 1", "Row 2 Col 2"],
+    ]
+    summary.add_table(rows)
+    result = summary.stringify()
+    assert "<table>" in result
+    assert "<th>Header 1</th>" in result
+    assert "<th>Header 2</th>" in result
+    assert "<td>Row 1 Col 1</td>" in result
+    assert "</table>" in result
+
+
+def test_job_summary_add_table_with_dict_cells() -> None:
+    summary = gat.JobSummary()
+    rows: list[list[str | dict[str, str | bool | int]]] = [
+        [{"data": "Header 1", "header": True}, {"data": "Header 2", "header": True}],
+        [{"data": "Spanning", "colspan": "2"}],
+        ["Regular", "Cell"],
+    ]
+    summary.add_table(rows)
+    result = summary.stringify()
+    assert "<th>Header 1</th>" in result
+    assert "<th>Header 2</th>" in result
+    assert 'colspan="2"' in result
+    assert "<td>Regular</td>" in result
+
+
+def test_job_summary_add_details() -> None:
+    summary = gat.JobSummary()
+    summary.add_details("Click to expand", "Hidden content here")
+    result = summary.stringify()
+    assert "<details>" in result
+    assert "<summary>Click to expand</summary>" in result
+    assert "Hidden content here" in result
+    assert "</details>" in result
+
+
+def test_job_summary_add_image() -> None:
+    summary = gat.JobSummary()
+    summary.add_image("https://example.com/image.png", "Test Image")
+    result = summary.stringify()
+    assert '<img src="https://example.com/image.png" alt="Test Image">' in result
+
+    summary.clear()
+    summary.add_image("image.png", "Alt text", width="100", height="50")
+    result = summary.stringify()
+    assert 'width="100"' in result
+    assert 'height="50"' in result
+
+
+def test_job_summary_sanitization() -> None:
+    summary = gat.JobSummary()
+    summary.add_heading("<script>alert('xss')</script>")
+    result = summary.stringify()
+    assert "&lt;script&gt;" in result
+    assert "<script>" not in result
+
+
+def test_job_summary_fluent_chaining() -> None:
+    summary = gat.JobSummary()
+    result = (
+        summary.add_heading("Test Report", 1)
+        .add_separator()
+        .add_list(["Test 1: Pass", "Test 2: Pass"])
+        .add_break()
+        .add_quote("All tests passed!")
+        .stringify()
+    )
+    assert "<h1>Test Report</h1>" in result
+    assert "<hr>" in result
+    assert "<ul>" in result
+    assert "<blockquote>" in result
+
+
+def test_job_summary_write(tmpdir: Any) -> None:
+    file = tmpdir.join("summary")
+
+    with mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": file.strpath}):
+        summary = gat.JobSummary()
+        summary.add_heading("Test Summary", 1).add_raw("Some content").write()
+
+        assert "<h1>Test Summary</h1>" in file.read()
+        assert summary.is_empty()  # Buffer should be cleared after write
+
+
+def test_job_summary_write_overwrite(tmpdir: Any) -> None:
+    file = tmpdir.join("summary")
+    file.write("Old content")
+
+    with mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": file.strpath}):
+        summary = gat.JobSummary()
+        summary.add_heading("New Summary", 1).write(overwrite=True)
+
+        content = file.read()
+        assert "<h1>New Summary</h1>" in content
+        assert "Old content" not in content
+
+
+def test_job_summary_write_append(tmpdir: Any) -> None:
+    file = tmpdir.join("summary")
+    file.write("Existing content\n")
+
+    with mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": file.strpath}):
+        summary = gat.JobSummary()
+        summary.add_heading("Appended Summary", 1).write(overwrite=False)
+
+        content = file.read()
+        assert "Existing content" in content
+        assert "<h1>Appended Summary</h1>" in content
+
+
+def test_job_summary_write_no_env_var() -> None:
+    with mock.patch.dict(os.environ, {}, clear=True):
+        summary = gat.JobSummary()
+        summary.add_heading("Test", 1)
+
+        with pytest.raises(ValueError, match="GITHUB_STEP_SUMMARY"):
+            summary.write()
+
+
+def test_job_summary_size_limit(tmpdir: Any) -> None:
+    file = tmpdir.join("summary")
+
+    with mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": file.strpath}):
+        summary = gat.JobSummary()
+        large_content = "x" * (gat_job_summary.MAX_SUMMARY_SIZE + 1)
+        summary.add_raw(large_content)
+
+        with pytest.raises(ValueError, match="Summary exceeds maximum size"):
+            summary.write()

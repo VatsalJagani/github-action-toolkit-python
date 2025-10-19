@@ -14,6 +14,7 @@ __all__ = (  # noqa: F405
     "append_job_summary",
     "overwrite_job_summary",
     "remove_job_summary",
+    "JobSummary",
     "get_state",
     "save_state",
     "get_all_user_inputs",
