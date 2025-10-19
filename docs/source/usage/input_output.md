@@ -51,7 +51,7 @@ GitHub Actions Docs: [set_env](https://docs.github.com/en/actions/using-workflow
 
 ### **`export_variable(name, value)`**
 
-Sets an environment variable for your workflows (alias for `set_env`). This matches the naming convention from the Node.js `@actions/toolkit`.
+Sets an environment variable for your workflows (alias for `set_env`). This matches the naming convention from the Javascript `@actions/toolkit`.
 
 **example:**
 

@@ -48,7 +48,7 @@ summary.write()
 
 installation
 quickstart
-migration
+compare_with_js_toolkit
 ```
 
 ```{toctree}
@@ -130,7 +130,7 @@ uv add github-action-toolkit
 
 - {doc}`/quickstart` - Get started in minutes
 - {doc}`/recipes` - Common patterns and best practices
-- {doc}`/migration` - Migrate from Node.js @actions/toolkit
+- {doc}`/compare_with_js_toolkit` - Compare with @actions/toolkit
 - {doc}`/examples` - Complete example workflows
 - [GitHub Issues](https://github.com/VatsalJagani/github-action-toolkit-python/issues) - Report bugs
 - [Discussions](https://github.com/VatsalJagani/github-action-toolkit-python/discussions) - Ask questions

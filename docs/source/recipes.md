@@ -777,7 +777,7 @@ if __name__ == '__main__':
 ## More Resources
 
 - {doc}`/quickstart` - Get started quickly
-- {doc}`/migration` - Migrate from Node.js toolkit
+- {doc}`/compare_with_js_toolkit` - Compare with JavaScript toolkit from GitHub
 - {doc}`/examples` - More complete examples
 - {doc}`/usage/input_output` - Detailed input/output reference
 - {doc}`/usage/job_summary` - Job summary reference

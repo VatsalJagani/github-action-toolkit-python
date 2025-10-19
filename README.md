@@ -218,15 +218,15 @@ Full documentation is available at: [https://github-action-toolkit.readthedocs.i
 ### Quick Links
 
 - [**Quickstart Guide**](https://github-action-toolkit.readthedocs.io/en/latest/quickstart.html) - Get started in minutes
-- [**Migration Guide**](https://github-action-toolkit.readthedocs.io/en/latest/migration.html) - Migrate from Node.js @actions/toolkit
+- [**Comparison Guide with JS Toolkit**](https://github-action-toolkit.readthedocs.io/en/latest/compare_with_js_toolkit.html) - Compare with Javascript toolkit from GitHub @actions/toolkit
 - [**Recipes**](https://github-action-toolkit.readthedocs.io/en/latest/recipes.html) - Common patterns and best practices
 - [**Security Guide**](https://github-action-toolkit.readthedocs.io/en/latest/security.html) - Security best practices
 - [**Examples**](https://github-action-toolkit.readthedocs.io/en/latest/examples.html) - Complete workflow examples
 - [**API Reference**](https://github-action-toolkit.readthedocs.io/en/latest/usage.html) - Detailed function documentation
 
-## Comparison with Node.js @actions/toolkit
+## Comparison with Javascript @actions/toolkit
 
-| Feature | Python | Node.js |
+| Feature | Python | Javascript |
 |---------|--------|---------|
 | **Syntax** | Clean, readable Python | JavaScript/TypeScript |
 | **Type Safety** | Full type hints | TypeScript types |
@@ -256,8 +256,6 @@ if not name:
 set_output('greeting', f'Hello {name}')
 info('Process complete')
 ```
-
-See the [Migration Guide](https://github-action-toolkit.readthedocs.io/en/latest/migration.html) for complete migration instructions.
 
 ## Example Action
 

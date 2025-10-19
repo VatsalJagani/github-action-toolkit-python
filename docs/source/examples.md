@@ -756,7 +756,7 @@ For more examples, see:
 - [Examples Directory](https://github.com/VatsalJagani/github-action-toolkit-python/tree/main/examples) - Complete working examples
 - {doc}`/recipes` - Code patterns and best practices
 - {doc}`/quickstart` - Getting started guide
-- {doc}`/migration` - Examples of migrated actions
+- {doc}`/compare_with_js_toolkit` - Examples of comparison with JS toolkit library
 
 ## Contributing Examples
 

@@ -1,10 +1,10 @@
-# Migrating from Node.js @actions/toolkit
+# Comparison with Javascript @actions/toolkit
 
-This guide helps you migrate GitHub Actions from JavaScript/TypeScript using `@actions/toolkit` to Python using `github-action-toolkit`.
+This guide helps you compare GitHub Action Toolkit in Python compares JavaScript/TypeScript using `@actions/toolkit` with  Python using `github-action-toolkit`.
 
 ## Package Mapping
 
-| Node.js Package | Python Equivalent | Notes |
+| Javascript Package | Python Equivalent | Notes |
 |----------------|------------------|-------|
 | `@actions/core` | `github_action_toolkit` | Core functionality |
 | `@actions/github` | `github_action_toolkit.GitHubAPIClient` | GitHub API access |
@@ -385,7 +385,7 @@ except CancellationRequested:
 
 ### 1. Input Naming
 
-Node.js converts input names automatically:
+Node.js / Javascript converts input names automatically:
 
 ```javascript
 // JavaScript - both work
@@ -466,18 +466,6 @@ runs:
 4. **Familiar Syntax**: Python is widely known and easy to read
 5. **Scientific Computing**: Access to ML/AI libraries if needed
 
-## Migration Checklist
-
-- [ ] Install `github-action-toolkit` package
-- [ ] Replace `@actions/core` imports with `github_action_toolkit`
-- [ ] Convert `getInput()` calls to `get_user_input()`
-- [ ] Convert `setOutput()` calls to `set_output()`
-- [ ] Replace logging functions (`core.info` → `info`)
-- [ ] Update workflow file to use Python runtime
-- [ ] Update error handling to use Python exceptions
-- [ ] Test locally with simulator
-- [ ] Update documentation and README
-- [ ] Add Python version requirements
 
 ## Example Migration
 

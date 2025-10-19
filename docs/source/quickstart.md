@@ -218,7 +218,7 @@ print(sim.outputs)  # {"greeting": "Hello, Local Test!"}
 - {doc}`/usage/input_output` - Learn about inputs, outputs, and environment variables
 - {doc}`/usage/print_messages` - Master console output and annotations
 - {doc}`/usage/job_summary` - Create rich workflow summaries
-- {doc}`/migration` - Migrate from Node.js @actions/toolkit
+- {doc}`/compare_with_js_toolkit` - Compare with @actions/toolkit
 - {doc}`/recipes` - Common patterns and best practices
 - {doc}`/examples` - Complete example workflows
 
