@@ -269,6 +269,10 @@ Whenever a change is user-facing, update the documentation and README in the sam
 
 ## Testing
 
+- Always add or update tests when introducing new functionality or changing user-facing behavior. Cover the happy path and at least one edge case for each new behavior.
+- Do not modify tests for purely non-behavioral changes (formatting, refactors without behavior change, comments). If test updates seem necessary for such changes, reconsider the code change or justify the behavior change explicitly.
+- Ensure the full test suite passes before considering a task complete. Use targeted runs for speed during development, but finish with the standard test task.
+
 ### Test Location
 
 - For longer tests put them in a file like `tests/test_somename.py` in the `tests/`
