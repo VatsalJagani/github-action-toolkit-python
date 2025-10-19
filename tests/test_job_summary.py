@@ -437,3 +437,86 @@ All checks passed successfully!
 
     result = file.read()
     assert result == snapshot
+
+
+# Additional snapshot tests for JobSummary builder
+
+
+def test_job_summary_builder_table_snapshot(snapshot: Any) -> None:
+    """Snapshot test for JobSummary table building."""
+    summary = gat.JobSummary()
+    rows = [
+        ["Name", "Status", "Duration"],
+        ["Build", "✅ Success", "2m 15s"],
+        ["Test", "✅ Success", "5m 42s"],
+        ["Deploy", "⚠️  Warning", "1m 30s"],
+    ]
+    summary.add_heading("CI/CD Pipeline", 2).add_table(rows)
+    result = summary.stringify()
+    assert result == snapshot
+
+
+def test_job_summary_builder_code_blocks_snapshot(snapshot: Any) -> None:
+    """Snapshot test for JobSummary code blocks."""
+    summary = gat.JobSummary()
+    summary.add_heading("Code Examples", 2).add_code_block(
+        'def hello():\n    print("Hello, World!")', "python"
+    ).add_break().add_code_block("npm install github-action-toolkit", "bash")
+    result = summary.stringify()
+    assert result == snapshot
+
+
+def test_job_summary_builder_mixed_content_snapshot(snapshot: Any) -> None:
+    """Snapshot test for JobSummary with mixed content types."""
+    summary = gat.JobSummary()
+    (
+        summary.add_heading("Test Report", 1)
+        .add_separator()
+        .add_quote("Testing is an integral part of software development.", "Anonymous")
+        .add_break()
+        .add_list(
+            ["Unit tests: 150 passed", "Integration tests: 45 passed", "E2E tests: 20 passed"]
+        )
+        .add_separator()
+        .add_link("View detailed report", "https://example.com/report")
+        .add_details("Click to expand logs", "Log content here\nLine 2\nLine 3")
+    )
+    result = summary.stringify()
+    assert result == snapshot
+
+
+def test_job_summary_template_test_report_snapshot(snapshot: Any) -> None:
+    """Snapshot test for test report template."""
+    summary = gat.JobSummaryTemplate.test_report(
+        title="Integration Test Results",
+        passed=85,
+        failed=3,
+        skipped=2,
+        duration="12m 34s",
+    )
+    result = summary.stringify()
+    assert result == snapshot
+
+
+def test_job_summary_template_coverage_report_snapshot(snapshot: Any) -> None:
+    """Snapshot test for coverage report template."""
+    modules = {
+        "authentication": 92.5,
+        "database": 88.3,
+        "api": 95.1,
+        "utils": 78.9,
+        "models": 91.0,
+    }
+    summary = gat.JobSummaryTemplate.coverage_report("Test Coverage Report", modules)
+    result = summary.stringify()
+    assert result == snapshot
+
+
+def test_job_summary_sanitization_snapshot(snapshot: Any) -> None:
+    """Snapshot test for HTML sanitization in job summary."""
+    summary = gat.JobSummary()
+    summary.add_heading("<script>alert('xss')</script> Malicious Title").add_raw(
+        "<img src=x onerror=alert('xss')>"
+    ).add_quote("<b>Bold</b> and <i>italic</i> tags")
+    result = summary.stringify()
+    assert result == snapshot

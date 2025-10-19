@@ -1,4 +1,63 @@
 # serializer version: 1
+# name: test_job_summary_builder_code_blocks_snapshot
+  '''
+  <h2>Code Examples</h2>
+  <pre lang="python"><code>def hello():
+      print("Hello, World!")</code></pre>
+  <br>
+  <pre lang="bash"><code>npm install github-action-toolkit</code></pre>
+  
+  '''
+# ---
+# name: test_job_summary_builder_mixed_content_snapshot
+  '''
+  <h1>Test Report</h1>
+  <hr>
+  <blockquote cite="Anonymous">Testing is an integral part of software development.</blockquote>
+  <br>
+  <ul>
+  <li>Unit tests: 150 passed</li>
+  <li>Integration tests: 45 passed</li>
+  <li>E2E tests: 20 passed</li>
+  </ul>
+  <hr>
+  <a href="https://example.com/report">View detailed report</a><details>
+  <summary>Click to expand logs</summary>
+  Log content here
+  Line 2
+  Line 3
+  </details>
+  
+  '''
+# ---
+# name: test_job_summary_builder_table_snapshot
+  '''
+  <h2>CI/CD Pipeline</h2>
+  <table>
+  <tr>
+  <th>Name</th>
+  <th>Status</th>
+  <th>Duration</th>
+  </tr>
+  <tr>
+  <td>Build</td>
+  <td>✅ Success</td>
+  <td>2m 15s</td>
+  </tr>
+  <tr>
+  <td>Test</td>
+  <td>✅ Success</td>
+  <td>5m 42s</td>
+  </tr>
+  <tr>
+  <td>Deploy</td>
+  <td>⚠️  Warning</td>
+  <td>1m 30s</td>
+  </tr>
+  </table>
+  
+  '''
+# ---
 # name: test_job_summary_complex_markdown
   '''
   
@@ -37,6 +96,81 @@
   '''
   # New content
   - New point
+  
+  '''
+# ---
+# name: test_job_summary_sanitization_snapshot
+  '''
+  <h1>&lt;script&gt;alert('xss')&lt;/script&gt; Malicious Title</h1>
+  <img src=x onerror=alert('xss')><blockquote>&lt;b&gt;Bold&lt;/b&gt; and &lt;i&gt;italic&lt;/i&gt; tags</blockquote>
+  
+  '''
+# ---
+# name: test_job_summary_template_coverage_report_snapshot
+  '''
+  <h1>Test Coverage Report</h1>
+  <hr>
+  <blockquote>✓ Good coverage: 89.2% average</blockquote>
+  <table>
+  <tr>
+  <th>Module</th>
+  <th>Coverage</th>
+  </tr>
+  <tr>
+  <td>api</td>
+  <td>✓ 95.1%</td>
+  </tr>
+  <tr>
+  <td>authentication</td>
+  <td>✓ 92.5%</td>
+  </tr>
+  <tr>
+  <td>database</td>
+  <td>✓ 88.3%</td>
+  </tr>
+  <tr>
+  <td>models</td>
+  <td>✓ 91.0%</td>
+  </tr>
+  <tr>
+  <td>utils</td>
+  <td>⚠ 78.9%</td>
+  </tr>
+  </table>
+  
+  '''
+# ---
+# name: test_job_summary_template_test_report_snapshot
+  '''
+  <h1>Integration Test Results</h1>
+  <hr>
+  <blockquote>✗ 3 test(s) failed</blockquote>
+  <table>
+  <tr>
+  <th>Metric</th>
+  <th>Count</th>
+  </tr>
+  <tr>
+  <td>Total Tests</td>
+  <td>90</td>
+  </tr>
+  <tr>
+  <td>✓ Passed</td>
+  <td>85</td>
+  </tr>
+  <tr>
+  <td>✗ Failed</td>
+  <td>3</td>
+  </tr>
+  <tr>
+  <td>⊘ Skipped</td>
+  <td>2</td>
+  </tr>
+  <tr>
+  <td>Duration</td>
+  <td>12m 34s</td>
+  </tr>
+  </table>
   
   '''
 # ---

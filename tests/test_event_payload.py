@@ -477,3 +477,76 @@ def test_get_typed_event_pull_request(tmpdir: Any) -> None:
         assert event.action == "opened"
         assert event.number == 42
         assert event.pull_request.title == "Test PR"
+
+
+# Property-based tests
+
+
+from hypothesis import given
+from hypothesis import strategies as st
+
+
+@given(st.sampled_from(["push", "pull_request", "pull_request_target"]))
+def test_is_pr_with_various_event_names(event_name: str) -> None:
+    """Property test: is_pr correctly identifies PR events."""
+    with mock.patch.dict(os.environ, {"GITHUB_EVENT_NAME": event_name}):
+        result = gat.is_pr()
+        expected = event_name in ["pull_request", "pull_request_target"]
+        assert result == expected
+
+
+@given(
+    st.integers(min_value=1, max_value=999999),
+    st.text(min_size=1, max_size=50),
+)
+def test_get_pr_number_with_various_payloads(pr_number: int, repo_name: str) -> None:
+    """Property test: get_pr_number extracts PR number from payload."""
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+        payload = {
+            "pull_request": {"number": pr_number},
+            "repository": {
+                "id": 1,
+                "node_id": "R_1",
+                "name": repo_name,
+                "full_name": f"owner/{repo_name}",
+                "private": False,
+                "owner": {
+                    "login": "owner",
+                    "id": 1,
+                    "node_id": "U_1",
+                    "avatar_url": "https://example.com",
+                    "gravatar_id": "",
+                    "url": "https://example.com",
+                    "html_url": "https://example.com",
+                    "type": "User",
+                },
+                "html_url": "https://example.com",
+                "fork": False,
+                "url": "https://example.com",
+                "default_branch": "main",
+            },
+            "sender": {
+                "login": "user",
+                "id": 2,
+                "node_id": "U_2",
+                "avatar_url": "https://example.com",
+                "gravatar_id": "",
+                "url": "https://example.com",
+                "html_url": "https://example.com",
+                "type": "User",
+            },
+        }
+        json.dump(payload, f)
+        filepath = f.name
+
+    try:
+        with mock.patch.dict(
+            os.environ, {"GITHUB_EVENT_PATH": filepath, "GITHUB_EVENT_NAME": "pull_request"}
+        ):
+            gat.event_payload.cache_clear()
+            result = gat.get_pr_number()
+            assert result == pr_number
+    finally:
+        os.unlink(filepath)
