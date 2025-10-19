@@ -28,7 +28,7 @@ source .venv/bin/activate
 # including dev dependencies and optional dependencies.
 make install
 
-# Run uv sync, lint, and test (and also generate agent rules):
+# Run uv sync, lint, and test, docs-check:
 make
 
 # Build wheel:
@@ -77,33 +77,14 @@ See [uv docs](https://docs.astral.sh/uv/) for details.
 
 ## Agent Rules
 
-This project includes instructions for AI coding assistants. The source rules are in
-[.cursor/rules/](.cursor/rules/) directory.
+This project includes instructions for AI coding assistants. The source rules are located under `.github/copilot-instructions.md`.
 
-The `make agent-rules` command generates AI assistant instruction files from these source
-rules for different AI tools:
+But we have a soft-link of instructions/rules for different AI tools:
 
-- **Cursor**: `.cursorrules` (root) and `.cursor/rules/*.mdc` files
 - **Claude**: `CLAUDE.md` (root) 
 - **GitHub Copilot**: `.github/copilot-instructions.md`
 - **Other agents**: `AGENTS.md` (root)
 
-These generated files are in `.gitignore` and are regenerated as part of `make` default
-target. To manually regenerate them:
-
-```shell
-make agent-rules
-```
-
-### File Locations for Each AI Tool
-
-- **Cursor**: Automatically reads from `.cursorrules` or `.cursor/rules/` directory
-- **Claude**: Uses `CLAUDE.md` in the project root
-- **GitHub Copilot**: Automatically reads from `.github/copilot-instructions.md`
-- **Other agents**: Can use `AGENTS.md` in the project root
-
-All these files contain the same instructions, just in the locations where each tool
-expects to find them.
 
 ## IDE setup
 

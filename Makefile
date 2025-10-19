@@ -4,9 +4,9 @@
 
 .DEFAULT_GOAL := default
 
-.PHONY: default install lint test upgrade build clean agent-rules
+.PHONY: default install lint test upgrade build clean
 
-default: agent-rules install lint test docs-check
+default: install lint test docs-check
 
 install:
 	uv sync --all-extras
@@ -23,22 +23,6 @@ upgrade:
 build:
 	uv build
 
-agent-rules: .cursorrules CLAUDE.md AGENTS.md .github/copilot-instructions.md
-
-# Use .cursor/rules for sources of rules.
-# Create Cursor, Claude, and GitHub Copilot rules from these.
-.cursorrules: .cursor/rules/general.mdc .cursor/rules/python.mdc
-	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > .cursorrules
-
-CLAUDE.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
-	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > CLAUDE.md
-
-AGENTS.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
-	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > AGENTS.md
-
-.github/copilot-instructions.md: .cursor/rules/general.mdc .cursor/rules/python.mdc
-	cat .cursor/rules/general.mdc .cursor/rules/python.mdc > .github/copilot-instructions.md
-
 clean:
 	-rm -rf dist/
 	-rm -rf *.egg-info/
@@ -47,7 +31,6 @@ clean:
 	-rm -rf .ruff_cache/
 	-rm -rf .venv/
 	-rm -rf docs/build/
-	-rm -rf .cursorrules CLAUDE.md AGENTS.md .github/copilot-instructions.md
 	-find . -type d -name "__pycache__" -exec rm -rf {} +
 
 
