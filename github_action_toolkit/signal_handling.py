@@ -26,7 +26,7 @@ class CancellationHandler:
     def __init__(self) -> None:
         self._handlers: list[Callable[[], None]] = []
         self._original_handlers: dict[signal.Signals, Any] = {}
-        self._enabled = False
+        self._enabled: bool = False
 
     def register(self, handler: Callable[[], None]) -> None:
         """
