@@ -14,6 +14,8 @@ __all__ = (  # noqa: F405
     "append_job_summary",
     "overwrite_job_summary",
     "remove_job_summary",
+    "JobSummary",
+    "JobSummaryTemplate",
     "get_state",
     "save_state",
     "get_all_user_inputs",
@@ -24,13 +26,37 @@ __all__ = (  # noqa: F405
     "get_workflow_environment_variables",
     "get_env",
     "set_env",
+    "export_variable",
+    "add_path",
     "event_payload",
+    "get_event_name",
+    "get_typed_event",
+    "is_pr",
+    "get_pr_number",
+    "head_ref",
+    "base_ref",
+    "get_changed_files",
+    "get_labels",
+    "PushEvent",
+    "PullRequestEvent",
+    "IssueCommentEvent",
+    "WorkflowRunEvent",
+    "Actor",
+    "Repository",
+    "Commit",
+    "Label",
+    "PullRequest",
+    "Issue",
+    "Comment",
+    "WorkflowRun",
+    "BaseEvent",
     "Repo",
     "GitHubArtifacts",
     "print_directory_tree",
 )
 
 from .debugging import *  # noqa: F403
+from .event_models import *  # noqa: F403
 from .event_payload import *  # noqa: F403
 from .git_manager import *  # noqa: F403
 from .github_artifacts import *  # noqa: F403

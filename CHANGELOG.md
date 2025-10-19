@@ -23,6 +23,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GitHubArtifacts.get_artifacts()`: Added `name_pattern` parameter for pattern-based filtering
 - Improved error handling for large files and edge cases with detailed error messages
 - All HTTP operations now include timeout and retry logic for robustness
+- Fluent Job Summary Builder API (`JobSummary` class) for constructing rich GitHub Actions job summaries
+  - Support for headings, text, line breaks, and separators
+  - Support for ordered and unordered lists
+  - Support for tables with headers, rows, and advanced cell options (colspan, rowspan)
+  - Support for code blocks with optional syntax highlighting
+  - Support for images with alt text and dimensions
+  - Support for collapsible details sections
+  - Support for quotes and links
+  - Automatic content sanitization to prevent XSS attacks
+  - Size limit enforcement (1 MiB maximum)
+  - Buffer management with `write()`, `clear()`, `is_empty()`, and `stringify()` methods
+- Template API (`JobSummaryTemplate` class) with pre-built templates for:
+  - Test reports with pass/fail/skip counts
+  - Code coverage reports with per-module breakdowns
+  - Deployment reports with environment and version details
+  - Benchmark reports with performance metrics
+  - Comprehensive documentation for Job Summary API with examples
+- Added `export_variable` function as an alias for `set_env` to match Node.js @actions/core naming convention
+- Added `add_path` function to prepend directories to the system PATH for subsequent workflow steps
+
+### Changed
+
+- Enhanced all environment file operations (`GITHUB_OUTPUT`, `GITHUB_ENV`, `GITHUB_STATE`, `GITHUB_PATH`) with thread-safe atomic writes
+- Improved security with delimiter injection prevention and enhanced input validation
+- All file operations now use `fsync()` for atomic writes ensuring data durability
+- Added strongly typed event models using Pydantic for common GitHub Actions events:
+  - `PushEvent` for push events
+  - `PullRequestEvent` for pull_request events
+  - `IssueCommentEvent` for issue_comment events
+  - `WorkflowRunEvent` for workflow_run events
+- Added supporting typed models: `Actor`, `Repository`, `Commit`, `Label`, `PullRequest`, `Issue`, `Comment`, `WorkflowRun`, `BaseEvent`
+- Added `get_typed_event()` function to parse event payload into typed models
+- Added convenience helper functions:
+  - `get_event_name()` - get the name of the triggering event
+  - `is_pr()` - check if current event is a pull request
+  - `get_pr_number()` - get PR number for pull request events
+  - `head_ref()` - get head reference for push/PR events
+  - `base_ref()` - get base reference for PR events
+  - `get_changed_files()` - get list of changed files for push events
+  - `get_labels()` - get list of labels for PR/issue events
+
 
 ## [v0.6.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.6.0) - 2025-10-15
 
