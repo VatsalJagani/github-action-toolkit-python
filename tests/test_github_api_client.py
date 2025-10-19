@@ -5,12 +5,13 @@
 # pyright: reportUnknownVariableType=false
 # pyright: reportUnknownParameterType=false
 # pyright: reportUnknownMemberType=false
+# pyright: reportUnknownArgumentType=false
 
 from __future__ import annotations
 
 import os
 import time
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from github import GithubException
@@ -52,14 +53,14 @@ def test_init_with_env_token(mock_env):
 def test_init_without_token():
     """Test initialization fails without token."""
     with patch.dict(os.environ, {}, clear=True):
-        with pytest.raises(ValueError, match="GitHub token not provided"):
+        with pytest.raises(ValueError, match="GitHub token is required"):
             GitHubAPIClient()
 
 
 def test_init_with_custom_base_url(mock_pygithub):
     """Test initialization with custom base URL for GHES."""
     client = GitHubAPIClient(
-        token="test_token", base_url="https://github.enterprise.com/api/v3"
+        token="test_token", api_base_url="https://github.enterprise.com/api/v3"
     )
     assert client.base_url == "https://github.enterprise.com/api/v3"
     mock_pygithub.assert_called_once()
@@ -72,7 +73,7 @@ def test_session_creation():
     assert hasattr(client._session, "adapters")
 
 
-def test_get_repo(mock_pygithub):
+def test_get_repository(mock_pygithub):
     """Test getting a repository."""
     mock_repo = Mock()
     mock_github_instance = Mock()
@@ -80,7 +81,7 @@ def test_get_repo(mock_pygithub):
     mock_pygithub.return_value = mock_github_instance
 
     client = GitHubAPIClient(token="test_token")
-    repo = client.get_repo("owner/repo")
+    repo = client.get_repository("owner/repo")
 
     assert repo == mock_repo
     mock_github_instance.get_repo.assert_called_once_with(full_name_or_id="owner/repo")
@@ -125,20 +126,21 @@ def test_get_organization(mock_pygithub):
     org = client.get_organization("github")
 
     assert org == mock_org
-    mock_github_instance.get_organization.assert_called_once_with(login="github")
+    mock_github_instance.get_organization.assert_called_once_with("github")
 
 
 def test_paginate_with_list(mock_pygithub):
     """Test pagination with a paginated list."""
     mock_items = [Mock(), Mock(), Mock()]
-    mock_paginated_list = Mock()
-    mock_paginated_list.__iter__ = Mock(return_value=iter(mock_items))
+
+    # Create a mock that is properly iterable
+    mock_paginated_list = mock_items  # Just use the list directly
 
     mock_github_instance = Mock()
     mock_pygithub.return_value = mock_github_instance
 
     client = GitHubAPIClient(token="test_token")
-    items = list(client.paginate(mock_paginated_list))
+    items = list(client.paginate(mock_paginated_list))  # pyright: ignore[reportArgumentType]
 
     assert len(items) == 3
     assert items == mock_items
@@ -397,7 +399,7 @@ def test_with_rate_limit_handling_github_exception(mock_pygithub):
     client = GitHubAPIClient(token="test_token", rate_limit_wait=True)
 
     with patch.object(time, "sleep"):
-        repo = client.get_repo("owner/repo")
+        repo = client.get_repository("owner/repo")
 
     assert repo == mock_repo
 
@@ -418,7 +420,7 @@ def test_with_rate_limit_handling_no_wait(mock_pygithub):
     client = GitHubAPIClient(token="test_token", rate_limit_wait=False)
 
     with pytest.raises(RateLimitError):
-        client.get_repo("owner/repo")
+        client.get_repository("owner/repo")
 
 
 def test_with_rate_limit_handling_non_rate_limit_error(mock_pygithub):
@@ -437,7 +439,7 @@ def test_with_rate_limit_handling_non_rate_limit_error(mock_pygithub):
     client = GitHubAPIClient(token="test_token")
 
     with pytest.raises(APIError) as exc_info:
-        client.get_repo("owner/nonexistent")
+        client.get_repository("owner/nonexistent")
 
     assert exc_info.value.status_code == 404
 
@@ -453,6 +455,7 @@ def test_github_property(mock_pygithub):
 
 ## Tests
 
+
 def test_api_client_initialization_minimal():
     """Test minimal API client initialization."""
     client = GitHubAPIClient(token="test_token_minimal")
@@ -466,7 +469,7 @@ def test_api_client_custom_settings():
     """Test API client with custom settings."""
     client = GitHubAPIClient(
         token="test_token",
-        base_url="https://custom.github.com/api/v3",
+        api_base_url="https://custom.github.com/api/v3",
         max_retries=5,
         backoff_factor=2.0,
         rate_limit_wait=False,
