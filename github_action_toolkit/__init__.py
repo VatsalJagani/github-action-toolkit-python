@@ -28,11 +28,15 @@ __all__ = (  # noqa: F405
     "Repo",
     "GitHubArtifacts",
     "print_directory_tree",
+    "GitHubAPIClient",
+    "RateLimitError",
+    "APIError",
 )
 
 from .debugging import *  # noqa: F403
 from .event_payload import *  # noqa: F403
 from .git_manager import *  # noqa: F403
+from .github_api_client import *  # noqa: F403
 from .github_artifacts import *  # noqa: F403
 from .input_output import *  # noqa: F403
 from .job_summary import *  # noqa: F403

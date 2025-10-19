@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Added `GitHubAPIClient` - A typed GitHub API client with advanced features:
+  - Automatic rate limit detection and handling with exponential backoff
+  - Support for GitHub Enterprise Server (GHES) via custom base URL
+  - Pagination helpers for easy iteration over large result sets
+  - Conditional request support with ETag caching
+  - GraphQL query execution
+  - Built-in retry logic with configurable backoff
+  - Comprehensive error handling with `RateLimitError` and `APIError` exceptions
+
 ## [v0.6.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.6.0) - 2025-10-15
 
 ### Added
