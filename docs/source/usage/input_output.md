@@ -9,7 +9,7 @@ GitHub Actions Docs: [set_env](https://docs.github.com/en/actions/using-workflow
 **example:**
 
 ```python
->> from github_action_utils import get_workflow_environment_variables
+>> from github_action_toolkit import get_workflow_environment_variables
 
 >> get_workflow_environment_variables()
 
@@ -26,7 +26,7 @@ GitHub Actions Docs: [set_env](https://docs.github.com/en/actions/using-workflow
 **example:**
 
 ```python
->> from github_action_utils import get_env
+>> from github_action_toolkit import get_env
 
 >> get_env("my_env")
 >> get_env("GITHUB_API_URL")
@@ -44,10 +44,42 @@ GitHub Actions Docs: [set_env](https://docs.github.com/en/actions/using-workflow
 **example:**
 
 ```python
->> from github_action_utils import set_env
+>> from github_action_toolkit import set_env
 
 >> set_env("my_env", "test value")
 ```
+
+### **`export_variable(name, value)`**
+
+Sets an environment variable for your workflows (alias for `set_env`). This matches the naming convention from the Node.js `@actions/toolkit`.
+
+**example:**
+
+```python
+>> from github_action_toolkit import export_variable
+
+>> export_variable("BUILD_NUMBER", "123")
+>> export_variable("DEPLOY_ENV", "production")
+```
+
+### **`add_path(path)`**
+
+Prepends a directory to the system PATH for all subsequent actions in the current job. The newly added path is available in the current action and all subsequent actions.
+
+**example:**
+
+```python
+>> from github_action_toolkit import add_path
+>> from pathlib import Path
+
+>> # Add using string path
+>> add_path("/usr/local/bin")
+
+>> # Add using pathlib.Path
+>> add_path(Path("/opt/custom-tools/bin"))
+```
+
+**Note:** The path must be an absolute path. Relative paths will raise a `ValueError`.
 
 ### **`get_all_user_inputs()`**
 

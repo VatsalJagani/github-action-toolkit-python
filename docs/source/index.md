@@ -21,6 +21,8 @@ local_development
 /usage/event_payload
 /usage/git_manager
 /usage/github_artifacts
+/usage/github_api_client
+/usage/github_cache
 /usage/debugging
 ```
 

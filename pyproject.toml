@@ -40,7 +40,8 @@ classifiers = [
 
 dependencies = [
     "gitpython>=3.1",
-    "PyGithub>=1.58"
+    "pydantic>=2.0",
+    "PyGithub>=1.58",
 ]
 
 
