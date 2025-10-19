@@ -37,7 +37,7 @@ Prepends a directory to the system PATH for all subsequent actions in the curren
 **Note:** The path must be an absolute path. Relative paths will raise a `ValueError`.
 
 
-## Output Patterns
+## Examples and Best Practices
 
 ### Structured JSON Output
 
@@ -87,3 +87,9 @@ from github_action_toolkit import set_output
 report_path = Path('reports/coverage.html').resolve()
 set_output('report-path', str(report_path))
 ```
+
+## See Also
+
+- {doc}`/usage/input` - Getting user inputs
+- {doc}`/usage/environment_variables` - Managing environment variables
+- {doc}`/examples` - Complete workflow examples using outputs

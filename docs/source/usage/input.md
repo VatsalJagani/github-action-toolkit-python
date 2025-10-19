@@ -83,7 +83,7 @@ Gets user input from running workflow with type-casting into choice.
 ```
 
 
-## Input Validation
+## Examples and Best Practices
 
 ### Required Inputs with Clear Errors
 
@@ -148,3 +148,10 @@ from github_action_toolkit import get_user_input_as
 debug = get_user_input_as('debug', bool, default_value=False)
 dry_run = get_user_input_as('dry-run', bool, default_value=False)
 ```
+
+## See Also
+
+- {doc}`/usage/output` - Setting outputs for workflow steps
+- {doc}`/usage/environment_variables` - Managing environment variables
+- {doc}`/usage/exceptions` - Handling input errors with `InputError`
+- {doc}`/security` - Input validation best practices

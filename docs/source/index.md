@@ -41,6 +41,37 @@ summary.write()
 
 ## Documentation
 
+### Quick Reference
+
+Looking for something specific? Here's a quick guide:
+
+**Console Output:**
+- {doc}`/usage/print_messages` - Print messages, warnings, errors, and debug information
+- {doc}`/usage/file_annotation` - Create file annotations for linting and code review
+
+**Workflow Data:**
+- {doc}`/usage/input` - Get user inputs from workflow configuration
+- {doc}`/usage/output` - Set outputs and manage PATH
+- {doc}`/usage/environment_variables` - Manage environment variables and state
+
+**Job Summaries:**
+- {doc}`/usage/job_summary` - Create rich formatted summaries
+- {doc}`/usage/job_summary_templates` - Pre-built templates for common use cases
+
+**Error Handling:**
+- {doc}`/usage/exceptions` - Exception types and error handling
+- {doc}`/usage/signal_handling` - Handle cancellation signals
+
+**GitHub Integration:**
+- {doc}`/usage/event_payload` - Access event data from workflow triggers
+- {doc}`/usage/git_manager` - Git repository operations
+- {doc}`/usage/github_artifacts` - Upload and download artifacts
+- {doc}`/usage/github_api_client` - GitHub REST and GraphQL API access
+- {doc}`/usage/github_cache` - Cache dependencies and build outputs
+
+**Development:**
+- {doc}`/usage/debugging` - Debug and troubleshoot workflows
+
 ```{toctree}
 :maxdepth: 2
 :hidden:

@@ -394,3 +394,9 @@ summary.write()
 ## Reference
 
 For more information, see the [GitHub Actions documentation on job summaries](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary).
+
+## See Also
+
+- {doc}`/usage/job_summary_templates` - Pre-built templates for common use cases
+- {doc}`/usage/print_messages` - Basic console output functions
+- {doc}`/examples` - Complete examples using job summaries

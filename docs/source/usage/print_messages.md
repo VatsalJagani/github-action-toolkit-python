@@ -173,7 +173,7 @@ GitHub Actions Docs: [group](https://docs.github.com/en/actions/using-workflows/
 ```
 
 
-## Grouping and Organization
+## Examples and Best Practices
 
 ### Progress Groups
 
@@ -221,3 +221,10 @@ if verbose:
         info('Platform: Linux')
         info('Working directory: /home/runner/work')
 ```
+
+## See Also
+
+- {doc}`/usage/file_annotation` - Creating file annotations and warnings
+- {doc}`/usage/input` - Getting user inputs for controlling verbosity
+- {doc}`/usage/job_summary` - Creating rich job summaries
+- {doc}`/examples` - Complete examples using print functions
