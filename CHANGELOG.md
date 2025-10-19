@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Added GitHubCache class for Actions cache support with following functionality:
+  - save_cache: Save cache with composite keys
+  - restore_cache: Restore cache with fallback key hierarchy
+  - is_feature_available: Check if cache feature is available
+- Added cache-related exceptions: CacheNotFoundError, CacheRestoreError, CacheSaveError
+
 ## [v0.6.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.6.0) - 2025-10-15
 
 ### Added
