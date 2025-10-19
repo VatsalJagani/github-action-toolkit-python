@@ -16,9 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `SimulatorResult` for accessing outputs, summaries, state, and environment variables
 - Property-based testing with Hypothesis for robust validation of edge cases
 - Snapshot testing with Syrupy for validating formatted output consistency
-- Expanded CI matrix to test on Ubuntu, macOS, and Windows across Python 3.11, 3.12, and 3.13
-
-- CI workflow now uses `fail-fast: false` strategy for comprehensive testing across all platform combinations
 
 - Advanced Git Manager features for `Repo` class:
   - Safe directory configuration with `configure_safe_directory()`
