@@ -12,6 +12,8 @@ from github.Artifact import Artifact
 from github.PaginatedList import PaginatedList
 from github.Repository import Repository
 
+from .exceptions import ConfigurationError, EnvironmentError, GitHubAPIError
+
 
 class GitHubArtifacts:
     """
@@ -28,35 +30,53 @@ class GitHubArtifacts:
         github_repo: str | None = None,
     ) -> None:
         """
-        Initialize GitHubArtifacts with token and repository.
+        Initialize GitHub Artifacts manager.
 
-        Args:
-            github_token: GitHub token with repo access (optional, defaults to GITHUB_TOKEN env)
-            github_repo: Repository in 'owner/repo' format (optional, defaults to GITHUB_REPOSITORY env)
+        :param github_token: GitHub token with repo access (optional, defaults to env variable)
+        :param github_repo: Repository in 'owner/repo' format (optional, defaults to env variable)
+        :raises ConfigurationError: When required configuration is missing or invalid
+        :raises EnvironmentError: When required environment variables are not set
+        :raises GitHubAPIError: When GitHub API operations fail
         """
         _token = github_token or os.environ.get("GITHUB_TOKEN")
         if not _token:
-            raise ValueError("GitHub token not provided and GITHUB_TOKEN not set in environment.")
+            raise ConfigurationError(
+                "GitHub token not provided and GITHUB_TOKEN not set in environment. "
+                "Provide a token via github_token parameter or set GITHUB_TOKEN."
+            )
         self.token = _token
 
         if github_repo:
             if "/" not in github_repo:
-                raise ValueError("github_repo must be in 'owner/repo' format")
+                raise ConfigurationError(
+                    f"github_repo must be in 'owner/repo' format, got '{github_repo}'. "
+                    "Example: 'octocat/hello-world'"
+                )
         elif os.environ.get("GITHUB_REPOSITORY"):
             github_repo = os.environ.get("GITHUB_REPOSITORY")
         if not github_repo:
-            raise ValueError(
-                "GitHub repository not provided and GITHUB_REPOSITORY not set in environment."
+            raise EnvironmentError(
+                "GitHub repository not provided and GITHUB_REPOSITORY not set in environment. "
+                "Provide github_repo parameter or run in GitHub Actions context."
             )
 
         _a_run_id: str | None = os.environ.get("GITHUB_RUN_ID")
         if _a_run_id:
             self.action_run_id = _a_run_id
         else:
-            raise RuntimeError("GITHUB_RUN_ID not set")
+            raise EnvironmentError(
+                "GITHUB_RUN_ID not set in environment. "
+                "This class must be used in a GitHub Actions workflow context."
+            )
 
-        gh = PyGithub(login_or_token=self.token)
-        self.repo: Repository = gh.get_repo(full_name_or_id=github_repo)
+        try:
+            gh = PyGithub(login_or_token=self.token)
+            self.repo: Repository = gh.get_repo(full_name_or_id=github_repo)
+        except Exception as e:
+            raise GitHubAPIError(
+                f"Failed to access repository '{github_repo}': {e}. "
+                "Ensure the token has permissions and repository exists."
+            ) from e
 
     def get_artifacts(
         self, current_run_only: bool = False, name_pattern: str | None = None

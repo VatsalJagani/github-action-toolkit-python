@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import re
 import subprocess
@@ -9,6 +11,7 @@ from urllib.parse import urlparse, urlunparse
 from git import Repo as GitRepo
 from github import Github
 
+from .exceptions import ConfigurationError, GitHubAPIError, GitOperationError
 from .print_messages import info, warning
 
 
@@ -27,23 +30,43 @@ class Repo:
         depth: int | None = None,
         single_branch: bool = False,
     ):
+        """
+        Initialize a Git repository manager.
+
+        :param url: URL to clone from (e.g., https://github.com/owner/repo.git)
+        :param path: Path to existing repository
+        :param cleanup: Whether to sync to base branch on enter/exit
+        :param depth: Depth for shallow clone (if cloning)
+        :param single_branch: Whether to clone a single branch (if cloning)
+        :raises ConfigurationError: When neither url nor path is provided
+        :raises GitOperationError: When repository operations fail
+        """
         if not url and not path:
-            raise ValueError("Either 'url' or 'path' must be provided")
+            raise ConfigurationError(
+                "Either 'url' or 'path' must be provided. "
+                "Provide a Git repository URL to clone or a path to an existing repository."
+            )
 
         self.url = url
         self.repo_path = path or tempfile.mkdtemp(prefix="gitrepo_")
 
-        if url:
-            info(f"Cloning repository from {url} to {self.repo_path}")
-            clone_kwargs = {}
-            if depth is not None:
-                clone_kwargs["depth"] = depth
-            if single_branch:
-                clone_kwargs["single_branch"] = single_branch
-            self.repo = GitRepo.clone_from(url, self.repo_path, **clone_kwargs)  # pyright: ignore[reportUnknownArgumentType]
-        else:
-            info(f"Using existing repository at {self.repo_path}")
-            self.repo = GitRepo(path)
+        try:
+            if url:
+                info(f"Cloning repository from {url} to {self.repo_path}")
+                clone_kwargs = {}
+                if depth is not None:
+                    clone_kwargs["depth"] = depth
+                if single_branch:
+                    clone_kwargs["single_branch"] = single_branch
+                self.repo = GitRepo.clone_from(url, self.repo_path, **clone_kwargs)  # pyright: ignore[reportUnknownArgumentType]
+            else:
+                info(f"Using existing repository at {self.repo_path}")
+                self.repo = GitRepo(path)
+        except Exception as e:
+            raise GitOperationError(
+                f"Failed to initialize repository: {e}. "
+                f"Ensure the URL is valid and accessible or the path exists."
+            ) from e
 
         self.base_branch = self.repo.active_branch.name
         self.cleanup = cleanup
@@ -126,29 +149,50 @@ class Repo:
         :param head: Source branch for the PR (optional, uses current branch)
         :param base: Target branch for the PR (optional, uses original base branch)
         :returns: URL of the created PR
+        :raises ConfigurationError: When GitHub token is not available
+        :raises GitHubAPIError: When PR creation fails
         """
 
         # 1. Get GitHub token
         token = github_token or os.environ.get("GITHUB_TOKEN")
         if not token:
-            raise ValueError("GitHub token not provided and GITHUB_TOKEN not set in environment.")
+            raise ConfigurationError(
+                "GitHub token not provided and GITHUB_TOKEN not set in environment. "
+                "Provide a token via the github_token parameter or set GITHUB_TOKEN."
+            )
 
         # 2. Infer repo name from remote
-        origin_url = self.repo.remotes.origin.url
+        try:
+            origin_url = self.repo.remotes.origin.url
+        except Exception as e:
+            raise GitOperationError(
+                f"Failed to get origin remote URL: {e}. "
+                "Ensure the repository has an 'origin' remote configured."
+            ) from e
+
         # Convert SSH or HTTPS URL to "owner/repo"
         match = re.search(r"(github\.com[:/])(.+?)(\.git)?$", origin_url)
         if not match:
-            raise ValueError(f"Cannot extract repo name from remote URL: {origin_url}")
+            raise ConfigurationError(
+                f"Cannot extract repo name from remote URL: {origin_url}. "
+                "Expected a GitHub URL like https://github.com/owner/repo.git"
+            )
         repo_name = match.group(2)
 
         # 3. Use last commit message as PR title
         if not title:
-            raw_message = self.repo.head.commit.message
-            if isinstance(raw_message, bytes):
-                raw_message = raw_message.decode()
-            title = raw_message.strip()
-            if not title:
-                raise ValueError("No commit message found for PR title.")
+            try:
+                raw_message = self.repo.head.commit.message
+                if isinstance(raw_message, bytes):
+                    raw_message = raw_message.decode()
+                title = raw_message.strip()
+                if not title:
+                    raise ConfigurationError(
+                        "No commit message found for PR title. "
+                        "Provide a title parameter or ensure the repository has commits."
+                    )
+            except Exception as e:
+                raise GitOperationError(f"Failed to get commit message: {e}") from e
 
         # 4. Use current branch as head
         if not head:
@@ -159,11 +203,16 @@ class Repo:
             base = self.base_branch or "main"  # fallback if not set during init
 
         # 6. Create PR using PyGithub
-        github = Github(token)
-        repo = github.get_repo(repo_name)
-        pr = repo.create_pull(title=title, body=body, head=head, base=base)
-
-        return pr.html_url
+        try:
+            github = Github(token)
+            repo = github.get_repo(repo_name)
+            pr = repo.create_pull(title=title, body=body, head=head, base=base)
+            return pr.html_url
+        except Exception as e:
+            raise GitHubAPIError(
+                f"Failed to create pull request: {e}. "
+                f"Ensure the token has permissions and branches exist (head: {head}, base: {base})."
+            ) from e
 
     def configure_safe_directory(self):
         """

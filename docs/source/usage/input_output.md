@@ -199,3 +199,21 @@ GitHub Actions Docs: [save_state](https://docs.github.com/en/actions/using-workf
 
 >> save_state("my_state", "test value")
 ```
+
+### **`with_env(**env_vars)`**
+
+Context manager for temporarily setting environment variables. Variables are automatically restored to their original values (or removed if they didn't exist) when the context exits.
+
+**example:**
+
+```python
+>> from github_action_toolkit import with_env
+>> import os
+
+>> # Temporarily set environment variables
+>> with with_env(MY_VAR="value", ANOTHER="test"):
+>>     print(os.environ["MY_VAR"])  # "value"
+>>     print(os.environ["ANOTHER"])  # "test"
+>> # Variables are restored here
+>> print(os.environ.get("MY_VAR"))  # None (if it didn't exist before)
+```

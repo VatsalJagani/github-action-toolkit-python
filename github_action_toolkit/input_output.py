@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import os
 import threading
+from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 from warnings import warn
 
 from .consts import ACTION_ENV_DELIMITER
+from .exceptions import EnvironmentError, InputError
 from .print_messages import echo, escape_data, escape_property, group
 
 # Thread-local lock for file operations to ensure thread-safety
@@ -110,6 +115,7 @@ def get_user_input_as(name: str, input_type: type, default_value: Any = None) ->
     :param input_type: Type to cast the input value to (e.g., str, int, float, bool)
     :param default_value: In case the input is not provided return this as default value (e.g., True, False, 0, etc)
     :returns: input value cast to the specified type or None
+    :raises InputError: When the input value cannot be converted to the specified type
     """
     value = get_user_input(name)
     if value is None:
@@ -137,7 +143,10 @@ def get_user_input_as(name: str, input_type: type, default_value: Any = None) ->
                 return input_type(value)
 
     except ValueError as e:
-        raise ValueError(f"Cannot convert input '{name}' to {input_type}: {e}") from e
+        raise InputError(
+            f"Cannot convert input '{name}' with value '{value}' to {input_type.__name__}. "
+            f"Provide a valid {input_type.__name__} value for input '{name}'."
+        ) from e
 
 
 def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> None:
@@ -147,6 +156,7 @@ def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> Non
     :param name: name of the output
     :param value: value of the output
     :returns: None
+    :raises EnvironmentError: When GITHUB_OUTPUT environment variable is not set
     """
     if use_subprocess is not None:
         warn(
@@ -156,7 +166,14 @@ def set_output(name: str, value: Any, use_subprocess: bool | None = None) -> Non
             stacklevel=2,
         )
 
-    _write_to_file(os.environ["GITHUB_OUTPUT"], _build_file_input(name, value))
+    output_file = os.environ.get("GITHUB_OUTPUT")
+    if not output_file:
+        raise EnvironmentError(
+            "GITHUB_OUTPUT environment variable is not set. "
+            "This function must be run in a GitHub Actions context."
+        )
+
+    _write_to_file(output_file, _build_file_input(name, value))
 
 
 def get_state(name: str) -> str | None:
@@ -177,6 +194,7 @@ def save_state(name: str, value: Any, use_subprocess: bool | None = None) -> Non
     :param name: Name of the state environment variable (e.g: STATE_{name})
     :param value: value of the state environment variable
     :returns: None
+    :raises EnvironmentError: When GITHUB_STATE environment variable is not set
     """
     if use_subprocess is not None:
         warn(
@@ -186,7 +204,14 @@ def save_state(name: str, value: Any, use_subprocess: bool | None = None) -> Non
             stacklevel=2,
         )
 
-    _write_to_file(os.environ["GITHUB_STATE"], _build_file_input(name, value))
+    state_file = os.environ.get("GITHUB_STATE")
+    if not state_file:
+        raise EnvironmentError(
+            "GITHUB_STATE environment variable is not set. "
+            "This function must be run in a GitHub Actions context."
+        )
+
+    _write_to_file(state_file, _build_file_input(name, value))
 
 
 def get_workflow_environment_variables() -> dict[str, Any]:
@@ -194,11 +219,19 @@ def get_workflow_environment_variables() -> dict[str, Any]:
     get a dictionary of all environment variables set in the GitHub Actions workflow.
 
     :returns: dictionary of all environment variables
+    :raises EnvironmentError: When GITHUB_ENV environment variable is not set
     """
+    env_file = os.environ.get("GITHUB_ENV")
+    if not env_file:
+        raise EnvironmentError(
+            "GITHUB_ENV environment variable is not set. "
+            "This function must be run in a GitHub Actions context."
+        )
+
     environment_variable_dict: dict[str, str] = {}
     marker = f"<<{ACTION_ENV_DELIMITER}"
 
-    with open(os.environ["GITHUB_ENV"], "rb") as file:
+    with open(env_file, "rb") as file:
         for line in file:
             decoded_line: str = line.decode("utf-8")
 
@@ -231,8 +264,51 @@ def set_env(name: str, value: Any) -> None:
     :param name: name of the environment variable
     :param value: value of the environment variable
     :returns: None
+    :raises EnvironmentError: When GITHUB_ENV environment variable is not set
     """
-    _write_to_file(os.environ["GITHUB_ENV"], _build_file_input(name, value))
+    env_file = os.environ.get("GITHUB_ENV")
+    if not env_file:
+        raise EnvironmentError(
+            "GITHUB_ENV environment variable is not set. "
+            "This function must be run in a GitHub Actions context."
+        )
+
+    with open(env_file, "ab") as f:
+        f.write(_build_file_input(name, value))
+
+
+@contextmanager
+def with_env(**env_vars: str) -> Generator[None, None, None]:
+    """
+    Temporarily set environment variables within a context.
+
+    Environment variables are restored to their original values (or removed if they
+    didn't exist) when the context exits.
+
+    Example:
+        with with_env(MY_VAR="value", ANOTHER="test"):
+            # MY_VAR and ANOTHER are set here
+            pass
+        # Variables are restored here
+
+    :param env_vars: Environment variables to set as keyword arguments
+    :returns: Context manager that handles environment variable scoping
+    """
+    original_values: dict[str, str | None] = {}
+
+    for key in env_vars:
+        original_values[key] = os.environ.get(key)
+
+    try:
+        for key, value in env_vars.items():
+            os.environ[key] = value
+        yield
+    finally:
+        for key, original_value in original_values.items():
+            if original_value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = original_value
 
 
 def export_variable(name: str, value: Any) -> None:

@@ -26,6 +26,7 @@ __all__ = (  # noqa: F405
     "get_workflow_environment_variables",
     "get_env",
     "set_env",
+    "with_env",
     "export_variable",
     "add_path",
     "event_payload",
@@ -57,6 +58,17 @@ __all__ = (  # noqa: F405
     "CacheRestoreError",
     "CacheSaveError",
     "print_directory_tree",
+    "GitHubActionError",
+    "EnvironmentError",
+    "InputError",
+    "GitOperationError",
+    "GitHubAPIError",
+    "ConfigurationError",
+    "CancellationRequested",
+    "register_cancellation_handler",
+    "enable_cancellation_support",
+    "disable_cancellation_support",
+    "is_cancellation_enabled",
     "simulate_github_action",
     "SimulatorConfig",
     "SimulatorResult",
@@ -68,6 +80,7 @@ __all__ = (  # noqa: F405
 from .debugging import *  # noqa: F403
 from .event_models import *  # noqa: F403
 from .event_payload import *  # noqa: F403
+from .exceptions import *  # noqa: F403
 from .git_manager import *  # noqa: F403
 from .github_api_client import *  # noqa: F403
 from .github_artifacts import *  # noqa: F403
@@ -76,4 +89,5 @@ from .input_output import *  # noqa: F403
 from .job_summary import *  # noqa: F403
 from .local_simulator import *  # noqa: F403
 from .print_messages import *  # noqa: F403
+from .signal_handling import *  # noqa: F403
 from .version import VERSION, VERSION_SHORT  # noqa: F403

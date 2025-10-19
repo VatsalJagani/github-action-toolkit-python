@@ -161,7 +161,7 @@ def test_get_user_input_as_missing_env_var():
 
 @mock.patch.dict(os.environ, {"INPUT_BROKEN": "abc"})
 def test_get_user_input_as_type_cast_error():
-    with pytest.raises(ValueError):
+    with pytest.raises(gat.InputError):
         gat.get_user_input_as("broken", int)
 
 
@@ -195,6 +195,49 @@ def test_get_workflow_environment_variables(tmpdir: Any) -> None:
 def test_get_env() -> None:
     assert gat.get_env("GITHUB_ACTOR") == "test"
     assert gat.get_env("ANOTHER") == "another test"
+
+
+def test_with_env_context_manager():
+    """Test with_env context manager sets and restores environment variables."""
+    original_value = os.environ.get("TEST_VAR", None)
+    os.environ["EXISTING_VAR"] = "original"
+
+    with gat.with_env(TEST_VAR="temp_value", EXISTING_VAR="modified"):
+        assert os.environ.get("TEST_VAR") == "temp_value"
+        assert os.environ.get("EXISTING_VAR") == "modified"
+
+    assert os.environ.get("TEST_VAR") == original_value
+    assert os.environ.get("EXISTING_VAR") == "original"
+
+    os.environ.pop("EXISTING_VAR", None)
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_set_output_without_github_output_raises_error():
+    """Test set_output raises EnvironmentError when GITHUB_OUTPUT not set."""
+    with pytest.raises(gat.EnvironmentError):
+        gat.set_output("test", "value")
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_save_state_without_github_state_raises_error():
+    """Test save_state raises EnvironmentError when GITHUB_STATE not set."""
+    with pytest.raises(gat.EnvironmentError):
+        gat.save_state("test", "value")
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_set_env_without_github_env_raises_error():
+    """Test set_env raises EnvironmentError when GITHUB_ENV not set."""
+    with pytest.raises(gat.EnvironmentError):
+        gat.set_env("test", "value")
+
+
+@mock.patch.dict(os.environ, {}, clear=True)
+def test_get_workflow_environment_variables_without_github_env_raises_error():
+    """Test get_workflow_environment_variables raises error when GITHUB_ENV not set."""
+    with pytest.raises(gat.EnvironmentError):
+        gat.get_workflow_environment_variables()
 
 
 def test_export_variable(tmpdir: Any) -> None:
