@@ -13,29 +13,32 @@ from github_action_toolkit.exceptions import CancellationRequested
 
 def test_enable_disable_cancellation_support():
     """Test enabling and disabling cancellation support."""
-    assert not gat.is_cancellation_enabled()
+    handler = gat.CancellationHandler()
+    assert not handler.is_enabled()
 
-    gat.enable_cancellation_support()
-    assert gat.is_cancellation_enabled()
+    handler.enable()
+    assert handler.is_enabled()
 
-    gat.disable_cancellation_support()
-    assert not gat.is_cancellation_enabled()
+    handler.disable()
+    assert not handler.is_enabled()
 
 
 def test_enable_cancellation_support_idempotent():
     """Test that enabling cancellation support multiple times is safe."""
-    gat.enable_cancellation_support()
-    gat.enable_cancellation_support()
-    assert gat.is_cancellation_enabled()
+    handler = gat.CancellationHandler()
+    handler.enable()
+    handler.enable()
+    assert handler.is_enabled()
 
-    gat.disable_cancellation_support()
+    handler.disable()
 
 
 def test_disable_cancellation_support_idempotent():
     """Test that disabling cancellation support multiple times is safe."""
-    gat.disable_cancellation_support()
-    gat.disable_cancellation_support()
-    assert not gat.is_cancellation_enabled()
+    handler = gat.CancellationHandler()
+    handler.disable()
+    handler.disable()
+    assert not handler.is_enabled()
 
 
 def test_register_cancellation_handler():
@@ -45,8 +48,9 @@ def test_register_cancellation_handler():
     def handler():
         handler_called.append(True)
 
-    gat.register_cancellation_handler(handler)
-    gat.enable_cancellation_support()
+    cancellation = gat.CancellationHandler()
+    cancellation.register(handler)
+    cancellation.enable()
 
     try:
         with pytest.raises(CancellationRequested):
@@ -54,7 +58,7 @@ def test_register_cancellation_handler():
 
         assert len(handler_called) == 1
     finally:
-        gat.disable_cancellation_support()
+        cancellation.disable()
 
 
 def test_multiple_cancellation_handlers():
@@ -67,9 +71,10 @@ def test_multiple_cancellation_handlers():
     def handler2():
         call_order.append(2)
 
-    gat.register_cancellation_handler(handler1)
-    gat.register_cancellation_handler(handler2)
-    gat.enable_cancellation_support()
+    cancellation = gat.CancellationHandler()
+    cancellation.register(handler1)
+    cancellation.register(handler2)
+    cancellation.enable()
 
     try:
         with pytest.raises(CancellationRequested):
@@ -77,7 +82,7 @@ def test_multiple_cancellation_handlers():
 
         assert call_order == [1, 2]
     finally:
-        gat.disable_cancellation_support()
+        cancellation.disable()
 
 
 def test_cancellation_handler_exceptions_are_caught():
@@ -91,9 +96,10 @@ def test_cancellation_handler_exceptions_are_caught():
     def successful_handler():
         call_order.append(2)
 
-    gat.register_cancellation_handler(failing_handler)
-    gat.register_cancellation_handler(successful_handler)
-    gat.enable_cancellation_support()
+    cancellation = gat.CancellationHandler()
+    cancellation.register(failing_handler)
+    cancellation.register(successful_handler)
+    cancellation.enable()
 
     try:
         with pytest.raises(CancellationRequested):
@@ -101,4 +107,4 @@ def test_cancellation_handler_exceptions_are_caught():
 
         assert call_order == [1, 2]
     finally:
-        gat.disable_cancellation_support()
+        cancellation.disable()

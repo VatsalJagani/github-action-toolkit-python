@@ -56,9 +56,3 @@ class Debugging:
                     is_last = i == len(files) - 1 and not dirs
                     prefix = prefix_map["last_branch"] if is_last else prefix_map["branch"]
                     info(f"{base_indent}{prefix}{f}")
-
-
-# Backward compatibility function
-def print_directory_tree(max_level: int = 3) -> None:
-    """Print directory structure in a visually appealing tree format."""
-    Debugging.print_directory_tree(max_level)

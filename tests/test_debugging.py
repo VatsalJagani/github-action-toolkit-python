@@ -13,7 +13,7 @@ from typing import Any
 
 import pytest
 
-import github_action_toolkit.debugging as gat_debugging
+import github_action_toolkit as gat
 
 
 @pytest.fixture
@@ -108,7 +108,7 @@ def test_print_directory_tree(
     original_dir = os.getcwd()
     os.chdir(temp_directory)
     try:
-        gat_debugging.print_directory_tree(max_level=max_level)
+        gat.Debugging.print_directory_tree(max_level=max_level)
         out, _ = capfd.readouterr()
         lines = _filtered_lines(out)
 
@@ -140,7 +140,7 @@ def test_print_directory_tree_empty_dir(capfd: Any, tmp_path: Path) -> None:
     original_dir = os.getcwd()
     os.chdir(tmp_path)
     try:
-        gat_debugging.print_directory_tree()
+        gat.Debugging.print_directory_tree()
         out, _ = capfd.readouterr()
         lines = _filtered_lines(out)
         assert len(lines) == 1

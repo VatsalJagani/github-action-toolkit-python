@@ -10,8 +10,8 @@ def test_event_models_imports():
     from github_action_toolkit.event_models import (
         Actor,
         BaseEvent,
-        Commit,
         Comment,
+        Commit,
         Issue,
         IssueCommentEvent,
         Label,
@@ -70,7 +70,7 @@ def test_exceptions_imports():
 
 
 def test_main_package_imports():
-    """Test that main package still exports the expected items."""
+    """Test that main package exports the expected items."""
     import github_action_toolkit as gat
 
     # Classes
@@ -85,23 +85,26 @@ def test_main_package_imports():
     assert hasattr(gat, "GitHubArtifacts")
     assert hasattr(gat, "GitHubAPIClient")
 
-    # Functions (backward compatibility)
-    assert hasattr(gat, "event_payload")
-    assert hasattr(gat, "get_event_name")
-    assert hasattr(gat, "get_typed_event")
-    assert hasattr(gat, "is_pr")
-    assert hasattr(gat, "get_pr_number")
-    assert hasattr(gat, "head_ref")
-    assert hasattr(gat, "base_ref")
-    assert hasattr(gat, "get_changed_files")
-    assert hasattr(gat, "get_labels")
+    # Check that the __all__ does not include the functions
+    assert "event_payload" not in gat.__all__
+    assert "get_event_name" not in gat.__all__
+    assert "get_typed_event" not in gat.__all__
+    assert "is_pr" not in gat.__all__
+    assert "get_pr_number" not in gat.__all__
+    assert "head_ref" not in gat.__all__
+    assert "base_ref" not in gat.__all__
+    assert "get_changed_files" not in gat.__all__
+    assert "get_labels" not in gat.__all__
+    assert "print_directory_tree" not in gat.__all__
+    assert "register_cancellation_handler" not in gat.__all__
+    assert "enable_cancellation_support" not in gat.__all__
+    assert "disable_cancellation_support" not in gat.__all__
+    assert "is_cancellation_enabled" not in gat.__all__
 
-    assert hasattr(gat, "print_directory_tree")
-
-    assert hasattr(gat, "register_cancellation_handler")
-    assert hasattr(gat, "enable_cancellation_support")
-    assert hasattr(gat, "disable_cancellation_support")
-    assert hasattr(gat, "is_cancellation_enabled")
+    # Verify that the module objects themselves are not callables
+    # (they're modules, not functions)
+    if hasattr(gat, "event_payload"):
+        assert not callable(gat.event_payload) or str(type(gat.event_payload)) == "<class 'module'>"
 
 
 def test_class_functionality():

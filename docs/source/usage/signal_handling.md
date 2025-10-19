@@ -3,9 +3,19 @@ Signal Handling & Cancellation
 
 The toolkit provides support for graceful cancellation when workflows are stopped or cancelled. This allows your actions to clean up resources properly before exiting.
 
-## Cancellation Support
+## CancellationHandler Class
 
-### **`enable_cancellation_support()`**
+The `CancellationHandler` class provides a unified interface for managing cancellation signals.
+
+### Creating a Handler
+
+```python
+from github_action_toolkit import CancellationHandler
+
+handler = CancellationHandler()
+```
+
+### **`enable()`**
 
 Enable automatic handling of cancellation signals (SIGTERM and SIGINT). When enabled, cancellation signals will:
 1. Call all registered cancellation handlers
@@ -14,50 +24,58 @@ Enable automatic handling of cancellation signals (SIGTERM and SIGINT). When ena
 **example:**
 
 ```python
-from github_action_toolkit import enable_cancellation_support, CancellationRequested
+from github_action_toolkit import CancellationHandler
+from github_action_toolkit.exceptions import CancellationRequested
 
-enable_cancellation_support()
+handler = CancellationHandler()
+handler.enable()
 
 try:
     # Your long-running operation
     process_data()
 except CancellationRequested:
     print("Operation was cancelled, cleaning up...")
+finally:
+    handler.disable()
 ```
 
-### **`disable_cancellation_support()`**
+### **`disable()`**
 
 Disable automatic handling of cancellation signals and restore original signal handlers.
 
 **example:**
 
 ```python
-from github_action_toolkit import disable_cancellation_support
+from github_action_toolkit import CancellationHandler
 
-disable_cancellation_support()
+handler = CancellationHandler()
+handler.enable()
+# ... do work ...
+handler.disable()
 ```
 
-### **`is_cancellation_enabled()`**
+### **`is_enabled()`**
 
-Check if cancellation support is currently enabled.
+Check if cancellation support is currently enabled for this handler.
 
 **example:**
 
 ```python
-from github_action_toolkit import is_cancellation_enabled
+from github_action_toolkit import CancellationHandler
 
-if is_cancellation_enabled():
+handler = CancellationHandler()
+if handler.is_enabled():
     print("Cancellation support is active")
 ```
 
-### **`register_cancellation_handler(handler)`**
+### **`register(handler_func)`**
 
 Register a cleanup handler to be called when cancellation is requested. Handlers are called in the order they were registered.
 
 **example:**
 
 ```python
-from github_action_toolkit import register_cancellation_handler, enable_cancellation_support
+from github_action_toolkit import CancellationHandler
 
 def cleanup_database():
     print("Closing database connections...")
@@ -67,16 +85,23 @@ def cleanup_files():
     print("Removing temporary files...")
     # Cleanup code
 
-register_cancellation_handler(cleanup_database)
-register_cancellation_handler(cleanup_files)
-enable_cancellation_support()
+cancellation = CancellationHandler()
+cancellation.register(cleanup_database)
+cancellation.register(cleanup_files)
+cancellation.enable()
 
 # Both handlers will be called on cancellation
 ```
 
-### **`CancellationRequested`**
+## CancellationRequested Exception
 
 Exception raised when a cancellation signal (SIGTERM or SIGINT) is received. Catch this exception to handle cancellation gracefully.
+
+Import from `github_action_toolkit.exceptions`:
+
+```python
+from github_action_toolkit.exceptions import CancellationRequested
+```
 
 **example:**
 

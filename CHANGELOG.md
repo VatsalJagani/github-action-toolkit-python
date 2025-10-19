@@ -21,13 +21,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `GitOperationError` - For git operation failures
   - `GitHubAPIError` - For GitHub API failures
   - `ConfigurationError` - For invalid configuration
+  - `CacheNotFoundError`, `CacheRestoreError`, `CacheSaveError` - For cache operations
+  - `APIError`, `RateLimitError` - For GitHub API errors
+  - `CancellationRequested` - For cancellation signals
 - Added scoped environment helpers:
   - `with_env()` - Context manager for temporary environment variables
-- Added cancellation support for graceful shutdown:
-  - `CancellationRequested` - Exception raised on SIGTERM/SIGINT
-  - `enable_cancellation_support()` - Enable signal handling
-  - `disable_cancellation_support()` - Disable signal handling
-  - `register_cancellation_handler()` - Register cleanup handlers
+- Added new class-based APIs:
+  - `EventPayload` - Class for accessing GitHub Actions event data
+  - `Debugging` - Class with static methods for debugging utilities
+  - `CancellationHandler` - Class for managing cancellation signals
+- Added `GitRepo` as an alias for `Repo` class
+
+### Changed
+
+- **BREAKING**: Removed backward compatibility function exports from main package
+  - Event payload functions (`event_payload()`, `get_event_name()`, etc.) removed - use `EventPayload` class instead
+  - Debugging function (`print_directory_tree()`) removed - use `Debugging.print_directory_tree()` instead
+  - Signal handling functions (`enable_cancellation_support()`, etc.) removed - use `CancellationHandler` class instead
+- **BREAKING**: Event models no longer exported from main package
+  - Import from `github_action_toolkit.event_models` instead
+- **BREAKING**: Exceptions no longer exported from main package  
+  - Import from `github_action_toolkit.exceptions` instead
+- Simplified package exports to focus on class-based APIs
+
+### Migration Guide
+
+**Before:**
+```python
+from github_action_toolkit import event_payload, get_event_name, is_pr
+from github_action_toolkit import print_directory_tree
+from github_action_toolkit import enable_cancellation_support
+from github_action_toolkit import PushEvent, CancellationRequested
+
+payload = event_payload()
+name = get_event_name()
+print_directory_tree()
+enable_cancellation_support()
+```
+
+**After:**
+```python
+from github_action_toolkit import EventPayload, Debugging, CancellationHandler
+from github_action_toolkit.event_models import PushEvent
+from github_action_toolkit.exceptions import CancellationRequested
+
+event = EventPayload()
+payload = event.get_payload()
+name = event.get_event_name()
+
+Debugging.print_directory_tree()
+
+handler = CancellationHandler()
+handler.enable()
+```
   - `is_cancellation_enabled()` - Check if cancellation is enabled
 
 ### Changed
