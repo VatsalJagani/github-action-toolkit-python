@@ -98,6 +98,17 @@ When you're ready to contribute code to address an open issue, please follow the
 
 4. **Test your changes**
 
+    <details><summary>Expand details 👇</summary><br/>
+
+    Before submitting a pull request:
+    
+    - Run tests: `uv run pytest`
+    - Run linting: `make lint` or `uv run python devtools/lint.py`
+    - Ensure your code builds: `uv build`
+    
+    </details>
+
+
 **Then Read the `development.md` file on GitHub for this project for development guidelines.**
 
 

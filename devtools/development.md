@@ -11,6 +11,7 @@ repo](https://github.com/VatsalJagani/github-action-toolkit/fork) (having your o
 fork will make it easier to contribute) and
 [clone it](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
 
+
 ## Basic Developer Workflows
 
 The `Makefile` simply offers shortcuts to `uv` commands for developer convenience.
@@ -73,6 +74,24 @@ uv add package_name@latest
 
 See [uv docs](https://docs.astral.sh/uv/) for details.
 
+## Optional Dependency Extras
+
+The project provides granular optional dependency groups:
+
+- `test`: Testing dependencies (pytest, pytest-cov, etc.)
+- `lint`: Linting and formatting tools (ruff, codespell)
+- `typing`: Type checking tools (basedpyright, mypy)
+- `docs`: Documentation building tools (sphinx, furo, etc.)
+- `utils`: Development utilities (rich, funlog)
+- `dev`: All development dependencies (meta-extra)
+- `release`: Release related dependencies (pip, twine)
+
+Install specific extras:
+```shell
+uv sync --extra test --extra lint
+# Or install all at once:
+uv sync --all-extras
+```
 
 
 ## Agent Rules
