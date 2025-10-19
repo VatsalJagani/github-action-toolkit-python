@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Fixed Job Summary Templates documentation to correctly document the `JobSummaryTemplate` class static methods instead of unrelated custom examples.
+
+
 ## [v0.8.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.8.0) - 2025-10-19
 
 ### Added
