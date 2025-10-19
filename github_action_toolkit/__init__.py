@@ -28,6 +28,10 @@ __all__ = (  # noqa: F405
     "Repo",
     "GitHubArtifacts",
     "print_directory_tree",
+    "simulate_github_action",
+    "run_action_locally",
+    "SimulatorConfig",
+    "SimulatorResult",
 )
 
 from .debugging import *  # noqa: F403
@@ -36,5 +40,6 @@ from .git_manager import *  # noqa: F403
 from .github_artifacts import *  # noqa: F403
 from .input_output import *  # noqa: F403
 from .job_summary import *  # noqa: F403
+from .local_simulator import *  # noqa: F403
 from .print_messages import *  # noqa: F403
 from .version import VERSION, VERSION_SHORT  # noqa: F403

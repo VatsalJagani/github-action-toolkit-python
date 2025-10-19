@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Local development simulator for testing GitHub Actions locally without pushing to GitHub
+  - `simulate_github_action()` context manager for full environment simulation
+  - `run_action_locally()` convenience function for quick testing
+  - `SimulatorConfig` class for customizing simulated environment
+  - `SimulatorResult` for accessing outputs, summaries, state, and environment variables
+- Property-based testing with Hypothesis for robust validation of edge cases
+- Snapshot testing with Syrupy for validating formatted output consistency
+- Expanded CI matrix to test on Ubuntu, macOS, and Windows across Python 3.11, 3.12, and 3.13
+
+### Changed
+
+- CI workflow now uses `fail-fast: false` strategy for comprehensive testing across all platform combinations
+
 ## [v0.6.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.6.0) - 2025-10-15
 
 ### Added

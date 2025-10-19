@@ -7,6 +7,7 @@
 
 installation
 usage
+local_development
 ```
 
 ```{toctree}
