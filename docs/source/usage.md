@@ -19,3 +19,5 @@ This section documents all the functions provided by `github-action-toolkit`. Th
 * **[GitHub Artifact Functions](/usage/github_artifacts)**
 
 * **[GitHub API Client](/usage/github_api_client)**
+
+* **[GitHub Cache Functions](/usage/github_cache)**
