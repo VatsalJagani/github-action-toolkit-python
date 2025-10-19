@@ -39,7 +39,7 @@ Therefore:
 
 # General Coding Guidelines
 
-## Using Comments
+## Comments
 
 - Keep all comments concise and clear and suitable for inclusion in final production.
 
@@ -62,6 +62,7 @@ Therefore:
   This is fine: “// Now fetch the data from the cache”
 
 - DO NOT use emojis or special unicode characters like ① or • or – or — in comments.
+  Comments should explain why, not restate what the code clearly does. Keep them concise.
 
 - Use emojis in output if it enhances the clarity and can be done consistently.
   You may use ✔︎ and ✘ to indicate success and failure, and ∆ and ‼︎ for user-facing
@@ -71,8 +72,6 @@ Therefore:
   Unless the user says otherwise, avoid emojis and Unicode in comments as clutters the
   output with little benefit.---
 description: Python Coding Guidelines
-globs: *.py,pyproject.toml
-alwaysApply: false
 ---
 # Python Coding Guidelines
 
@@ -125,104 +124,6 @@ Always use full type annotations, generics, and other modern practices.
 - You must verify there are zero linter warnings/errors or test failures before
   considering any task complete.
 
-## Linting, Formatting, and Type Checking
-
-This project uses a comprehensive set of tools to ensure code quality:
-
-- codespell: Automatically checks and fixes spelling errors in code and documentation. Runs with --write-changes, so typos are auto-fixed.
-- ruff check: Fast linter; runs with --fix to auto-fix where possible.
-- ruff format: Formatter compatible with Black; formats code and sorts imports.
-- basedpyright: Modern type checker; shows coverage stats with --stats.
-
-All these run together via `make lint`. It will:
-1. Fix spelling errors automatically
-2. Fix lint issues where possible
-3. Format all code consistently
-4. Check types and report any errors
-
-After `make lint`, address any remaining issues that couldn’t be auto-fixed. Prefer adding types over ignores; use `# pyright: ignore` only for justified false positives. See pyproject.toml for configured rules.
-
-For test files prefer to fix the test-cases issues first before coming to fix the linting and type-checking issues.
-As some type-checking issues are common for test-files, ignore specific rule for particular line in the test file. And if the same rule ignore needs to be ignores for more than 1 line then ignore it at file level.
-
-File level pyright ignore can be written in this format, example `# pyright: reportUnusedVariable=false`.
-Line specific pyright ignore can be written in this format, example `# pyright: ignore[reportMissingImports]`.
-
-## Documentation (Sphinx + MyST) Guidelines
-
-This repo uses Sphinx with MyST Markdown for docs.
-
-- Structure
-  - Sources live in `docs/source/`.
-  - Top-level landing page is `docs/source/index.md` with MyST `toctree` entries.
-  - Feature/usage guides live under `docs/source/usage/` and are plain `.md` files.
-  - Static assets go under `docs/source/_static/` (CSS, images, etc.).
-
-- Authoring conventions
-  - Use MyST Markdown (not reStructuredText) for new pages.
-  - One top-level `#` heading per page; use `##` and below for subsections.
-  - File naming: snake_case to match existing pages (e.g., `git_manager.md`).
-  - Prefer concise “what/why/how” sections; avoid restating code or obvious facts.
-  - Code blocks: use fenced code blocks with a language, e.g.,
-    ```
-    ```python
-    from github_action_toolkit import Repo
-    ```
-    ```
-  - Commands: use `bash` fenced blocks. Keep one command per line; make them copyable.
-  - Admonitions: use MyST directives for notes/warnings when helpful, e.g.,
-    ```
-    ```{note}
-    This step is non-fatal and only logs on failure.
-    ```
-    ```
-  - Links: prefer relative links to other docs pages; external links must be full URLs.
-  - Cross-references: rely on headings/anchors (MyST auto-generates anchors for headings).
-
-- Adding a new usage page
-  - Create `docs/source/usage/<topic>.md` with a clear `#` title.
-  - Add it to the Usage `toctree` in `docs/source/index.md` (e.g., `/usage/<topic>`).
-  - Keep examples minimal and runnable; prefer Python snippets or short command blocks.
-
-- Validation
-  - Build docs locally and keep them warning-free:
-    - `make docs-check` (runs `uv sync` and Sphinx via the Makefile target).
-  - For live preview while editing docs: `make docs-live`.
-  - Fix broken links, missing references, or formatting warnings immediately.
-
-## Changelog updates (Keep a Changelog)
-
-- Always update `CHANGELOG.md` whenever a change is user-facing. This includes, but isn’t limited to:
-  - Source code behavior changes
-  - Configuration/schema or environment variable changes
-  - Python package functions or classes changes
-  - Logging format or content that users see
-  - Documentation changes that affect how users use or understand the project (guides, examples, reference, navigation)
-- Add entries under the Unreleased section using concise bullets. Prefer the standard categories:
-  - Added, Changed, Fixed, Deprecated, Removed, Security
-  - If a docs-only change is clearly user-facing, include it under Added/Changed (don’t hide it under internal changes).
-- Keep entries short, specific, and actionable. Use imperative mood and avoid implementation detail.
-
-
-## Documentation and README updates
-
-Whenever a change is user-facing, update the documentation and README in the same pull request.
-
-- What to update in docs (`docs/source`):
-  - Pages that reflect behavior, inputs/outputs, configuration, environment variables, supported versions, CLI/entry points, defaults, and migration/deprecation notes.
-  - Examples and code snippets to match new APIs, flags, defaults, or workflows.
-  - Toctree entries when adding/removing pages; fix cross-references and anchors.
-  - Screenshots/diagrams if UI or output changes are visible to users.
-- What to update in `README.md`:
-  - Quickstart/installation, minimum supported versions, badges, and primary usage examples.
-  - High-level configuration summary and links into the docs for details.
-  - Any action usage snippets or copy-paste examples so they remain accurate.
-- Validation before submitting the PR:
-  - Run the docs validation task and ensure it passes with no warnings treated as errors: `make docs-check`.
-  - Ensure `CHANGELOG.md` has an Unreleased entry matching the change and links to updated docs when relevant.
-  - Confirm README and docs are consistent (no conflicting instructions).
-
-
 ## General Development Practices
 
 - Be sure to resolve the pyright (basedpyright) linter errors as you develop and make
@@ -259,21 +160,135 @@ Whenever a change is user-facing, update the documentation and README in the sam
 - Use pathlib `Path` instead of strings.
   Use `Path(filename).read_text()` instead of two-line `with open(...)` blocks.
 
-- Use strif’s `atomic_output_file` context manager when writing files to ensure output
-  files are written atomically.
-
 ## Use Modern Python Practices
 
 - ALWAYS use `@override` decorators to override methods from base classes.
   This is a modern Python practice and helps avoid bugs.
 
+
+## Linting, Formatting, and Type Checking
+
+This project uses a comprehensive set of tools to ensure code quality:
+
+- codespell: Automatically checks and fixes spelling errors in code and documentation. Runs with --write-changes, so typos are auto-fixed.
+- ruff check: Fast linter; runs with --fix to auto-fix where possible.
+- ruff format: Formatter compatible with Black; formats code and sorts imports.
+- basedpyright: Modern type checker; shows coverage stats with --stats.
+
+All these run together via `make lint`. It will:
+1. Fix spelling errors automatically
+2. Fix lint issues where possible
+3. Format all code consistently
+4. Check types and report any errors
+
+After `make lint`, address any remaining issues that couldn’t be auto-fixed. Prefer adding types over ignores; use `# pyright: ignore` only for justified false positives. See pyproject.toml for configured rules.
+
+For test files prefer to fix the test-cases issues first before coming to fix the linting and type-checking issues.
+As some type-checking issues are common for test-files, ignore specific rule for particular line in the test file. And if the same rule ignore needs to be ignores for more than 1 line then ignore it at file level.
+
+File level pyright ignore can be written in this format, example `# pyright: reportUnusedVariable=false`.
+Line specific pyright ignore can be written in this format, example `# pyright: ignore[reportMissingImports]`.
+
+
+## Documentation & README
+
+Use Sphinx with MyST Markdown (`.md`) to author documentation, and keep `README.md` aligned with user-facing behavior.
+
+- Typical layout: a `docs/` directory with a `source/` (inputs) and `build/` (outputs) subdirectory.
+- Theme: choose a modern Sphinx theme (for example, Furo) suitable for your audience.
+- Parser/format: MyST Markdown via `myst_parser`.
+- Helpful extensions often include: `sphinx.ext.autodoc`, `sphinx.ext.napoleon`, `sphinx.ext.intersphinx`, `sphinx.ext.viewcode`, `sphinx.ext.doctest`, `sphinx_copybutton`, `sphinx_autodoc_typehints`, and a Mermaid plugin.
+- MyST features: enable the ones you need (e.g., `colon_fence` for colon directives, heading anchors for linkable headings).
+- Static assets: keep CSS/images under a static directory (commonly `_static/`).
+- Versioning: avoid hardcoding versions inside pages; prefer a single source of truth injected via Sphinx config.
+
+### Authoring
+
+- Write one top-level H1 per page. Use H2 and H3 for subsections.
+- Add each page to a toctree (commonly in the project’s main index page). Example:
+  ```md
+  ```{toctree}
+  :maxdepth: 2
+  :caption: Guide
+
+  overview
+  usage
+  troubleshooting
+  ```
+  ```
+- Prefer Sphinx roles over raw URLs for cross-references:
+  - Link to another page with `{doc}`: ``{doc}`overview``
+  - Use intersphinx for external APIs (e.g., ``:py:class:`pathlib.Path``).
+- Code blocks: use fenced blocks with language hints (`python`, `yaml`, `bash`, `json`) and keep examples copyable.
+- Admonitions: use MyST directives, for example:
+  ```md
+  ```{note}
+  Short helpful note.
+  ```
+  ```
+  or colon-fence syntax:
+
+  ::: tip
+  Friendly tip.
+  :::
+- Mermaid diagrams: use the MyST directive and ensure the extension is enabled:
+  ```md
+  ```{mermaid}
+  graph TD
+    A[Start] --> B{Build}
+    B -->|pass| C[Publish]
+    B -->|fail| D[Fix]
+  ```
+  ```
+- Images: store under a static folder and reference with a relative path (for example: ./_static/img.png).
+
+### Build, validate, and preview
+
+- Validate docs with Sphinx, ideally treating warnings as errors:
+  ```bash
+  make docs-check
+  ```
+- For live preview with auto-rebuild, use sphinx-autobuild:
+  ```bash
+  make docs-live
+  ```
+
+### Common pitfalls and fixes
+
+- “Document isn’t included in any toctree” (orphan page): add the page to a toctree (often the main index page).
+- Broken anchors to headings: if heading anchors aren’t available, add explicit labels or use `{ref}`.
+- Unknown directive errors (admonitions/mermaid): verify the directive syntax and that the related extensions are enabled.
+- Version drift in content: centralize versioning via Sphinx config or a single source, and reference it in pages.
+- Image path issues: keep assets under a static directory and use correct relative paths from the page.
+
+### When to update and how to validate
+
+Whenever a change is user-facing, update docs and README in the same pull request.
+
+- Update docs under `docs/source` when behavior, inputs/outputs, configuration, environment variables, supported versions, CLI/entry points, defaults, or migration/deprecation notes change. Keep examples and code snippets in sync, update toctrees/cross-references, and refresh screenshots/diagrams when UI/output changes.
+- Update `README.md` for quickstart/installation, minimum supported versions, badges, primary usage examples, high-level configuration summary, and any copy-paste action usage snippets.
+- Validate before submitting:
+  - Run the docs validation task and ensure it passes with no warnings treated as errors: `make docs-check`.
+  - Ensure `CHANGELOG.md` has an Unreleased entry matching the change and, when relevant, links to updated docs.
+  - Confirm README and docs are consistent (no conflicting instructions).
+
+## Changelog updates (Keep a Changelog)
+
+- Always update `CHANGELOG.md` whenever a change is user-facing. This includes, but isn’t limited to:
+  - Source code behavior changes (inputs/outputs, defaults, errors, messages, CLI/entry points, public APIs)
+  - Configuration/schema or environment variable changes
+  - Inputs changes
+  - Behavioral changes
+  - Logging format or content that users see
+  - Documentation changes that affect how users use or understand the project (guides, examples, reference, navigation)
+- Add entries under the Unreleased section using concise bullets. Prefer the standard categories:
+  - Added, Changed, Fixed, Deprecated, Removed, Security
+  - If a docs-only change is clearly user-facing, include it under Added/Changed (don’t hide it under internal changes).
+- Keep entries short, specific, and actionable. Use imperative mood and avoid implementation detail.
+
+
+
 ## Testing
-
-- Always add or update tests when introducing new functionality or changing user-facing behavior. Cover the happy path and at least one edge case for each new behavior.
-- Do not modify tests for purely non-behavioral changes (formatting, refactors without behavior change, comments). If test updates seem necessary for such changes, reconsider the code change or justify the behavior change explicitly.
-- Ensure the full test suite passes before considering a task complete. Use targeted runs for speed during development, but finish with the standard test task.
-
-### Test Location
 
 - For longer tests put them in a file like `tests/test_somename.py` in the `tests/`
   directory (or `tests/module_name/test_somename.py` file for a submodule).
@@ -282,27 +297,6 @@ Whenever a change is user-facing, update the documentation and README in the sam
   comment. This keeps the tests easy to maintain and close to the code.
   Inline tests should NOT import pytest or pytest fixtures as we do not want runtime
   dependency on pytest.
-
-### Running Tests
-
-```shell
-# Run all tests (no output shown by default):
-make test
-
-# Run all tests with output visible:
-uv run pytest -s
-
-# Run a specific test file with output:
-uv run pytest -s tests/test_somename.py
-
-# Run a specific test function:
-uv run pytest -s tests/test_somename.py::test_function_name
-
-# Run inline tests from a source file:
-uv run pytest -s github_action_toolkit/module/file.py
-```
-
-### Test Writing Guidelines
 
 - DO NOT write one-off test code in extra files that are throwaway.
 
@@ -345,6 +339,11 @@ uv run pytest -s github_action_toolkit/module/file.py
     assert link.url == "https://example.com"
     assert link.title == "Example"
   ```
+
+- Always add or update tests when introducing new functionality or changing user-facing behavior. Cover the happy path and at least one edge case for each new behavior.
+- Do not modify tests for purely non-behavioral changes (formatting, refactors without behavior change, comments). If test updates seem necessary for such changes, reconsider the code change or justify the behavior change explicitly.
+- Ensure the full test suite passes before considering a task complete. Use targeted runs for speed during development, but finish with the standard test task.
+
 
 ## Types and Type Annotations
 
@@ -392,21 +391,6 @@ uv run pytest -s github_action_toolkit/module/file.py
       """).strip()
   ```
 
-## Guidelines for Comments
-
-- Comments should be EXPLANATORY: Explain *WHY* something is done a certain way and not
-  just *what* is done.
-
-- Comments should be CONCISE: Remove all extraneous words.
-
-- DO NOT use comments to state obvious things or repeat what is evident from the code.
-  Here is an example of a comment that SHOULD BE REMOVED because it simply repeats the
-  code, which is distracting and adds no value:
-  ```python
-  if self.failed == 0:
-      # All successful
-      return "All tasks finished successfully"
-  ```
 
 ## Guidelines for Docstrings
 
