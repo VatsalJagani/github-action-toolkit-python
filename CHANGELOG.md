@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- GitHub Check Runs API integration for quality gates
+  - `GitHubCheckRun` class for creating check runs that appear in PR interface
+  - Support for check run status, conclusions, annotations, and custom output
+  - Automatic annotation limiting (50 per request as per GitHub API)
+  - Integration with existing logging system for warnings and errors
+
 ### Fixed
 
 - Fixed Job Summary Templates documentation to correctly document the `JobSummaryTemplate` class static methods instead of unrelated custom examples.
