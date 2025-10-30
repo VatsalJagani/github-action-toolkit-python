@@ -41,6 +41,7 @@ __all__ = (  # noqa: F405
     "GitHubArtifacts",
     "GitHubCache",
     "GitHubAPIClient",
+    "GitHubCheckRun",
     # Debugging
     "Debugging",
     # Signal handling class
@@ -57,6 +58,7 @@ from .git_manager import GitRepo, Repo  # noqa: F403
 from .github_api_client import GitHubAPIClient  # noqa: F403
 from .github_artifacts import GitHubArtifacts  # noqa: F403
 from .github_cache import GitHubCache  # noqa: F403
+from .github_check_runs import GitHubCheckRun  # noqa: F403
 from .input_output import *  # noqa: F403
 from .job_summary import *  # noqa: F403
 from .local_simulator import *  # noqa: F403
