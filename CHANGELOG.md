@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- **Pull Request Comments**: Added convenient methods to `GitHubAPIClient` for adding comments on pull requests
+  - `get_pull_request()` - Get a pull request by number
+  - `create_pr_comment()` - Add general comments to PR conversation
+  - `create_pr_review_comment()` - Add review comments on specific code lines
+  - `get_pr_comments()` - Retrieve all general PR comments
+  - `get_pr_review_comments()` - Retrieve all code review comments
+  - Documentation and examples for PR comment functionality
+
 ### Fixed
 
 - Fixed Job Summary Templates documentation to correctly document the `JobSummaryTemplate` class static methods instead of unrelated custom examples.

@@ -160,6 +160,13 @@ print(f'Stars: {repo.stargazers_count}')
 issues = client.paginate(lambda: repo.get_issues(state='open'))
 for issue in issues:
     print(f'#{issue.number}: {issue.title}')
+
+# Add comments to pull requests
+client.create_pr_comment(
+    repo='owner/repo',
+    pr_number=42,
+    body='✓ All checks passed! Ready for review.'
+)
 ```
 
 ### Artifacts & Caching

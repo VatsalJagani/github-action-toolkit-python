@@ -475,3 +475,121 @@ def test_api_client_custom_settings():
     assert client.max_retries == 5
     assert client.backoff_factor == 2.0
     assert client.rate_limit_wait is False
+
+
+def test_get_pull_request(mock_pygithub):
+    """Test getting a pull request."""
+    mock_pr = Mock()
+    mock_repo = Mock()
+    mock_repo.get_pull.return_value = mock_pr
+
+    mock_github_instance = Mock()
+    mock_github_instance.get_repo.return_value = mock_repo
+    mock_pygithub.return_value = mock_github_instance
+
+    client = GitHubAPIClient(token="test_token")
+    pr = client.get_pull_request("owner/repo", 123)
+
+    assert pr == mock_pr
+    mock_github_instance.get_repo.assert_called_once_with(full_name_or_id="owner/repo")
+    mock_repo.get_pull.assert_called_once_with(123)
+
+
+def test_get_pull_request_with_repo_object(mock_pygithub):
+    """Test getting a pull request with Repository object."""
+    mock_pr = Mock()
+    mock_repo = Mock()
+    mock_repo.get_pull.return_value = mock_pr
+
+    mock_github_instance = Mock()
+    mock_pygithub.return_value = mock_github_instance
+
+    client = GitHubAPIClient(token="test_token")
+    pr = client.get_pull_request(mock_repo, 456)
+
+    assert pr == mock_pr
+    mock_repo.get_pull.assert_called_once_with(456)
+
+
+def test_create_pr_comment(mock_pygithub):
+    """Test creating a comment on a pull request."""
+    mock_comment = Mock()
+    mock_pr = Mock()
+    mock_pr.create_issue_comment.return_value = mock_comment
+
+    mock_repo = Mock()
+    mock_repo.get_pull.return_value = mock_pr
+
+    mock_github_instance = Mock()
+    mock_github_instance.get_repo.return_value = mock_repo
+    mock_pygithub.return_value = mock_github_instance
+
+    client = GitHubAPIClient(token="test_token")
+    comment = client.create_pr_comment("owner/repo", 123, "Great work!")
+
+    assert comment == mock_comment
+    mock_pr.create_issue_comment.assert_called_once_with("Great work!")
+
+
+def test_create_pr_review_comment(mock_pygithub):
+    """Test creating a review comment on specific code."""
+    mock_review_comment = Mock()
+    mock_pr = Mock()
+    mock_pr.create_review_comment.return_value = mock_review_comment
+
+    mock_repo = Mock()
+    mock_repo.get_pull.return_value = mock_pr
+
+    mock_github_instance = Mock()
+    mock_github_instance.get_repo.return_value = mock_repo
+    mock_pygithub.return_value = mock_github_instance
+
+    client = GitHubAPIClient(token="test_token")
+    comment = client.create_pr_review_comment(
+        "owner/repo", 123, "Fix this line", "abc123", "src/main.py", 42
+    )
+
+    assert comment == mock_review_comment
+    mock_pr.create_review_comment.assert_called_once_with(
+        body="Fix this line", commit="abc123", path="src/main.py", line=42
+    )
+
+
+def test_get_pr_comments(mock_pygithub):
+    """Test getting all comments on a pull request."""
+    mock_comments = [Mock(), Mock(), Mock()]
+    mock_pr = Mock()
+    mock_pr.get_issue_comments.return_value = mock_comments
+
+    mock_repo = Mock()
+    mock_repo.get_pull.return_value = mock_pr
+
+    mock_github_instance = Mock()
+    mock_github_instance.get_repo.return_value = mock_repo
+    mock_pygithub.return_value = mock_github_instance
+
+    client = GitHubAPIClient(token="test_token")
+    comments = list(client.get_pr_comments("owner/repo", 123))
+
+    assert len(comments) == 3
+    assert comments == mock_comments
+
+
+def test_get_pr_review_comments(mock_pygithub):
+    """Test getting all review comments on a pull request."""
+    mock_review_comments = [Mock(), Mock()]
+    mock_pr = Mock()
+    mock_pr.get_review_comments.return_value = mock_review_comments
+
+    mock_repo = Mock()
+    mock_repo.get_pull.return_value = mock_pr
+
+    mock_github_instance = Mock()
+    mock_github_instance.get_repo.return_value = mock_repo
+    mock_pygithub.return_value = mock_github_instance
+
+    client = GitHubAPIClient(token="test_token")
+    review_comments = list(client.get_pr_review_comments("owner/repo", 123))
+
+    assert len(review_comments) == 2
+    assert review_comments == mock_review_comments

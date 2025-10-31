@@ -291,6 +291,97 @@ for pr in client.paginate(repo.get_pulls, state="open"):
     print()
 ```
 
+### Add Comments to Pull Requests
+
+The library provides convenient methods for adding comments to pull requests, which is useful for code review automation, CI/CD feedback, and custom workflows.
+
+#### General PR Comments
+
+Add comments to the PR conversation thread:
+
+```python
+from github_action_toolkit import GitHubAPIClient
+
+client = GitHubAPIClient()
+
+# Add a general comment to the PR
+comment = client.create_pr_comment(
+    repo="owner/repo",
+    pr_number=42,
+    body="✓ All checks passed! Ready for review."
+)
+print(f"Comment created: {comment.html_url}")
+```
+
+#### Code Review Comments
+
+Add comments on specific lines of code in the PR diff:
+
+```python
+from github_action_toolkit import GitHubAPIClient
+
+client = GitHubAPIClient()
+
+# Add a review comment on a specific line
+review_comment = client.create_pr_review_comment(
+    repo="owner/repo",
+    pr_number=42,
+    body="Consider using `const` instead of `let` here.",
+    commit="abc123def456",  # SHA of the commit
+    path="src/main.js",     # File path
+    line=15                 # Line number in the diff
+)
+print(f"Review comment created: {review_comment.html_url}")
+```
+
+#### Reading PR Comments
+
+Get all comments on a pull request:
+
+```python
+from github_action_toolkit import GitHubAPIClient
+
+client = GitHubAPIClient()
+
+# Get general PR comments
+print("PR Comments:")
+for comment in client.get_pr_comments("owner/repo", 42):
+    print(f"  {comment.user.login}: {comment.body}")
+
+# Get code review comments
+print("\nReview Comments:")
+for comment in client.get_pr_review_comments("owner/repo", 42):
+    print(f"  {comment.user.login} on {comment.path}:{comment.line}")
+    print(f"    {comment.body}")
+```
+
+#### Practical Example: CI/CD Status Report
+
+```python
+from github_action_toolkit import GitHubAPIClient, get_env
+
+client = GitHubAPIClient()
+
+# Get PR number from GitHub Actions environment
+pr_number = int(get_env("GITHUB_PR_NUMBER"))
+repo = get_env("GITHUB_REPOSITORY")
+
+# Create a status report
+report = """
+## Build Status Report
+
+✓ **Build**: Successful
+✓ **Tests**: 42 passed, 0 failed
+✓ **Coverage**: 85%
+⚠️ **Performance**: Response time increased by 5%
+
+Ready for review!
+"""
+
+# Post the report as a comment
+client.create_pr_comment(repo, pr_number, report)
+```
+
 ### Monitor Repository Activity
 
 ```python
