@@ -264,6 +264,15 @@ def test_clone_with_ref_checkout(mock_git_repo):
         clone_repo.git.checkout.assert_called_once_with("abc123")
 
 
+def test_clone_ref_not_used_as_base_branch_fallback(mock_git_repo):
+    repo_url = "https://github.com/test/test.git"
+    clone_repo = mock_git_repo.clone_from.return_value
+    clone_repo.active_branch = None
+
+    with Repo(url=repo_url, clone_ref="deadbeef") as repo:
+        assert repo.base_branch == "main"
+
+
 def test_clone_with_token_injects_auth(mock_git_repo):
     repo_url = "https://github.com/test/private-repo.git"
     with Repo(url=repo_url, github_token="ghp_secret") as repo:
@@ -271,6 +280,17 @@ def test_clone_with_token_injects_auth(mock_git_repo):
             "https://x-access-token:ghp_secret@github.com/test/private-repo.git",
             repo.repo_path,
         )
+        repo.repo.git.remote.assert_called_once_with("set-url", "origin", repo_url)
+
+
+def test_clone_with_token_preserves_port(mock_git_repo):
+    repo_url = "https://github.com:8443/test/private-repo.git"
+    with Repo(url=repo_url, github_token="ghp_secret") as repo:
+        mock_git_repo.clone_from.assert_called_once_with(
+            "https://x-access-token:ghp_secret@github.com:8443/test/private-repo.git",
+            repo.repo_path,
+        )
+        repo.repo.git.remote.assert_called_once_with("set-url", "origin", repo_url)
 
 
 def test_fetch_retry_records_metadata(mock_git_repo):

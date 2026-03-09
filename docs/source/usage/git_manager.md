@@ -28,7 +28,7 @@ If path is provided, the existing local repo will be used.
 - `depth` (int, optional): Create a shallow clone with specified depth (faster clones)
 - `single_branch` (bool, default=False): Clone only a single branch (faster clones)
 - `clone_branch` (str, optional): Clone a specific branch directly. This is mostly clone-scoped, and is also used as a fallback base branch when the active branch cannot be determined.
-- `clone_ref` (str, optional): Checkout a specific branch/tag/SHA after clone. This is mostly clone-scoped, and is also used as a fallback base branch when the active branch cannot be determined.
+- `clone_ref` (str, optional): Checkout a specific branch/tag/SHA after clone.
 - `github_token` (str, optional): GitHub token used for private clone authentication and as the default token for `create_pr()`.
 - `clone_no_checkout` (bool, default=False): Clone with no working tree checkout (equivalent to `git clone --no-checkout`)
 - `retry_attempts` (int, default=3): Retry attempts for clone/fetch/pull operations

@@ -83,8 +83,8 @@ class Repo:
         :param single_branch: Whether to clone a single branch (if cloning)
         :param clone_branch: Branch to clone explicitly. Primarily clone-scoped, and also
             used as fallback in `_detect_base_branch()` when active branch cannot be read.
-        :param clone_ref: Branch/tag/SHA to checkout after clone. Primarily clone-scoped,
-            and also used as fallback in `_detect_base_branch()`.
+        :param clone_ref: Branch/tag/SHA to checkout after clone in detached-HEAD friendly
+            workflows.
         :param github_token: Optional GitHub token. Used for clone authentication and as
             class-level default for `create_pr()`. If omitted, falls back to `GITHUB_TOKEN`.
         :param clone_no_checkout: Clone without checking out HEAD
@@ -709,6 +709,14 @@ class Repo:
         except Exception as exc:
             raise self._classify_git_error(exc, context="clone", default=GitCloneError) from exc
 
+        # If credentials were injected for clone auth, immediately scrub origin URL
+        # so sensitive tokens are not persisted in local git config.
+        if clone_url != url:
+            try:
+                repo.git.remote("set-url", "origin", url)
+            except Exception as exc:
+                raise self._classify_git_error(exc, context="reset origin URL after clone") from exc
+
         if self.clone_ref:
             try:
                 self._run_with_retry(
@@ -727,8 +735,6 @@ class Repo:
         except Exception:  # noqa: BLE001
             if self.clone_branch:
                 return self.clone_branch
-            if self.clone_ref:
-                return self.clone_ref
             return "main"
 
     def _run_with_retry(self, operation_name: str, operation: Callable[[], T]) -> T:
@@ -776,10 +782,11 @@ class Repo:
             return url
         parsed = urlparse(url)
         if parsed.scheme == "https" and parsed.hostname == "github.com":
+            host_with_port = parsed.netloc.rsplit("@", 1)[-1]
             return urlunparse(
                 (
                     parsed.scheme,
-                    f"x-access-token:{self.github_token}@{parsed.hostname}",
+                    f"x-access-token:{self.github_token}@{host_with_port}",
                     parsed.path,
                     parsed.params,
                     parsed.query,
