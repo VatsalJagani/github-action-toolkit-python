@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [v0.9.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.9.0) - 2026-03-09
+
 ### Added
 
 - `Repo` constructor now supports explicit clone branch/ref/auth and checkout controls: `clone_branch`, `clone_ref`, `github_token`, and `clone_no_checkout`.
