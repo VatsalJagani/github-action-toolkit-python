@@ -13,6 +13,11 @@ from unittest import mock
 
 import pytest
 
+from github_action_toolkit.exceptions import (
+    GitAuthenticationError,
+    GitNetworkError,
+    GitReferenceError,
+)
 from github_action_toolkit.git_manager import Repo
 
 
@@ -211,7 +216,7 @@ def test_create_pr(mock_github, mock_git_repo):
                 base="main",
             )
 
-    mock_github.assert_called_once_with("fake-token")
+    mock_github.assert_called_once_with(login_or_token="fake-token")
     mock_github.return_value.get_repo.assert_called_once_with("test/repo")
     mock_repo_obj.create_pull.assert_called_once_with(
         title="Test PR", body="PR Body", head="feature/test", base="main"
@@ -239,6 +244,132 @@ def test_shallow_single_branch_clone(mock_git_repo):
         mock_git_repo.clone_from.assert_called_once_with(
             repo_url, repo.repo_path, depth=1, single_branch=True
         )
+
+
+def test_clone_with_branch_and_no_checkout(mock_git_repo):
+    repo_url = "https://github.com/test/test.git"
+    with Repo(url=repo_url, clone_branch="release/v1", clone_no_checkout=True) as repo:
+        mock_git_repo.clone_from.assert_called_once_with(
+            repo_url,
+            repo.repo_path,
+            branch="release/v1",
+            no_checkout=True,
+        )
+
+
+def test_clone_with_ref_checkout(mock_git_repo):
+    repo_url = "https://github.com/test/test.git"
+    with Repo(url=repo_url, clone_ref="abc123") as _repo:
+        clone_repo = mock_git_repo.clone_from.return_value
+        clone_repo.git.checkout.assert_called_once_with("abc123")
+
+
+def test_clone_ref_not_used_as_base_branch_fallback(mock_git_repo):
+    repo_url = "https://github.com/test/test.git"
+    clone_repo = mock_git_repo.clone_from.return_value
+    clone_repo.active_branch = None
+
+    with Repo(url=repo_url, clone_ref="deadbeef") as repo:
+        assert repo.base_branch == "main"
+
+
+def test_clone_with_token_injects_auth(mock_git_repo):
+    repo_url = "https://github.com/test/private-repo.git"
+    with Repo(url=repo_url, github_token="ghp_secret") as repo:
+        mock_git_repo.clone_from.assert_called_once_with(
+            "https://x-access-token:ghp_secret@github.com/test/private-repo.git",
+            repo.repo_path,
+        )
+        repo.repo.git.remote.assert_called_once_with("set-url", "origin", repo_url)
+
+
+def test_clone_with_token_preserves_port(mock_git_repo):
+    repo_url = "https://github.com:8443/test/private-repo.git"
+    with Repo(url=repo_url, github_token="ghp_secret") as repo:
+        mock_git_repo.clone_from.assert_called_once_with(
+            "https://x-access-token:ghp_secret@github.com:8443/test/private-repo.git",
+            repo.repo_path,
+        )
+        repo.repo.git.remote.assert_called_once_with("set-url", "origin", repo_url)
+
+
+def test_fetch_retry_records_metadata(mock_git_repo):
+    git_cmd = mock_git_repo.return_value.git
+    git_cmd.fetch.side_effect = [Exception("temporary failure"), "ok"]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with Repo(path=tmpdir, retry_attempts=2, retry_backoff_seconds=0) as repo:
+            repo.fetch()
+            metadata = repo.get_operation_metadata("fetch")
+
+    assert metadata == {
+        "attempts": 2,
+        "retries": 1,
+        "elapsed_ms": mock.ANY,
+        "success": True,
+    }
+
+
+def test_clone_auth_error_is_typed(mock_git_repo):
+    mock_git_repo.clone_from.side_effect = Exception("Authentication failed for repository")
+
+    with pytest.raises(GitAuthenticationError):
+        Repo(url="https://github.com/test/test.git", retry_attempts=1)
+
+
+def test_clone_network_error_is_typed(mock_git_repo):
+    mock_git_repo.clone_from.side_effect = Exception("Could not resolve host: github.com")
+
+    with pytest.raises(GitNetworkError):
+        Repo(url="https://github.com/test/test.git", retry_attempts=1)
+
+
+def test_clone_ref_error_is_typed(mock_git_repo):
+    clone_repo = mock_git_repo.clone_from.return_value
+    clone_repo.git.checkout.side_effect = Exception("pathspec 'missing-ref' did not match any file")
+
+    with pytest.raises(GitReferenceError):
+        Repo(
+            url="https://github.com/test/test.git",
+            clone_ref="missing-ref",
+            retry_attempts=1,
+        )
+
+
+def test_redacts_token_in_error_messages(mock_git_repo):
+    mock_git_repo.clone_from.side_effect = Exception(
+        "fatal: Authentication failed for https://x-access-token:ghp_secret@github.com/test/repo.git"
+    )
+
+    with pytest.raises(GitAuthenticationError, match=r"\*\*\*") as exc_info:
+        Repo(
+            url="https://github.com/test/repo.git",
+            github_token="ghp_secret",
+            retry_attempts=1,
+        )
+
+    assert "ghp_secret" not in str(exc_info.value)
+
+
+@mock.patch("github_action_toolkit.git_manager.Github")
+def test_create_pr_uses_class_level_github_token(mock_github, mock_git_repo):
+    mock_repo_instance = mock_git_repo.return_value
+    mock_repo_instance.remotes.origin.url = "https://github.com/test/repo.git"
+
+    mock_repo_obj = mock.Mock()
+    mock_pr = mock.Mock()
+    mock_pr.html_url = "https://github.com/test/repo/pull/2"
+    mock_repo_obj.create_pull.return_value = mock_pr
+    mock_github.return_value.get_repo.return_value = mock_repo_obj
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with Repo(path=tmpdir, github_token="class-token") as repo:
+            pr_url = repo.create_pr(
+                title="Class Token PR", body="", head="feature/test", base="main"
+            )
+
+    mock_github.assert_called_once_with(login_or_token="class-token")
+    assert pr_url == "https://github.com/test/repo/pull/2"
 
 
 @mock.patch("github_action_toolkit.git_manager.subprocess.run")

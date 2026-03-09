@@ -37,6 +37,22 @@ class GitOperationError(GitHubActionError):
     """
 
 
+class GitCloneError(GitOperationError):
+    """Raised when repository clone operations fail."""
+
+
+class GitAuthenticationError(GitOperationError):
+    """Raised when git operations fail due to authentication or authorization issues."""
+
+
+class GitNetworkError(GitOperationError):
+    """Raised when git operations fail because of transient network connectivity issues."""
+
+
+class GitReferenceError(GitOperationError):
+    """Raised when a branch, tag, SHA, or other git reference is invalid or missing."""
+
+
 class GitHubAPIError(GitHubActionError):
     """
     Raised when GitHub API operations fail.

@@ -10,7 +10,7 @@ The `Repo` and `GitRepo` classes provide a high-level interface for Git operatio
 
 ## API Reference
 
-### `Repo(url=None, path=None, cleanup=False, depth=None, single_branch=False)`
+### `Repo(url=None, path=None, cleanup=False, depth=None, single_branch=False, clone_branch=None, clone_ref=None, github_token=None, clone_no_checkout=False, retry_attempts=3, retry_backoff_seconds=1.0, retry_backoff_multiplier=2.0, redactor=None)`
 
 Initializes the Git repository manager.
 
@@ -27,6 +27,14 @@ If path is provided, the existing local repo will be used.
 - `cleanup` (bool, default=False): Enable cleanup mode (see below)
 - `depth` (int, optional): Create a shallow clone with specified depth (faster clones)
 - `single_branch` (bool, default=False): Clone only a single branch (faster clones)
+- `clone_branch` (str, optional): Clone a specific branch directly. This is mostly clone-scoped, and is also used as a fallback base branch when the active branch cannot be determined.
+- `clone_ref` (str, optional): Checkout a specific branch/tag/SHA after clone.
+- `github_token` (str, optional): GitHub token used for private clone authentication and as the default token for `create_pr()`.
+- `clone_no_checkout` (bool, default=False): Clone with no working tree checkout (equivalent to `git clone --no-checkout`)
+- `retry_attempts` (int, default=3): Retry attempts for clone/fetch/pull operations
+- `retry_backoff_seconds` (float, default=1.0): Initial backoff in seconds between retries
+- `retry_backoff_multiplier` (float, default=2.0): Multiplier for exponential backoff
+- `redactor` (callable, optional): Custom redaction callback for sensitive error text
 
 #### Cleanup Mode (`cleanup=True`)
 
@@ -65,6 +73,37 @@ This synchronization happens twice: once on `__enter__` (before your work) and o
 >> with Repo(url="https://github.com/user/repo.git", depth=1, single_branch=True) as repo:
 >>     print(f"Cloned to {repo.repo_path}")
 ```
+
+**Clone private repo with token and explicit clone ref example:**
+
+```python
+>> with Repo(
+>>     url="https://github.com/org/private-repo.git",
+>>     github_token=os.getenv("GITHUB_TOKEN"),
+>>     clone_branch="main",
+>>     clone_ref="v1.2.3",
+>>     clone_no_checkout=True,
+>> ) as repo:
+>>     print(repo.repo_path)
+```
+
+**Retry and operation metadata example:**
+
+```python
+>> with Repo(url="https://github.com/user/repo.git", retry_attempts=4) as repo:
+>>     repo.fetch()
+>>     print(repo.get_operation_metadata("fetch"))
+
+# Example output:
+# {'attempts': 2, 'retries': 1, 'elapsed_ms': 438, 'success': True}
+```
+
+Common git failure modes are raised as typed exceptions from `github_action_toolkit.exceptions`:
+
+- `GitAuthenticationError`
+- `GitNetworkError`
+- `GitReferenceError`
+- `GitCloneError`
 
 ## Basic Operations
 
@@ -151,7 +190,8 @@ Parameters:
 
 * github_token (optional):
 GitHub token with repo scope.
-If not provided, it will be read from the environment variable GITHUB_TOKEN.
+If not provided, `Repo(..., github_token=...)` is used.
+If class-level token is also not set, it falls back to environment variable `GITHUB_TOKEN`.
 
 * title (optional):
 Title of the pull request.

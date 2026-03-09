@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- `Repo` constructor now supports explicit clone branch/ref/auth and checkout controls: `clone_branch`, `clone_ref`, `github_token`, and `clone_no_checkout`.
+- Added built-in retry and exponential backoff controls for clone/fetch/pull workflows via `retry_attempts`, `retry_backoff_seconds`, and `retry_backoff_multiplier`.
+- Added operation observability metadata for retried operations with `Repo.get_operation_metadata()` including `attempts`, `retries`, `elapsed_ms`, and `success`.
+- Added typed git operation exceptions for cleaner error handling:
+  - `GitCloneError`
+  - `GitAuthenticationError`
+  - `GitNetworkError`
+  - `GitReferenceError`
+
+### Changed
+
+- Improved private repository clone UX by allowing token-based HTTPS auth in `Repo(...)` without pre-embedding credentials in the URL.
+- Standardized sensitive value redaction for git error messages, with support for an optional custom redaction callback.
+
 ### Fixed
 
 - Fixed Job Summary Templates documentation to correctly document the `JobSummaryTemplate` class static methods instead of unrelated custom examples.
