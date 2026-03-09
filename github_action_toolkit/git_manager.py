@@ -4,15 +4,39 @@ import os
 import re
 import subprocess
 import tempfile
+import time
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from types import TracebackType
+from typing import Any, TypeVar, cast
 from urllib.parse import urlparse, urlunparse
 
 from git import Repo as GitPythonRepo
 from github import Github
 
-from .exceptions import ConfigurationError, GitHubAPIError, GitOperationError
+from .exceptions import (
+    ConfigurationError,
+    GitAuthenticationError,
+    GitCloneError,
+    GitHubAPIError,
+    GitNetworkError,
+    GitOperationError,
+    GitReferenceError,
+)
 from .print_messages import info, warning
+
+T = TypeVar("T")
+
+
+@dataclass(frozen=True)
+class OperationMetadata:
+    """Metadata for an operation execution useful for observability/debugging."""
+
+    attempts: int
+    retries: int
+    elapsed_ms: int
+    success: bool
 
 
 class Repo:
@@ -21,6 +45,17 @@ class Repo:
     repo: GitPythonRepo
     base_branch: str
     cleanup: bool
+    retry_attempts: int
+    retry_backoff_seconds: float
+    retry_backoff_multiplier: float
+    clone_branch: str | None
+    clone_ref: str | None
+    clone_depth: int | None
+    clone_single_branch: bool
+    clone_no_checkout: bool
+    github_token: str | None
+    _custom_redactor: Callable[[str], str] | None
+    _operation_metadata: dict[str, OperationMetadata]
 
     def __init__(
         self,
@@ -29,6 +64,14 @@ class Repo:
         cleanup: bool = False,
         depth: int | None = None,
         single_branch: bool = False,
+        clone_branch: str | None = None,
+        clone_ref: str | None = None,
+        github_token: str | None = None,
+        clone_no_checkout: bool = False,
+        retry_attempts: int = 3,
+        retry_backoff_seconds: float = 1.0,
+        retry_backoff_multiplier: float = 2.0,
+        redactor: Callable[[str], str] | None = None,
     ):
         """
         Initialize a Git repository manager.
@@ -38,6 +81,17 @@ class Repo:
         :param cleanup: Whether to sync to base branch on enter/exit
         :param depth: Depth for shallow clone (if cloning)
         :param single_branch: Whether to clone a single branch (if cloning)
+        :param clone_branch: Branch to clone explicitly. Primarily clone-scoped, and also
+            used as fallback in `_detect_base_branch()` when active branch cannot be read.
+        :param clone_ref: Branch/tag/SHA to checkout after clone. Primarily clone-scoped,
+            and also used as fallback in `_detect_base_branch()`.
+        :param github_token: Optional GitHub token. Used for clone authentication and as
+            class-level default for `create_pr()`. If omitted, falls back to `GITHUB_TOKEN`.
+        :param clone_no_checkout: Clone without checking out HEAD
+        :param retry_attempts: Number of attempts for clone/fetch/pull operations
+        :param retry_backoff_seconds: Initial retry backoff in seconds
+        :param retry_backoff_multiplier: Exponential backoff multiplier
+        :param redactor: Optional callback to further redact sensitive text in errors
         :raises ConfigurationError: When neither url nor path is provided
         :raises GitOperationError: When repository operations fail
         """
@@ -47,28 +101,44 @@ class Repo:
                 "Provide a Git repository URL to clone or a path to an existing repository."
             )
 
+        if retry_attempts < 1:
+            raise ConfigurationError("retry_attempts must be >= 1")
+        if retry_backoff_seconds < 0:
+            raise ConfigurationError("retry_backoff_seconds must be >= 0")
+        if retry_backoff_multiplier < 1:
+            raise ConfigurationError("retry_backoff_multiplier must be >= 1")
+
         self.url = url
         self.repo_path = path or tempfile.mkdtemp(prefix="gitrepo_")
+        self.retry_attempts = retry_attempts
+        self.retry_backoff_seconds = retry_backoff_seconds
+        self.retry_backoff_multiplier = retry_backoff_multiplier
+        self.clone_branch = clone_branch
+        self.clone_ref = clone_ref
+        self.clone_depth = depth
+        self.clone_single_branch = single_branch
+        self.clone_no_checkout = clone_no_checkout
+        self.github_token = github_token or os.environ.get("GITHUB_TOKEN")
+        self._custom_redactor = redactor
+        self._operation_metadata = {}
 
         try:
             if url:
-                info(f"Cloning repository from {url} to {self.repo_path}")
-                clone_kwargs = {}
-                if depth is not None:
-                    clone_kwargs["depth"] = depth
-                if single_branch:
-                    clone_kwargs["single_branch"] = single_branch
-                self.repo = GitPythonRepo.clone_from(url, self.repo_path, **clone_kwargs)  # pyright: ignore[reportUnknownArgumentType]
+                redacted_url = self._redact_sensitive_text(url)
+                info(f"Cloning repository from {redacted_url} to {self.repo_path}")
+                self.repo = self._clone_repository(url)
             else:
                 info(f"Using existing repository at {self.repo_path}")
+                if path is None:
+                    raise ConfigurationError("path must be provided when url is not set")
                 self.repo = GitPythonRepo(path)
         except Exception as e:
-            raise GitOperationError(
-                f"Failed to initialize repository: {e}. "
-                f"Ensure the URL is valid and accessible or the path exists."
-            ) from e
+            if isinstance(e, GitOperationError):
+                raise
+            error = self._classify_git_error(e, context="initialize repository")
+            raise error from e
 
-        self.base_branch = self.repo.active_branch.name
+        self.base_branch = self._detect_base_branch()
         self.cleanup = cleanup
 
     def __enter__(self):
@@ -130,7 +200,27 @@ class Repo:
     def pull(self, remote: str = "origin", branch: str | None = None):
         branch = branch or self.get_current_branch()
         info(f"Pulling from {remote}/{branch}")
-        self.repo.git.pull(remote, branch)
+        try:
+            self._run_with_retry(
+                operation_name="pull",
+                operation=lambda: self.repo.git.pull(remote, branch),
+            )
+        except Exception as exc:
+            raise self._classify_git_error(exc, context=f"pull {remote}/{branch}") from exc
+
+    def fetch(self, remote: str = "origin", prune: bool = True):
+        """Fetch updates from the remote, optionally pruning deleted refs."""
+        info(f"Fetching from {remote}")
+        args = [remote]
+        if prune:
+            args.insert(0, "--prune")
+        try:
+            self._run_with_retry(
+                operation_name="fetch",
+                operation=lambda: self.repo.git.fetch(*args),
+            )
+        except Exception as exc:
+            raise self._classify_git_error(exc, context=f"fetch {remote}") from exc
 
     def create_pr(
         self,
@@ -154,7 +244,7 @@ class Repo:
         """
 
         # 1. Get GitHub token
-        token = github_token or os.environ.get("GITHUB_TOKEN")
+        token = github_token or self.github_token or os.environ.get("GITHUB_TOKEN")
         if not token:
             raise ConfigurationError(
                 "GitHub token not provided and GITHUB_TOKEN not set in environment. "
@@ -166,7 +256,7 @@ class Repo:
             origin_url = self.repo.remotes.origin.url
         except Exception as e:
             raise GitOperationError(
-                f"Failed to get origin remote URL: {e}. "
+                f"Failed to get origin remote URL: {self._redact_sensitive_text(str(e))}. "
                 "Ensure the repository has an 'origin' remote configured."
             ) from e
 
@@ -174,7 +264,7 @@ class Repo:
         match = re.search(r"(github\.com[:/])(.+?)(\.git)?$", origin_url)
         if not match:
             raise ConfigurationError(
-                f"Cannot extract repo name from remote URL: {origin_url}. "
+                f"Cannot extract repo name from remote URL: {self._redact_sensitive_text(origin_url)}. "
                 "Expected a GitHub URL like https://github.com/owner/repo.git"
             )
         repo_name = match.group(2)
@@ -204,7 +294,7 @@ class Repo:
 
         # 6. Create PR using PyGithub
         try:
-            github = Github(token)
+            github = Github(login_or_token=token)
             repo = github.get_repo(repo_name)
             pr = repo.create_pull(title=title, body=body, head=head, base=base)
             return pr.html_url
@@ -512,7 +602,7 @@ class Repo:
             f"Synchronizing repository to base branch '{self.base_branch}' (fetch, checkout, reset, clean, pull)"
         )
         try:
-            self.repo.git.fetch("--prune")
+            self.fetch(remote="origin", prune=True)
         except Exception as exc:  # noqa: BLE001
             warning(f"Fetch failed: {exc}")
 
@@ -579,9 +669,188 @@ class Repo:
         except Exception as exc:  # noqa: BLE001
             info(f"Final clean failed: {exc}")
         try:
-            self.repo.git.pull("origin", current_base)
+            self.pull("origin", current_base)
         except Exception as exc:  # noqa: BLE001
             info(f"Pull failed: {exc}")
+
+    def get_operation_metadata(
+        self, operation_name: str | None = None
+    ) -> dict[str, dict[str, int | bool]] | dict[str, int | bool] | None:
+        """
+        Return operation metadata captured for retried operations.
+
+        If `operation_name` is omitted, returns a dict for all tracked operations.
+        """
+        if operation_name is not None:
+            metadata = self._operation_metadata.get(operation_name)
+            return asdict(metadata) if metadata else None
+        return {name: asdict(metadata) for name, metadata in self._operation_metadata.items()}
+
+    def _clone_repository(self, url: str) -> GitPythonRepo:
+        clone_kwargs: dict[str, object] = {}
+        if self.clone_depth is not None:
+            clone_kwargs["depth"] = self.clone_depth
+        if self.clone_single_branch:
+            clone_kwargs["single_branch"] = self.clone_single_branch
+        if self.clone_branch:
+            clone_kwargs["branch"] = self.clone_branch
+        if self.clone_no_checkout:
+            clone_kwargs["no_checkout"] = self.clone_no_checkout
+        clone_kwargs_typed = cast(dict[str, Any], clone_kwargs)
+
+        clone_url = self._build_authenticated_url(url)
+        try:
+            repo = self._run_with_retry(
+                operation_name="clone",
+                operation=lambda: GitPythonRepo.clone_from(
+                    clone_url, self.repo_path, **clone_kwargs_typed
+                ),
+            )
+        except Exception as exc:
+            raise self._classify_git_error(exc, context="clone", default=GitCloneError) from exc
+
+        if self.clone_ref:
+            try:
+                self._run_with_retry(
+                    operation_name="checkout_ref",
+                    operation=lambda: repo.git.checkout(self.clone_ref),
+                )
+            except Exception as exc:
+                raise self._classify_git_error(
+                    exc, context=f"checkout ref '{self.clone_ref}'"
+                ) from exc
+        return repo
+
+    def _detect_base_branch(self) -> str:
+        try:
+            return self.repo.active_branch.name
+        except Exception:  # noqa: BLE001
+            if self.clone_branch:
+                return self.clone_branch
+            if self.clone_ref:
+                return self.clone_ref
+            return "main"
+
+    def _run_with_retry(self, operation_name: str, operation: Callable[[], T]) -> T:
+        total_attempts = self.retry_attempts
+        started_at = time.perf_counter()
+
+        last_exception: Exception | None = None
+        for attempt in range(1, total_attempts + 1):
+            try:
+                result = operation()
+                elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+                self._operation_metadata[operation_name] = OperationMetadata(
+                    attempts=attempt,
+                    retries=attempt - 1,
+                    elapsed_ms=elapsed_ms,
+                    success=True,
+                )
+                return result
+            except Exception as exc:  # noqa: BLE001
+                last_exception = exc
+                if attempt >= total_attempts:
+                    break
+                backoff = self.retry_backoff_seconds * (
+                    self.retry_backoff_multiplier ** (attempt - 1)
+                )
+                warning(
+                    f"{operation_name} failed on attempt {attempt}/{total_attempts}: {self._redact_sensitive_text(str(exc))}. "
+                    f"Retrying in {backoff:.2f}s"
+                )
+                time.sleep(backoff)
+
+        elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+        self._operation_metadata[operation_name] = OperationMetadata(
+            attempts=total_attempts,
+            retries=max(total_attempts - 1, 0),
+            elapsed_ms=elapsed_ms,
+            success=False,
+        )
+        if last_exception is None:
+            raise GitOperationError(f"Operation '{operation_name}' failed without an exception")
+        raise last_exception
+
+    def _build_authenticated_url(self, url: str) -> str:
+        if not self.github_token:
+            return url
+        parsed = urlparse(url)
+        if parsed.scheme == "https" and parsed.hostname == "github.com":
+            return urlunparse(
+                (
+                    parsed.scheme,
+                    f"x-access-token:{self.github_token}@{parsed.hostname}",
+                    parsed.path,
+                    parsed.params,
+                    parsed.query,
+                    parsed.fragment,
+                )
+            )
+        return url
+
+    def _redact_sensitive_text(self, text: str) -> str:
+        redacted = text
+        redacted = re.sub(r"(https?://)([^/@\s]+)@", r"\1***@", redacted)
+
+        secrets = [
+            self.github_token,
+            os.environ.get("GITHUB_TOKEN"),
+            os.environ.get("GH_TOKEN"),
+        ]
+        for secret in secrets:
+            if secret:
+                redacted = redacted.replace(secret, "***")
+
+        if self._custom_redactor:
+            redacted = self._custom_redactor(redacted)
+        return redacted
+
+    def _classify_git_error(
+        self,
+        exc: Exception,
+        *,
+        context: str,
+        default: type[GitOperationError] = GitOperationError,
+    ) -> GitOperationError:
+        message = self._redact_sensitive_text(str(exc))
+        lowered = message.lower()
+
+        auth_patterns = (
+            "authentication failed",
+            "could not read username",
+            "permission denied",
+            "access denied",
+            "repository not found",
+            "http basic: access denied",
+            "403",
+            "401",
+        )
+        network_patterns = (
+            "timed out",
+            "timeout",
+            "connection reset",
+            "connection refused",
+            "temporary failure",
+            "network is unreachable",
+            "could not resolve host",
+            "failed to connect",
+        )
+        ref_patterns = (
+            "pathspec",
+            "did not match any file",
+            "couldn't find remote ref",
+            "unknown revision",
+            "not something we can merge",
+            "reference is not a tree",
+        )
+
+        if any(pattern in lowered for pattern in auth_patterns):
+            return GitAuthenticationError(f"Failed to {context}: {message}")
+        if any(pattern in lowered for pattern in network_patterns):
+            return GitNetworkError(f"Failed to {context}: {message}")
+        if any(pattern in lowered for pattern in ref_patterns):
+            return GitReferenceError(f"Failed to {context}: {message}")
+        return default(f"Failed to {context}: {message}")
 
 
 # Alias for backward compatibility and convenience
