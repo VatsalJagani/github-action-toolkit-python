@@ -3,6 +3,7 @@ Prepares markdown release notes for GitHub releases.
 """
 
 import os
+import subprocess
 
 import packaging.version
 
@@ -44,10 +45,15 @@ def get_commit_history() -> str:
     new_version = packaging.version.parse(TAG)
 
     # Pull all tags.
-    os.popen("git fetch --tags")
+    subprocess.run(["git", "fetch", "--tags"], check=True)
 
     # Get all tags sorted by version, latest first.
-    all_tags = os.popen("git tag -l --sort=-version:refname 'v*'").read().split("\n")
+    all_tags = subprocess.run(
+        ["git", "tag", "-l", "--sort=-version:refname", "v*"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.split("\n")
 
     # Out of `all_tags`, find the latest previous version so that we can collect all
     # commits between that version and the new version we're about to publish.
@@ -62,10 +68,10 @@ def get_commit_history() -> str:
         if version < new_version:
             last_tag = tag
             break
+    log_cmd = ["git", "log", "--oneline", "--first-parent"]
     if last_tag is not None:
-        commits = os.popen(f"git log {last_tag}..{TAG} --oneline --first-parent").read()
-    else:
-        commits = os.popen("git log --oneline --first-parent").read()
+        log_cmd.insert(2, f"{last_tag}..{TAG}")
+    commits = subprocess.run(log_cmd, check=True, capture_output=True, text=True).stdout
     return "## Commits\n\n" + commits
 
 
