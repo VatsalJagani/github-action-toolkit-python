@@ -162,6 +162,37 @@ for issue in issues:
     print(f'#{issue.number}: {issue.title}')
 ```
 
+### GitHub Check Runs (Quality Gates)
+
+```python
+from github_action_toolkit import GitHubCheckRun
+
+# Create a check run for quality gates
+check_run = GitHubCheckRun(
+    repo_owner='owner',
+    repo_name='repo',
+    sha='commit_sha'
+)
+
+# Report quality check results
+result = check_run.create_check_run(
+    name='Code Quality',
+    status='completed',
+    conclusion='success',
+    title='All quality checks passed',
+    summary='✓ 150 checks passed\n✗ 0 failures',
+    annotations=[
+        {
+            'path': 'src/main.py',
+            'start_line': 10,
+            'end_line': 10,
+            'annotation_level': 'notice',
+            'message': 'Well-formatted code'
+        }
+    ]
+)
+```
+
 ### Artifacts & Caching
 
 ```python
