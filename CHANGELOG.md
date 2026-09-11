@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed `twine check` failing in CI (`'2.5' is not a valid metadata version`) by bumping `twine` to `>=7.0.0`, which pulls in a `packaging` version that understands the newer Metadata-Version emitted by recent `hatchling` releases.
+- Fixed CI lint failures caused by `basedpyright` 1.40.0 defaulting `failOnWarnings` to `true` by replacing deprecated `os.popen` calls with `subprocess` in `devtools/release_notes.py`.
 
 
 ## [v0.9.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.9.0) - 2026-03-09
