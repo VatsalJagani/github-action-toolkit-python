@@ -7,14 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Fixed
-
-- All Dependacies updated including python dependacies, and github action dependencies.
-- Fixed `twine check` failing in CI (`'2.5' is not a valid metadata version`) by bumping `twine` to `>=7.0.0`, which pulls in a `packaging` version that understands the newer Metadata-Version emitted by recent `hatchling` releases.
-
 ### Changed
 
 - Switched Dependabot's Python ecosystem config from `pip` to `uv` for proper `uv.lock`-aware dependency updates.
+- Grouped Dependabot updates into a single PR per ecosystem (one for `uv`, one for `github-actions`) instead of one PR per dependency.
+- Updated various Python and GitHub Actions dependencies.
+
+### Fixed
+
+- Fixed `twine check` failing in CI (`'2.5' is not a valid metadata version`) by bumping `twine` to `>=7.0.0`, which pulls in a `packaging` version that understands the newer Metadata-Version emitted by recent `hatchling` releases.
 
 
 ## [v0.9.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.9.0) - 2026-03-09
