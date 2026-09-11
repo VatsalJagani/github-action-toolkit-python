@@ -9,10 +9,14 @@ import requests
 from github import Github as PyGithub
 from github import GithubException
 from github.AuthenticatedUser import AuthenticatedUser
+from github.Commit import Commit
 from github.GithubObject import GithubObject
+from github.IssueComment import IssueComment
 from github.NamedUser import NamedUser
 from github.Organization import Organization
 from github.PaginatedList import PaginatedList
+from github.PullRequest import PullRequest
+from github.PullRequestComment import PullRequestComment
 from github.Repository import Repository
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -147,6 +151,91 @@ class GitHubAPIClient:
         :returns: Organization object
         """
         return self._with_rate_limit_handling(lambda: self._github.get_organization(login))
+
+    def get_pull_request(self, repo: str | Repository, number: int) -> PullRequest:
+        """
+        Get a pull request by number.
+
+        :param repo: Repository full name (owner/repo) or Repository object
+        :param number: Pull request number
+        :returns: PullRequest object
+        """
+        if isinstance(repo, str):
+            repo = self.get_repository(repo)
+        return self._with_rate_limit_handling(lambda: repo.get_pull(number))
+
+    def create_pr_comment(self, repo: str | Repository, pr_number: int, body: str) -> IssueComment:
+        """
+        Create a comment on a pull request (issue comment).
+
+        Creates a general comment on the PR conversation thread, not tied to specific code.
+        For code review comments on specific lines, use `create_pr_review_comment`.
+
+        :param repo: Repository full name (owner/repo) or Repository object
+        :param pr_number: Pull request number
+        :param body: Comment body (Markdown supported)
+        :returns: Created IssueComment object
+        """
+        pr = self.get_pull_request(repo, pr_number)
+        return self._with_rate_limit_handling(lambda: pr.create_issue_comment(body))
+
+    def create_pr_review_comment(
+        self,
+        repo: str | Repository,
+        pr_number: int,
+        body: str,
+        commit: Commit | str,
+        path: str,
+        line: int,
+    ) -> PullRequestComment:
+        """
+        Create a review comment on a specific line of code in a pull request.
+
+        This creates a comment on a specific file and line in the PR diff, useful for
+        code reviews. For general PR comments, use `create_pr_comment`.
+
+        :param repo: Repository full name (owner/repo) or Repository object
+        :param pr_number: Pull request number
+        :param body: Comment body (Markdown supported)
+        :param commit: Commit object or SHA to comment on
+        :param path: Path to file in the repository
+        :param line: Line number in the diff to comment on
+        :returns: Created PullRequestComment object
+        """
+        pr = self.get_pull_request(repo, pr_number)
+        return self._with_rate_limit_handling(
+            lambda: pr.create_review_comment(body=body, commit=commit, path=path, line=line)
+        )
+
+    def get_pr_comments(self, repo: str | Repository, pr_number: int) -> Iterator[IssueComment]:
+        """
+        Get all comments on a pull request (issue comments).
+
+        Retrieves general PR conversation comments, not code review comments.
+        For code review comments, use `get_pr_review_comments`.
+
+        :param repo: Repository full name (owner/repo) or Repository object
+        :param pr_number: Pull request number
+        :yields: IssueComment objects
+        """
+        pr = self.get_pull_request(repo, pr_number)
+        yield from self.paginate(pr.get_issue_comments)
+
+    def get_pr_review_comments(
+        self, repo: str | Repository, pr_number: int
+    ) -> Iterator[PullRequestComment]:
+        """
+        Get all review comments on a pull request (code review comments).
+
+        Retrieves comments on specific lines of code in the PR diff.
+        For general PR comments, use `get_pr_comments`.
+
+        :param repo: Repository full name (owner/repo) or Repository object
+        :param pr_number: Pull request number
+        :yields: PullRequestComment objects
+        """
+        pr = self.get_pull_request(repo, pr_number)
+        yield from self.paginate(pr.get_review_comments)
 
     def paginate(
         self,
