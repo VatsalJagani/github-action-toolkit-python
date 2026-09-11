@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [v0.10.0](https://github.com/VatsalJagani/github-action-toolkit-python/releases/tag/v0.10.0) - 2026-09-11
+
 ### Changed
 
 - Switched Dependabot's Python ecosystem config from `pip` to `uv` for proper `uv.lock`-aware dependency updates.

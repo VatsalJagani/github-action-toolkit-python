@@ -2,12 +2,12 @@
 
 set -e
 
-TAG=$(python -c 'from github_action_toolkit.version import VERSION; print("v" + VERSION)')
+TAG=$(uv run python -c 'from github_action_toolkit.version import VERSION; print("v" + VERSION)')
 
 read -p "Creating new release for $TAG. Do you want to continue? [Y/n] " prompt
 
 if [[ $prompt == "y" || $prompt == "Y" || $prompt == "yes" || $prompt == "Yes" ]]; then
-    python devtools/prepare_changelog.py
+    uv run python devtools/prepare_changelog.py
     git add -A
     git commit -m "Bump version to $TAG for release" || true && git push
     echo "Creating new git tag $TAG"
